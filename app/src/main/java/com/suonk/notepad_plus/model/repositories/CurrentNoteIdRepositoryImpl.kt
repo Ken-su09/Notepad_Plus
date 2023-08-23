@@ -1,7 +1,7 @@
 package com.suonk.mynotepad.model.database.data.repositories
 
 import com.suonk.mynotepad.domain.repositories.CurrentNoteIdRepository
-import com.suonk.mynotepad.model.database.dao.NoteDao
+import com.suonk.notepad_plus.model.database.dao.NoteDao
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

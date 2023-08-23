@@ -1,4 +1,4 @@
-package com.suonk.mynotepad.model.database.dao
+package com.suonk.notepad_plus.model.database.dao
 
 import androidx.room.*
 import com.suonk.mynotepad.model.database.data.entities.NoteEntity

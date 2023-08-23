@@ -6,11 +6,10 @@ import androidx.annotation.RequiresApi
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.suonk.mynotepad.model.database.AppDatabase
-import com.suonk.mynotepad.model.database.dao.NoteDao
-import com.suonk.mynotepad.model.database.dao.PictureDao
-import com.suonk.mynotepad.model.database.data.entities.NoteEntity
-import com.suonk.oc_project9.model.database.data.entities.real_estate.PhotoEntity
+import com.suonk.notepad_plus.model.database.AppDatabase
+import com.suonk.notepad_plus.model.database.dao.NoteDao
+import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
+import com.suonk.notepad_plus.model.database.data.dao.PictureDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,9 +18,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import java.time.Clock
-import java.time.LocalDateTime
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -48,11 +45,11 @@ class DataModule {
 //                            id = 1L,
 //
 //                        )
-                    )
+//                    )
 
-                    pictureDao.insertPhoto(PhotoEntity(0, 1L, "content://media/external/images/media/68287"))
-                    pictureDao.insertPhoto(PhotoEntity(0, 1L, "content://media/external/images/media/68288"))
-                    pictureDao.insertPhoto(PhotoEntity(0, 1L, "content://media/external/images/media/68289"))
+                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68287"))
+                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68288"))
+                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68289"))
                 }
 
             }

@@ -1,4 +1,4 @@
-package com.suonk.mynotepad.model.database.data.entities
+package com.suonk.notepad_plus.model.database.data.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
