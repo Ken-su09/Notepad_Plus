@@ -1,15 +1,13 @@
 package com.suonk.notepad_plus.ui.note.list
 
 import android.app.Application
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.suonk.mynotepad.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.domain.note.get.GetAllNotesFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.note.search.GetSearchNoteUseCase
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class NotesListViewModel @Inject constructor(
     private val getAllNotesFlowUseCase: GetAllNotesFlowUseCase,
@@ -29,31 +26,37 @@ class NotesListViewModel @Inject constructor(
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val application: Application,
-    ) : ViewModel() {
+) : ViewModel() {
 
-    val notesListLiveData: LiveData<List<NotesListViewState>> = liveData(dispatcherProvider.io) {
-        combine(getAllNotesFlowUseCase.invoke(), getSearchNoteUseCase.invoke()) { notes, search ->
-            val list = notes.asSequence().map {
-                transformEntityToViewState(it)
-            }.filter {
-                if (search != "" || search != " ") {
-                    it.title.lowercase().contains(search.lowercase()) || it.content.lowercase().contains(search.lowercase())
-                } else {
-                    true
-                }
-            }.toList()
-            emit(list)
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+
+    val notesListLiveData: LiveData<List<NotesListViewState>> = liveData {
+        combine(
+            getAllNotesFlowUseCase.invoke(),
+            getSearchNoteUseCase.invoke(),
+        ) { notes, search ->
+            emit(
+                notes.asSequence()
+                    .filter {
+                        if (search != null) {
+                            it.noteEntity.title.contains(search, ignoreCase = true) ||
+                                it.noteEntity.content.contains(search, ignoreCase = true)
+                        } else {
+                            true
+                        }
+                    }.map {
+                        transformEntityToViewState(it)
+                    }.toList()
+            )
         }.collect()
     }
 
-    private fun transformEntityToViewState(entity: NoteEntityWithPictures): NotesListViewState {
-        return NotesListViewState(
-            id = entity.noteEntity.id,
-            title = entity.noteEntity.title,
-            content = entity.noteEntity.content,
-            date = entity.noteEntity.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-            onClickedCallback = EquatableCallback {
+    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(
+        id = entity.noteEntity.id,
+        title = entity.noteEntity.title,
+        content = entity.noteEntity.content,
+        date = entity.noteEntity.date.format(dateTimeFormatter),
+        onClickedCallback = EquatableCallback {
 //                setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
-            })
-    }
+        })
 }

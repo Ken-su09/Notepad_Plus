@@ -1,8 +1,8 @@
 package com.suonk.notepad_plus.model.database.dao
 
 import androidx.room.*
-import com.suonk.mynotepad.model.database.data.entities.NoteEntity
-import com.suonk.mynotepad.model.database.data.entities.NoteEntityWithPictures
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import kotlinx.coroutines.flow.Flow
 
 @Dao

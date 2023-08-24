@@ -4,6 +4,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface SearchRepository {
 
-    fun getCurrentSearchParametersFlow(): StateFlow<String>
-    fun setCurrentSearchParameters(search: String)
+    fun getCurrentSearchParametersFlow(): StateFlow<String?>
+    fun setCurrentSearchParameters(search: String?)
 }

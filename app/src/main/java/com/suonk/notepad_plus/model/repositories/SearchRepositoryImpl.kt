@@ -9,13 +9,11 @@ import javax.inject.Singleton
 @Singleton
 class SearchRepositoryImpl @Inject constructor() : SearchRepository {
 
-    private val currentSearchParameterFlow = MutableStateFlow("")
+    private val currentSearchParameterFlow = MutableStateFlow<String?>(null)
 
-    override fun getCurrentSearchParametersFlow(): StateFlow<String> {
-        return currentSearchParameterFlow
-    }
+    override fun getCurrentSearchParametersFlow(): StateFlow<String?> = currentSearchParameterFlow
 
-    override fun setCurrentSearchParameters(search: String) {
+    override fun setCurrentSearchParameters(search: String?) {
         currentSearchParameterFlow.tryEmit(search)
     }
 }

@@ -5,8 +5,9 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import com.suonk.mynotepad.utils.viewBinding
+import com.suonk.notepad_plus.utils.viewBinding
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentNotesListBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
@@ -33,7 +34,7 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         binding.toolbar.menu?.let { menu ->
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem?.actionView as SearchView
-            searchView.imeOptions = EditorInfo.IME_ACTION_DONE;
+            searchView.imeOptions = EditorInfo.IME_ACTION_DONE
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(search: String?): Boolean {
                     search?.let {
@@ -53,9 +54,7 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         }
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
-                else -> {
-                    it.isChecked = true
-                }
+                else -> it.isChecked = true
             }
             true
         }
@@ -69,23 +68,17 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 //                    DeletedNotesListFragment()
                     NotesListFragment()
                 }
-                else -> {
-                    NotesListFragment()
-                }
+                else -> NotesListFragment()
             }
 
-            replaceFragment(R.id.fragment_container_view, fragmentToCommit, "")
+            requireActivity().supportFragmentManager.commit {
+                addToBackStack(null)
+                replace(R.id.fragment_container_view, fragmentToCommit, null)
+            }
 
             true
         }
     }
 
     //endregion
-
-    private fun replaceFragment(fragmentContainer: Int, fragment: Fragment, tag: String) {
-        if (requireActivity() is MainActivity) {
-            requireActivity().supportFragmentManager.beginTransaction().replace(fragmentContainer, fragment, tag).addToBackStack(null)
-                .commit()
-        }
-    }
 }

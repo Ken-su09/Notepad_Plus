@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.suonk.mynotepad.utils
+package com.suonk.notepad_plus.utils
 
 import android.view.LayoutInflater
 import android.view.View

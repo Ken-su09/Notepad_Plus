@@ -9,9 +9,8 @@ import com.suonk.notepad_plus.databinding.ItemNotesListBinding
 
 class NotesListAdapter : ListAdapter<NotesListViewState, NotesListAdapter.ViewHolder>(NotesListComparator) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(ItemNotesListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(ItemNotesListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.onBind(getItem(position))
@@ -31,7 +30,7 @@ class NotesListAdapter : ListAdapter<NotesListViewState, NotesListAdapter.ViewHo
     object NotesListComparator : DiffUtil.ItemCallback<NotesListViewState>() {
         override fun areItemsTheSame(
             oldItem: NotesListViewState, newItem: NotesListViewState
-        ): Boolean = oldItem == newItem
+        ): Boolean = oldItem.id == newItem.id
 
         override fun areContentsTheSame(
             oldItem: NotesListViewState, newItem: NotesListViewState

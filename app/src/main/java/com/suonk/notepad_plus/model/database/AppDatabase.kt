@@ -5,9 +5,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.suonk.notepad_plus.model.database.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.dao.PictureDao
-import com.suonk.mynotepad.model.database.data.entities.NoteEntity
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
-import com.suonk.mynotepad.utils.Converters
+import com.suonk.notepad_plus.utils.Converters
 
 @Database(entities = [NoteEntity::class, PictureEntity::class], version = 1)
 @TypeConverters(Converters::class)

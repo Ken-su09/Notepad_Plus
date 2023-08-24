@@ -1,6 +1,6 @@
-package com.suonk.mynotepad.domain.repositories
+package com.suonk.notepad_plus.domain.repositories
 
-import com.suonk.mynotepad.model.database.data.entities.NoteEntityWithPictures
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {

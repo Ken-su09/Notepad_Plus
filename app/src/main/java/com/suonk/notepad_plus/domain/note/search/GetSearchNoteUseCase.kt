@@ -8,5 +8,5 @@ import javax.inject.Singleton
 @Singleton
 class GetSearchNoteUseCase @Inject constructor(private val searchRepository: SearchRepository) {
 
-    fun invoke() : Flow<String> = searchRepository.getCurrentSearchParametersFlow()
+    fun invoke() : Flow<String?> = searchRepository.getCurrentSearchParametersFlow()
 }
