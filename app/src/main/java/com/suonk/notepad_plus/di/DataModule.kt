@@ -6,6 +6,8 @@ import androidx.annotation.RequiresApi
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.suonk.notepad_plus.model.database.AppDatabase
 import com.suonk.notepad_plus.model.database.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
@@ -69,4 +71,12 @@ class DataModule {
     @Provides
     @Singleton
     fun providePictureDao(database: AppDatabase) = database.pictureDao()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth() = FirebaseAuth.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore() = FirebaseFirestore.getInstance()
 }

@@ -12,7 +12,7 @@ interface NoteDao {
 
     @Transaction
     @Query("SELECT * FROM note_entity WHERE isDeleted == 0 ORDER BY id ASC")
-    fun getAllRealEstatesWithPhotos(): Flow<List<NoteEntityWithPictures>>
+    fun getAllNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
 
     //endregion
 

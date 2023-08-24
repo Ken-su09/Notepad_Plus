@@ -2,6 +2,6 @@
     <string name="app_name">Notepad_plus</string>
 
     <string name="nav_notes">Notes</string>
-    <string name="nav_garbage">Garbage</string>
-    <string name="a11y_add_note">Add Note</string>
+    <string name="nav_garbage">Corbeille</string>
+    <string name="a11y_add_note">Ajouter Note</string>
 </resources>

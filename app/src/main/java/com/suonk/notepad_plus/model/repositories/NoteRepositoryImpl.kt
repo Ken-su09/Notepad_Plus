@@ -1,4 +1,4 @@
-package com.suonk.mynotepad.model.database.data.repositories
+package com.suonk.notepad_plus.model.repositories
 
 import com.suonk.mynotepad.domain.repositories.NoteRepository
 import com.suonk.notepad_plus.model.database.dao.NoteDao
@@ -10,5 +10,5 @@ import javax.inject.Singleton
 @Singleton
 class NoteRepositoryImpl @Inject constructor(private val dao: NoteDao) : NoteRepository {
     
-    override fun getAllNotesWithPictures(): Flow<List<NoteEntityWithPictures>> = dao.getAllRealEstatesWithPhotos()
+    override fun getAllNotesWithPictures(): Flow<List<NoteEntityWithPictures>> = dao.getAllNotesWithPictures()
 }
