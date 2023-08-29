@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.di
 
 import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
 import com.suonk.notepad_plus.domain.repositories.NoteRepository
-import com.suonk.notepad_plus.model.database.data.repositories.CurrentNoteIdRepositoryImpl
+import com.suonk.notepad_plus.model.repositories.CurrentNoteIdRepositoryImpl
 import com.suonk.notepad_plus.domain.repositories.SearchRepository
 import com.suonk.notepad_plus.model.repositories.NoteRepositoryImpl
 import com.suonk.notepad_plus.model.repositories.SearchRepositoryImpl

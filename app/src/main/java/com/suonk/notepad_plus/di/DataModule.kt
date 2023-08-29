@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.suonk.notepad_plus.model.database.AppDatabase
-import com.suonk.notepad_plus.model.database.dao.NoteDao
+import com.suonk.notepad_plus.model.database.data.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
 import com.suonk.notepad_plus.model.database.data.dao.PictureDao
 import dagger.Module
