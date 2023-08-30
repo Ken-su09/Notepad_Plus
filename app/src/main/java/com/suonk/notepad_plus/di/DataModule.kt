@@ -46,10 +46,6 @@ class DataModule {
 //
 //                        )
 //                    )
-
-                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68287"))
-                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68288"))
-                    pictureDao.insertNewPicture(PictureEntity(0, 1L, "content://media/external/images/media/68289"))
                 }
 
             }

@@ -1,7 +1,6 @@
-package com.suonk.notepad_plus.model.database.data.repositories
+package com.suonk.notepad_plus.model.repositories
 
 import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
-import com.suonk.notepad_plus.model.database.dao.NoteDao
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CurrentNoteIdRepositoryImpl @Inject constructor(private val dao: NoteDao) : CurrentNoteIdRepository {
+class CurrentNoteIdRepositoryImpl @Inject constructor() : CurrentNoteIdRepository {
 
     private val currentNoteIdFlow = MutableStateFlow<Long?>(null)
     private val currentNoteIdChannel = Channel<Long?>(

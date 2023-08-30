@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.suonk.notepad_plus.domain.note.get.GetAllNotesFlowUseCase
-import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
-import com.suonk.notepad_plus.domain.note.search.GetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllNotesFlowUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
@@ -57,6 +57,6 @@ class NotesListViewModel @Inject constructor(
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
         onClickedCallback = EquatableCallback {
-//                setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
+            setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
         })
 }

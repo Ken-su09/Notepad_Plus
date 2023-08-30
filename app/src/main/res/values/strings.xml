@@ -4,4 +4,7 @@
     <string name="nav_notes">Notes</string>
     <string name="nav_garbage">Garbage</string>
     <string name="a11y_add_note">Add Note</string>
+    <string name="login_title">Login</string>
+
+    <string name="welcome_user_after_login">Welcome 1%s</string>
 </resources>

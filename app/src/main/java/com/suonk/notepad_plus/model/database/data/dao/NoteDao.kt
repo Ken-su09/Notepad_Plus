@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.model.database.dao
+package com.suonk.notepad_plus.model.database.data.dao
 
 import androidx.room.*
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
@@ -13,6 +13,10 @@ interface NoteDao {
     @Transaction
     @Query("SELECT * FROM note_entity WHERE isDeleted == 0 ORDER BY id ASC")
     fun getAllNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
+
+    @Transaction
+    @Query("SELECT * FROM note_entity WHERE isDeleted == 1 ORDER BY id ASC")
+    fun getAllDeletedNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
 
     //endregion
 

@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.domain.note.search
+package com.suonk.notepad_plus.domain.use_cases.note.search
 
 import com.suonk.notepad_plus.domain.repositories.SearchRepository
 import kotlinx.coroutines.flow.Flow
