@@ -2,6 +2,7 @@ package com.suonk.notepad_plus.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
@@ -9,7 +10,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.ActivityMainBinding
 import com.suonk.notepad_plus.ui.auth.AuthActivity
+import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListFragment
+import com.suonk.notepad_plus.utils.Event.Companion.observeEvent
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,8 +32,15 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        supportFragmentManager.commit {
-            replace(R.id.fragment_container_view, NotesListFragment(), null)
+        supportFragmentManager.commit { replace(R.id.fragment_container_view, NotesListFragment(), null) }
+
+        viewModel.mainViewAction.observeEvent(this) { action ->
+            when (action) {
+                is MainViewAction.Navigate.Detail -> {
+                    startActivity(Intent(this@MainActivity, NoteDetailsActivity::class.java))
+                    finish()
+                }
+            }
         }
     }
 }

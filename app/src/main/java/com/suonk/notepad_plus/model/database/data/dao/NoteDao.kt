@@ -18,6 +18,10 @@ interface NoteDao {
     @Query("SELECT * FROM note_entity WHERE isDeleted == 1 ORDER BY id ASC")
     fun getAllDeletedNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
 
+    @Transaction
+    @Query("SELECT * FROM note_entity WHERE id == :id")
+    fun getNoteById(id: Long): Flow<NoteEntityWithPictures>
+
     //endregion
 
     //region ============================================================= INSERT/UPDATE ============================================================

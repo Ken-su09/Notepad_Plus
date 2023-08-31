@@ -16,6 +16,9 @@
         android:theme="@style/Theme.Notepad_plus"
         tools:targetApi="31">
         <activity
+            android:name=".ui.note.details.NoteDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.auth.AuthActivity"
             android:exported="true">
             <intent-filter>

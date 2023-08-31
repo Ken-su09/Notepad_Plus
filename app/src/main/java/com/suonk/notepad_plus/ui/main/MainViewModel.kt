@@ -1,8 +1,22 @@
 package com.suonk.notepad_plus.ui.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
+import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowChannelUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {}
+class MainViewModel @Inject constructor(private val getCurrentIdFlowChannelUseCase: GetCurrentIdFlowChannelUseCase) : ViewModel() {
+
+    val mainViewAction: LiveData<Event<MainViewAction>> = liveData {
+        getCurrentIdFlowChannelUseCase.invoke().collect { id ->
+            id?.let {
+                emit(Event(MainViewAction.Navigate.Detail(id)))
+            }
+        }
+    }
+}

@@ -1,6 +1,7 @@
 package com.suonk.notepad_plus.ui.note.list
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
@@ -30,29 +31,27 @@ class NotesListViewModel @Inject constructor(
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
-    val notesListLiveData: LiveData<List<NotesListViewState>> = liveData {
+    val notesListLiveData: LiveData<List<NotesListViewState>> = liveData(dispatcherProvider.io) {
         combine(
             getAllNotesFlowUseCase.invoke(),
             getSearchNoteUseCase.invoke(),
         ) { notes, search ->
-            emit(
-                notes.asSequence()
-                    .filter {
-                        if (search != null) {
-                            it.noteEntity.title.contains(search, ignoreCase = true) ||
-                                it.noteEntity.content.contains(search, ignoreCase = true)
-                        } else {
-                            true
-                        }
-                    }.map {
-                        transformEntityToViewState(it)
-                    }.toList()
-            )
+            val list = notes.asSequence().filter {
+                if (search != null) {
+                    it.noteEntity.title.contains(search, ignoreCase = true) || it.noteEntity.content.contains(
+                        search, ignoreCase = true
+                    )
+                } else {
+                    true
+                }
+            }.map {
+                transformEntityToViewState(it)
+            }.toList()
+            emit(list)
         }.collect()
     }
 
-    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(
-        id = entity.noteEntity.id,
+    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(id = entity.noteEntity.id,
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),

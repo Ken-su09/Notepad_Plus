@@ -1,6 +1,7 @@
 package com.suonk.notepad_plus.ui.note.list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
@@ -11,6 +12,7 @@ import com.suonk.notepad_plus.utils.viewBinding
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentNotesListBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
+import com.suonk.notepad_plus.ui.note.details.NoteDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,6 +26,21 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
         setupToolbar()
         setupBottomNavigationView()
+
+        val listAdapter = NotesListAdapter()
+
+        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
+            Log.i("GetNotesList", "list : $list")
+            listAdapter.submitList(list)
+        }
+        binding.recyclerView.adapter = listAdapter
+
+        binding.addNote.setOnClickListener {
+            if (requireActivity() is MainActivity) {
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container_view, NoteDetailsFragment(), null).addToBackStack(null).commit()
+            }
+        }
     }
 
     //region ========================================================= TOOLBAR / BOTTOM NAV =========================================================
@@ -68,6 +85,7 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 //                    DeletedNotesListFragment()
                     NotesListFragment()
                 }
+
                 else -> NotesListFragment()
             }
 

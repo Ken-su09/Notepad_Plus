@@ -1,8 +1,12 @@
 package com.suonk.notepad_plus.ui.auth
 
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -21,6 +25,10 @@ import com.suonk.notepad_plus.databinding.ActivityAuthBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AuthActivity : AppCompatActivity() {
@@ -43,9 +51,12 @@ class AuthActivity : AppCompatActivity() {
         binding.signIn.setOnClickListener { mailPasswordSignIn() }
         viewModel.isFieldsCorrectSingleLiveEvent.observe(this) { areFieldsCorrectlyFilled ->
             if (areFieldsCorrectlyFilled) {
+                Log.i("LoginWithGoogle", "binding.mailText.text.toString() : ${binding.mailText.text.toString()}")
+                Log.i("LoginWithGoogle", "binding.passwordText.text.toString() : ${binding.passwordText.text.toString()}")
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                    binding.mailText.text.toString(), binding.mailText.text.toString()
+                    binding.mailText.text.toString(), binding.passwordText.text.toString()
                 ).addOnCompleteListener { task ->
+                    Log.i("LoginWithGoogle", "task : $task")
                     checkIfTaskIsSuccessfulThenLogin(task)
                 }
             }
@@ -68,11 +79,16 @@ class AuthActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewModel.toastMessageSingleLiveEvent.observe(this) { message -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
+
+        animationPasswordIconClick()
     }
 
     //region ====================================================== SIGN IN WITH MAIL/PASSWORD ======================================================
 
     private fun mailPasswordSignIn() {
+        Log.i("LoginWithGoogle", "Passe par là")
         viewModel.checkIfFieldsAreCorrect(binding.mailText.text?.toString(), binding.passwordText.text?.toString())
     }
 
@@ -126,6 +142,33 @@ class AuthActivity : AppCompatActivity() {
                 loginSuccessfulToastMessage()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
+            }
+        }
+    }
+
+    private fun animationPasswordIconClick() {
+        binding.signUpPasswordGoToVisible.setOnClickListener {
+            val frameAnimation = binding.signUpPasswordGoToVisible.drawable as AnimationDrawable
+            frameAnimation.start()
+
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(525)
+                frameAnimation.stop()
+                binding.signUpPasswordGoToVisible.visibility = View.GONE
+                binding.signUpPasswordGoToInvisible.visibility = View.VISIBLE
+                binding.passwordText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+            }
+        }
+
+        binding.signUpPasswordGoToInvisible.setOnClickListener {
+            val frameAnimation = binding.signUpPasswordGoToInvisible.drawable as AnimationDrawable
+            frameAnimation.start()
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(525)
+                frameAnimation.stop()
+                binding.signUpPasswordGoToInvisible.visibility = View.GONE
+                binding.signUpPasswordGoToVisible.visibility = View.VISIBLE
+                binding.passwordText.transformationMethod = PasswordTransformationMethod.getInstance()
             }
         }
     }

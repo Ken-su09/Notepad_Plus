@@ -7,4 +7,11 @@
     <string name="login_title">Login</string>
 
     <string name="welcome_user_after_login">Welcome 1%s</string>
+    <string name="title_hint">Title</string>
+    <string name="content_hint">Type something…</string>
+
+    <string name="toolbar_delete">Delete note</string>
+    <string name="toolbar_save">Save note</string>
+    <string name="field_empty_toast_msg">Fields can not be empty</string>
+    <string name="last_update">Last update : </string>
 </resources>

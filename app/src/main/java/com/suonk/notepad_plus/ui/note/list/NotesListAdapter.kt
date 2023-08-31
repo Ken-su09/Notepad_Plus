@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.list
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -18,6 +19,7 @@ class NotesListAdapter : ListAdapter<NotesListViewState, NotesListAdapter.ViewHo
 
     class ViewHolder(private val binding: ItemNotesListBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind(notesListViewState: NotesListViewState) {
+            Log.i("GetNotesList", "notesListViewState : $notesListViewState")
             binding.title.text = notesListViewState.title
             binding.date.text = notesListViewState.date
             binding.content.text = notesListViewState.content

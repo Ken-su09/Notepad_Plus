@@ -10,6 +10,7 @@ import com.suonk.notepad_plus.model.database.AppDatabase
 import com.suonk.notepad_plus.model.database.data.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
 import com.suonk.notepad_plus.model.database.data.dao.PictureDao
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Clock
+import java.time.LocalDateTime
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -40,12 +42,22 @@ class DataModule {
 
             private fun prepopulateDatabase(noteDao: NoteDao, pictureDao: PictureDao) {
                 CoroutineScope(Dispatchers.IO).launch {
-//                    noteDao.upsertNoteEntity(
-//                        NoteEntity(
-//                            id = 1L,
-//
-//                        )
-//                    )
+                    noteDao.upsertNoteEntity(
+                        NoteEntity(
+                            id = 1L,
+                            title = "First News of the Week",
+                            content = "Règle : \n" +
+                                "- Nombre aléatoire en 10 - 255\n" +
+                                "- Le faire 5 fois\n" +
+                                "- Tirer 5 max mangas intéressants dans chaque page (peut aller page avant et après)\n" +
+                                "- Pas le droit à la même page\n" +
+                                "- Faire un tri entre les 5 ou prendre celui qui paraît être le plus omoshiroi",
+                            date = LocalDateTime.now(),
+                            color = 0,
+                            isFavorite = false,
+                            isDeleted = false
+                        )
+                    )
                 }
 
             }
