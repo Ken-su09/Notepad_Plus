@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.model.repositories
 
+import android.util.Log
 import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -13,13 +14,12 @@ class CurrentNoteIdRepositoryImpl @Inject constructor() : CurrentNoteIdRepositor
 
     private val currentNoteIdFlow = MutableStateFlow<Long?>(null)
     private val currentNoteIdChannel = Channel<Long?>(
-        capacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        capacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
     override fun getCurrentNoteIdFlow(): StateFlow<Long?> = currentNoteIdFlow
 
-    override fun getCurrentNoteIdChannel(): Channel<Long?>  = currentNoteIdChannel
+    override fun getCurrentNoteIdChannel(): Channel<Long?> = currentNoteIdChannel
 
     override fun setCurrentNoteIdFlow(id: Long?) {
         currentNoteIdFlow.value = id

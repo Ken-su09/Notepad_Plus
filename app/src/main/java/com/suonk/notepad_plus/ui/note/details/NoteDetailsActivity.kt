@@ -19,7 +19,9 @@ class NoteDetailsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction().replace(R.id.details_fragment_container, NotesListFragment()).addToBackStack(null)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.details_fragment_container, NoteDetailsFragment())
+                .addToBackStack(null)
                 .commit()
         }
     }

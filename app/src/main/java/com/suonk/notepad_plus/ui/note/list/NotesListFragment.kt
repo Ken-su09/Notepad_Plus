@@ -30,7 +30,6 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         val listAdapter = NotesListAdapter()
 
         viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
-            Log.i("GetNotesList", "list : $list")
             listAdapter.submitList(list)
         }
         binding.recyclerView.adapter = listAdapter

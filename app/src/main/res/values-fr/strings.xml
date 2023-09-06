@@ -13,5 +13,5 @@
     <string name="toolbar_delete">Supprimer la note</string>
     <string name="toolbar_save">Enregistrer une note</string>
     <string name="field_empty_toast_msg">Les champs ne peuvent être vides</string>
-    <string name="last_update">Dernière modification : </string>
+    <string name="last_update">Dernière modification : %s</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details
 
+import android.support.v4.media.session.PlaybackStateCompat.Actions
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -8,9 +9,12 @@ import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.domain.use_cases.note.get.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowChannelUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
+import com.suonk.notepad_plus.ui.note.details.actions_list.EditTextAction
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
+import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.NativeText
 import com.suonk.notepad_plus.utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteDetailsViewModel @Inject constructor(
     private val getNoteByIdFlowUseCase: GetNoteByIdFlowUseCase,
-    private val getCurrentIdFlowChannelUseCase: GetCurrentIdFlowChannelUseCase,
+    private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val fixedClock: Clock
@@ -45,6 +49,7 @@ class NoteDetailsViewModel @Inject constructor(
     private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
 
     val finishSavingSingleLiveEvent = SingleLiveEvent<Unit>()
+    val editorActionsSingleLiveEvent = SingleLiveEvent<Int>()
     var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
     val noteDetailsViewState: LiveData<NoteDetailsViewState> = liveData(coroutineDispatcherProvider.io) {
@@ -55,7 +60,8 @@ class NoteDetailsViewModel @Inject constructor(
                     title = note.title,
                     content = note.content,
                     dateText = note.dateText,
-                    dateValue = note.dateValue
+                    dateValue = note.dateValue,
+                    actions = note.actions
                 )
             )
         }.collect()
@@ -63,8 +69,7 @@ class NoteDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getCurrentIdFlowChannelUseCase.invoke().collect { id ->
-                Log.i("GetNote", "id : $id")
+            getCurrentIdFlowUseCase.invoke().collect { id ->
                 val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
                 if (noteWithPictures == null) {
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
@@ -74,6 +79,7 @@ class NoteDetailsViewModel @Inject constructor(
                             content = "",
                             dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
                             dateValue = ZonedDateTime.now(fixedClock).toInstant(),
+                            actions = listOfActions()
                         )
                     )
                 } else {
@@ -87,6 +93,7 @@ class NoteDetailsViewModel @Inject constructor(
                                 noteWithPictures.noteEntity.date.format(dateTimeFormatter)
                             ),
                             dateValue = fromLocalDateToInstant(noteWithPictures.noteEntity.date),
+                            actions = listOfActions()
                         )
                     )
                     picturesMutableSharedFlow.tryEmit(noteWithPictures.photos.map {
@@ -99,7 +106,7 @@ class NoteDetailsViewModel @Inject constructor(
 
     fun onSaveNoteMenuItemClicked(title: String, content: String) {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getCurrentIdFlowChannelUseCase.invoke().collect { id ->
+            getCurrentIdFlowUseCase.invoke().collect { id ->
                 if (isEmptyOrBlank(title) || isEmptyOrBlank(content)) {
                     withContext(coroutineDispatcherProvider.main) {
                         toastMessageSingleLiveEvent.setValue(NativeText.Resource(R.string.field_empty_toast_msg))
@@ -133,5 +140,22 @@ class NoteDetailsViewModel @Inject constructor(
 
     private fun isEmptyOrBlank(value: String): Boolean {
         return value.isEmpty() || value.isBlank() || value == "" || value == " "
+    }
+
+    private fun listOfActions(): List<EditTextAction> {
+        return listOf(
+            EditTextAction(R.drawable.ic_undo, EquatableCallback {
+                editorActionsSingleLiveEvent.setValue(R.drawable.ic_undo)
+            }),
+            EditTextAction(R.drawable.ic_redo, EquatableCallback {
+                editorActionsSingleLiveEvent.setValue(R.drawable.ic_redo)
+            }),
+            EditTextAction(R.drawable.ic_bold, EquatableCallback {
+                editorActionsSingleLiveEvent.setValue(R.drawable.ic_bold)
+            }),
+            EditTextAction(R.drawable.ic_italic, EquatableCallback {
+                editorActionsSingleLiveEvent.setValue(R.drawable.ic_italic)
+            }),
+        )
     }
 }
