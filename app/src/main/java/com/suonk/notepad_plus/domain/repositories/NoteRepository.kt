@@ -8,6 +8,8 @@ interface NoteRepository {
 
     fun getAllNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
 
+    fun getAllDeletedNotesWithPictures(): Flow<List<NoteEntityWithPictures>>
+
     fun getNoteById(id: Long): Flow<NoteEntityWithPictures>
 
     suspend fun upsertNoteEntity(noteEntity: NoteEntity): Long

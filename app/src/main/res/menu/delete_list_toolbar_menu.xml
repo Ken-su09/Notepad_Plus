@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group
+        android:id="@+id/toolbar"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/ic_curve_arrow"
+            android:icon="@drawable/ic_curve_arrow"
+            android:title="Restore"
+            app:showAsAction="ifRoom" />
+
+        <item
+            android:id="@+id/sort_by"
+            android:icon="@drawable/ic_sort"
+            android:title="Sort By"
+            app:showAsAction="ifRoom">
+            <menu>
+            </menu>
+        </item>
+    </group>
+</menu>

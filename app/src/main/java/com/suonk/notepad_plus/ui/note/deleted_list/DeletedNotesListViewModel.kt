@@ -1,10 +1,10 @@
-package com.suonk.notepad_plus.ui.note.list
+package com.suonk.notepad_plus.ui.note.deleted_list
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllDeletedNotesFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllNotesFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
@@ -18,8 +18,8 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class NotesListViewModel @Inject constructor(
-    private val getAllNotesFlowUseCase: GetAllNotesFlowUseCase,
+class DeletedNotesListViewModel @Inject constructor(
+    private val getAllDeletedNotesFlowUseCase: GetAllDeletedNotesFlowUseCase,
 
     private val getSearchNoteUseCase: GetSearchNoteUseCase,
 //    private val setSearchNoteUseCase: SetSearchNoteUseCase,
@@ -31,9 +31,9 @@ class NotesListViewModel @Inject constructor(
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
-    val notesListLiveData: LiveData<List<NotesListViewState>> = liveData(dispatcherProvider.io) {
+    val deletedNotesListLiveData: LiveData<List<DeletedNotesListViewState>> = liveData(dispatcherProvider.io) {
         combine(
-            getAllNotesFlowUseCase.invoke(),
+            getAllDeletedNotesFlowUseCase.invoke(),
             getSearchNoteUseCase.invoke(),
         ) { notes, search ->
             val list = notes.asSequence().filter {
@@ -51,15 +51,11 @@ class NotesListViewModel @Inject constructor(
         }.collect()
     }
 
-    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(id = entity.noteEntity.id,
+    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = DeletedNotesListViewState(id = entity.noteEntity.id,
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
         onClickedCallback = EquatableCallback {
             setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
         })
-
-    fun onNewNoteClicked() {
-        setCurrentNoteIdUseCase.invoke(-1)
-    }
 }

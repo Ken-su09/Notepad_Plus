@@ -25,6 +25,7 @@ class ActionsListAdapter : ListAdapter<EditTextAction, ActionsListAdapter.ViewHo
             binding.actionIcon.setOnClickListener {
                 action.onClickedCallback()
             }
+            binding.root.background = action.background
         }
     }
 

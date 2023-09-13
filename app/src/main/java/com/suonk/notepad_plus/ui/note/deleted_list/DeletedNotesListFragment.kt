@@ -1,28 +1,30 @@
-package com.suonk.notepad_plus.ui.note.list
+package com.suonk.notepad_plus.ui.note.deleted_list
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import com.suonk.notepad_plus.utils.viewBinding
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.databinding.FragmentDeletedNotesListBinding
 import com.suonk.notepad_plus.databinding.FragmentNotesListBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
-import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListFragment
-import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsFragment
+import com.suonk.notepad_plus.ui.note.list.NotesListAdapter
+import com.suonk.notepad_plus.ui.note.list.NotesListFragment
+import com.suonk.notepad_plus.ui.note.list.NotesListViewModel
+import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
+class DeletedNotesListFragment : Fragment(R.layout.fragment_deleted_notes_list) {
 
-    private val viewModel by viewModels<NotesListViewModel>()
-    private val binding by viewBinding(FragmentNotesListBinding::bind)
+    private val viewModel by viewModels<DeletedNotesListViewModel>()
+    private val binding by viewBinding(FragmentDeletedNotesListBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,18 +32,12 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
         setupToolbar()
         setupBottomNavigationView()
 
-        val listAdapter = NotesListAdapter()
+        val listAdapter = DeletedNotesListAdapter()
 
-        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
+        viewModel.deletedNotesListLiveData.observe(viewLifecycleOwner) { list ->
             listAdapter.submitList(list)
         }
         binding.recyclerView.adapter = listAdapter
-
-        binding.addNote.setOnClickListener {
-            if (requireActivity() is MainActivity) {
-                viewModel.onNewNoteClicked()
-            }
-        }
     }
 
     //region ========================================================= TOOLBAR / BOTTOM NAV =========================================================
@@ -79,13 +75,13 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
     }
 
     private fun setupBottomNavigationView() {
-        binding.bottomNavigation.menu.findItem(R.id.nav_notes).isChecked = true
+        binding.bottomNavigation.menu.findItem(R.id.nav_deleted_notes).isChecked = true
         binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
             val fragmentToCommit = when (menuItem.itemId) {
-                R.id.nav_deleted_notes -> {
-                    DeletedNotesListFragment()
+                R.id.nav_notes -> {
+                    NotesListFragment()
                 }
-                else -> NotesListFragment()
+                else -> DeletedNotesListFragment()
             }
 
             requireActivity().supportFragmentManager.commit {

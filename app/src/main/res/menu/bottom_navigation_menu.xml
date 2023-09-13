@@ -8,7 +8,7 @@
             android:icon="@drawable/ic_notes"
             android:title="@string/nav_notes" />
         <item
-            android:id="@+id/nav_garbage"
+            android:id="@+id/nav_deleted_notes"
             android:icon="@drawable/ic_garbage"
             android:title="@string/nav_garbage" />
     </group>

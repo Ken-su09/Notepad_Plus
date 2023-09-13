@@ -6,9 +6,12 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentNoteDetailsBinding
+import com.suonk.notepad_plus.databinding.InsertAlertDialogLayoutBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
 import com.suonk.notepad_plus.ui.note.details.actions_list.ActionsListAdapter
 import com.suonk.notepad_plus.utils.showToast
@@ -24,7 +27,7 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setHasOptionsMenu(true)
         setupToolbar()
 
         binding.editor.background = ResourcesCompat.getDrawable(resources, R.drawable.custom_edit_text_background, null)
@@ -39,8 +42,8 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
         viewModel.toastMessageSingleLiveEvent.observe(viewLifecycleOwner) {
             it.showToast(requireContext())
         }
+        binding.editor.setFontSize(16)
         viewModel.editorActionsSingleLiveEvent.observe(viewLifecycleOwner) {
-            Log.i("RichEditor", "it : $it")
             when (it) {
                 R.drawable.ic_undo -> {
                     binding.editor.undo()
@@ -58,6 +61,74 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
                     binding.editor.setItalic()
                 }
 
+                R.drawable.ic_x2_subscript -> {
+                    binding.editor.setSubscript()
+                }
+
+                R.drawable.ic_x2_squared -> {
+                    binding.editor.setSuperscript()
+                }
+
+                R.drawable.ic_heading_1 -> {
+                    binding.editor.setHeading(1)
+                }
+
+                R.drawable.ic_heading_2 -> {
+                    binding.editor.setHeading(2)
+                }
+
+                R.drawable.ic_heading_3 -> {
+                    binding.editor.setHeading(3)
+                }
+
+                R.drawable.ic_heading_4 -> {
+                    binding.editor.setHeading(4)
+                }
+
+                R.drawable.ic_heading_5 -> {
+                    binding.editor.setHeading(5)
+                }
+
+                R.drawable.ic_heading_6 -> {
+                    binding.editor.setHeading(6)
+                }
+
+                R.drawable.ic_text_color -> {
+//                    binding.editor.setTextColor()
+                }
+
+                R.drawable.ic_background_color -> {
+//                    binding.editor.setTextColor()
+                }
+
+                R.drawable.ic_link -> {
+                    insertLink()
+                }
+
+                R.drawable.ic_insert_image -> {
+                    insertImage()
+                }
+
+                R.drawable.ic_left_align -> {
+                    binding.editor.setAlignLeft()
+                }
+
+                R.drawable.ic_center_align -> {
+                    binding.editor.setAlignCenter()
+                }
+
+                R.drawable.ic_right_align -> {
+                    binding.editor.setAlignRight()
+                }
+
+                R.drawable.ic_un_ordered_list -> {
+                    binding.editor.setBullets()
+                }
+
+                R.drawable.ic_numbered_list -> {
+                    binding.editor.setNumbers()
+                }
+
                 else -> {
 
                 }
@@ -65,17 +136,22 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
         }
     }
 
+    //region =============================================================== TOOLBAR ===============================================================+
+
     private fun setupToolbar() {
         binding.toolbar.inflateMenu(R.menu.details_toolbar)
+//        if (requireActivity() is NoteDetailsActivity) {
+//            requireActivity().setActionBar(binding.toolbar)
+//        }
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_delete_note -> {
+                    viewModel.onDeleteNoteMenuItemClicked()
                 }
 
                 R.id.action_save_note -> {
                     viewModel.onSaveNoteMenuItemClicked(
-                        title = binding.title.text.toString(), content = "binding.content.title.toString()"
-//                        content = binding.content.title.toString()
+                        title = binding.title.text.toString(), content = binding.editor.html
                     )
                 }
 
@@ -86,6 +162,8 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
             true
         }
     }
+
+    //endregion
 
     private fun bindDataFromViewModelToView() {
         viewModel.noteDetailsViewState.observe(viewLifecycleOwner) { noteDetails ->
@@ -98,4 +176,33 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
             binding.recyclerView.adapter = adapter
         }
     }
+
+    //region ================================================================ INSERT ================================================================
+
+    private fun insertImage() {
+        val insertLayoutBinding = InsertAlertDialogLayoutBinding.inflate(layoutInflater)
+        insertLayoutBinding.imageTitleEditText.isVisible = false
+        MaterialAlertDialogBuilder(requireContext()).setTitle("Alert Title").setMessage("This is a message for the alert dialog.")
+            .setView(insertLayoutBinding.root).setPositiveButton("OK") { dialog, _ ->
+                binding.editor.insertImage(insertLayoutBinding.imageLinkEditText.text.toString(), "")
+                dialog.dismiss()
+            }.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }.show()
+    }
+
+    private fun insertLink() {
+        val insertLayoutBinding = InsertAlertDialogLayoutBinding.inflate(layoutInflater)
+        MaterialAlertDialogBuilder(requireContext()).setTitle("Alert Title").setMessage("This is a message for the alert dialog.")
+            .setView(insertLayoutBinding.root).setPositiveButton("OK") { dialog, _ ->
+                binding.editor.insertLink(
+                    insertLayoutBinding.imageLinkEditText.text.toString(), insertLayoutBinding.imageTitleEditText.text.toString()
+                )
+                dialog.dismiss()
+            }.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }.show()
+    }
+
+    //endregion
 }
