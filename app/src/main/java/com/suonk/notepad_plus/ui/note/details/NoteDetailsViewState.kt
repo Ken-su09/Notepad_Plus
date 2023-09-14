@@ -10,5 +10,5 @@ data class NoteDetailsViewState(
     val content: String,
     val dateText: NativeText,
     val dateValue: Instant?,
-    val actions: List<EditTextAction>
+    val actions: List<NoteDetailsViewModel.NoteDetailsViewStateItem>
 )
