@@ -11,6 +11,9 @@ import com.suonk.notepad_plus.domain.use_cases.note.get.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
+import com.suonk.notepad_plus.ui.note.details.actions_list.ActionType
+import com.suonk.notepad_plus.ui.note.details.actions_list.ActionsSealed
+import com.suonk.notepad_plus.ui.note.details.actions_list.EditTextAction
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.NativeText
@@ -41,109 +44,115 @@ class NoteDetailsViewModel @Inject constructor(
     private val fixedClock: Clock,
 ) : ViewModel() {
 
-    enum class AvailableTextStyle(
-        @DrawableRes
-        val icon: Int
-    ) {
-        UNDO(R.drawable.ic_undo),
-        H1(R.drawable.ic_heading_1),
-        H2(R.drawable.ic_heading_2),
-    }
-
-    companion object {
-//        private val defaultNoteDetailsViewStateItems = listOf(
-//            EditTextAction(
-//                R.drawable.ic_undo,
-//                R.drawable.custom_item_background,
-//                EquatableCallback {
-//                    editorActionsSingleLiveEvent.setValue(R.drawable.ic_undo)
-//                }
-//            ),
-//            EditTextAction(
-//                R.drawable.ic_redo,
-//                R.drawable.custom_item_background,
-//                EquatableCallback {
-//                    editorActionsSingleLiveEvent.setValue(R.drawable.ic_redo)
-//                }
-//            ),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_bold),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_italic),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_x2_subscript),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_x2_squared),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_1),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_2),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_3),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_4),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_5),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_heading_6),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_text_color),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_background_color),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_insert_image),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_left_align),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_center_align),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_right_align),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_un_ordered_list),
-//            getEditTextActionWithBackgroundChanges(R.drawable.ic_numbered_list),
-//        )
-    }
-
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
     private var noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsViewState>(replay = 1)
     private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
 
-    private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<AvailableTextStyle>())
-
-    data class NoteDetailsViewStateItem(
-        val textStyle: AvailableTextStyle,
-        @get:DrawableRes
-        val icon: Int,
-        val enabled: Boolean,
-        val onClicked: EquatableCallback,
-    )
+    private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<ActionsSealed>())
 
     val finishSavingSingleLiveEvent = SingleLiveEvent<Unit>()
     val editorActionsSingleLiveEvent = SingleLiveEvent<Int>()
+    val contentFlow = MutableStateFlow("")
     var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
     val noteDetailsViewState: LiveData<NoteDetailsViewState> = liveData(coroutineDispatcherProvider.io) {
         combine(
-            noteDetailsViewStateMutableSharedFlow,
-            picturesMutableSharedFlow,
-            enabledTextStylesMutableStateFlow,
-        ) { note, pictures, enabledTextStyles ->
-            Log.i("GetEditTextAction", "enabledTextStyles : $enabledTextStyles")
-
+            noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
+        ) { note, pictures, enabledTextStyles, content ->
             emit(
-                NoteDetailsViewState(
-                    id = note.id,
+                NoteDetailsViewState(id = note.id,
                     title = note.title,
-                    content = note.content,
+                    content = if (content == "") note.content else content,
                     dateText = note.dateText,
                     dateValue = note.dateValue,
-                    actions = AvailableTextStyle.values().map { availableTextStyle ->
+                    actions = ActionsSealed.values().map { availableTextStyle ->
                         val isEnabled = enabledTextStyles.contains(availableTextStyle)
 
-                        NoteDetailsViewStateItem(
-                            textStyle = availableTextStyle,
+                        EditTextAction(textStyle = availableTextStyle,
                             icon = availableTextStyle.icon,
+                            background = availableTextStyle.background,
                             enabled = isEnabled,
-                            onClicked = EquatableCallback {
+                            onClickedCallback = EquatableCallback {
                                 onItemClicked(availableTextStyle)
-                            }
-                        )
-                    }
-                )
+                            })
+                    })
             )
         }.collect()
     }
 
-    private fun onItemClicked(availableTextStyle: AvailableTextStyle) {
-        enabledTextStylesMutableStateFlow.update {
-            if (it.contains(availableTextStyle)) {
-                it - availableTextStyle
-            } else {
-                it + availableTextStyle
+    private fun onItemClicked(actionSealed: ActionsSealed) {
+        enabledTextStylesMutableStateFlow.update { list ->
+            when (actionSealed.type) {
+                ActionType.REVERSE -> {
+                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                    list
+                }
+
+                ActionType.TEXT_STYLE -> {
+                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                    if (list.contains(actionSealed)) {
+                        actionSealed.background = R.drawable.custom_item_background
+                        list - actionSealed
+                    } else {
+                        actionSealed.background = R.drawable.custom_item_background_pressed
+                        list + actionSealed
+                    }
+                }
+
+                ActionType.X2 -> {
+                    list
+                }
+
+                ActionType.HEADING -> {
+                    var currentList = emptyList<ActionsSealed>()
+                    val headingItem = list.find { it.type == ActionType.HEADING }
+
+                    if (headingItem != null) {
+                        currentList = list - headingItem
+                    }
+
+                    headingItem?.background = R.drawable.custom_item_background
+
+                    if (list.contains(actionSealed)) {
+                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                        actionSealed.background = R.drawable.custom_item_background
+                        currentList - actionSealed
+                    } else {
+                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                        actionSealed.background = R.drawable.custom_item_background_pressed
+                        currentList + actionSealed
+                    }
+                }
+
+                ActionType.COLOR -> {
+                    list
+                }
+
+                ActionType.INSERT -> {
+                    list
+                }
+
+                ActionType.ALIGN -> {
+                    var currentList = emptyList<ActionsSealed>()
+                    val headingItem = list.find { it.type == ActionType.ALIGN }
+
+                    if (headingItem != null) {
+                        currentList = list - headingItem
+                    }
+
+                    headingItem?.background = R.drawable.custom_item_background
+
+                    if (list.contains(actionSealed)) {
+                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                        actionSealed.background = R.drawable.custom_item_background
+                        currentList - actionSealed
+                    } else {
+                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                        actionSealed.background = R.drawable.custom_item_background_pressed
+                        currentList + actionSealed
+                    }
+                }
             }
         }
     }
@@ -181,6 +190,7 @@ class NoteDetailsViewModel @Inject constructor(
                     picturesMutableSharedFlow.tryEmit(noteWithPictures.photos.map {
                         PictureViewState(it.picture)
                     }.toSet())
+                    contentFlow.tryEmit(noteWithPictures.noteEntity.content)
                 }
             }
         }
@@ -239,6 +249,12 @@ class NoteDetailsViewModel @Inject constructor(
                     finishSavingSingleLiveEvent.setValue(Unit)
                 }
             }
+        }
+    }
+
+    fun updateEditTextContent(content: String) {
+        contentFlow.update {
+            content
         }
     }
 

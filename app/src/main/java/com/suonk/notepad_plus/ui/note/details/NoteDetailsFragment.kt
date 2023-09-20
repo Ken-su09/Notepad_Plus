@@ -8,6 +8,7 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.asLiveData
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentNoteDetailsBinding
@@ -18,6 +19,7 @@ import com.suonk.notepad_plus.utils.showToast
 import com.suonk.notepad_plus.utils.toCharSequence
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import jp.wasabeef.richeditor.RichEditor
 
 @AndroidEntryPoint
 class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
@@ -43,6 +45,14 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
             it.showToast(requireContext())
         }
         binding.editor.setFontSize(16)
+
+        viewModel.contentFlow.asLiveData().observe(viewLifecycleOwner) {
+            Log.i("GetEditTextAction", "Passe par là : $it")
+            binding.editor.html = it
+        }
+//        binding.editor.setOnTextChangeListener { content ->
+//            viewModel.updateEditTextContent(content)
+//        }
         viewModel.editorActionsSingleLiveEvent.observe(viewLifecycleOwner) {
             when (it) {
                 R.drawable.ic_undo -> {
@@ -166,9 +176,11 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
     //endregion
 
     private fun bindDataFromViewModelToView() {
+        var cpt = 0
         viewModel.noteDetailsViewState.observe(viewLifecycleOwner) { noteDetails ->
+            cpt++
+
             binding.title.setText(noteDetails.title)
-            binding.editor.html = noteDetails.content
             binding.date.text = noteDetails.dateText.toCharSequence(requireContext())
 
             val adapter = ActionsListAdapter()
@@ -205,4 +217,9 @@ class NoteDetailsFragment : Fragment(R.layout.fragment_note_details) {
     }
 
     //endregion
+
+    private fun updateEditTextContent() {
+        binding.editor.setOnTextChangeListener {
+        }
+    }
 }

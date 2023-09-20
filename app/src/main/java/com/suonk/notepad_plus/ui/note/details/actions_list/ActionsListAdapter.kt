@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details.actions_list
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -22,10 +23,10 @@ class ActionsListAdapter : ListAdapter<EditTextAction, ActionsListAdapter.ViewHo
     class ViewHolder(private val binding: ItemActionsListBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind(action: EditTextAction) {
             binding.actionIcon.setImageResource(action.icon)
+            action.background?.let { binding.root.setBackgroundResource(it) }
             binding.actionIcon.setOnClickListener {
                 action.onClickedCallback()
             }
-            binding.root.background = action.background
         }
     }
 
