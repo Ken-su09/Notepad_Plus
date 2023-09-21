@@ -1,28 +1,27 @@
 package com.suonk.notepad_plus.ui.note.details
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.databinding.ActivityNoteDetailsBinding
-import com.suonk.notepad_plus.ui.note.list.NotesListFragment
-import com.suonk.notepad_plus.utils.viewBinding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class NoteDetailsActivity : AppCompatActivity() {
-
-    private val binding by viewBinding { ActivityNoteDetailsBinding.inflate(it) }
+class NoteDetailsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.details_fragment_container, NoteDetailsFragment())
-                .addToBackStack(null)
-                .commit()
+        setContent {
+            MaterialTheme {
+                HelloWorld()
+            }
         }
     }
+}
+
+@Composable
+fun HelloWorld() {
+    Text(text = "Coucou kenzy")
 }
