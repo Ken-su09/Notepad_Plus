@@ -2,7 +2,6 @@ package com.suonk.notepad_plus.ui.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
@@ -20,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val binding by viewBinding { ActivityMainBinding.inflate(it) }
+
     private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
         viewModel.mainViewAction.observeEvent(this) { action ->
             when (action) {
                 is MainViewAction.Navigate.Detail -> {
-                    Log.i("GET_NOTE", "action : $action")
                     startActivity(Intent(this@MainActivity, NoteDetailsActivity::class.java))
                 }
             }
