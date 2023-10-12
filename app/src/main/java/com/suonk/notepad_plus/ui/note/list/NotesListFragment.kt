@@ -1,8 +1,6 @@
 package com.suonk.notepad_plus.ui.note.list
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
@@ -14,8 +12,6 @@ import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentNotesListBinding
 import com.suonk.notepad_plus.ui.main.MainActivity
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListFragment
-import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
-import com.suonk.notepad_plus.ui.note.details.NoteDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,9 +28,9 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
         val listAdapter = NotesListAdapter()
 
-        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
-            listAdapter.submitList(list)
-        }
+//        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
+//            listAdapter.submitList(list)
+//        }
         binding.recyclerView.adapter = listAdapter
 
         binding.addNote.setOnClickListener {

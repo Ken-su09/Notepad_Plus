@@ -3,12 +3,12 @@ package com.suonk.notepad_plus.ui.auth
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
-import android.provider.Settings.Global.getString
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -76,7 +77,9 @@ class AuthActivity : AppCompatActivity() {
 //            return
 //        }
 
-        setContentView(binding.root)
+        setContent {
+            LoginPage()
+        }
 
         binding.signIn.setOnClickListener { mailPasswordSignIn() }
         viewModel.isFieldsCorrectSingleLiveEvent.observe(this) { areFieldsCorrectlyFilled ->
@@ -204,11 +207,8 @@ class AuthActivity : AppCompatActivity() {
     }
 }
 
-@Preview
 @Composable
 fun LoginPage() {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
 
 //    val customBackgroundDrawable = painterResource(id = R.drawable.custom_edit_text_background)
 //
@@ -244,49 +244,67 @@ fun LoginPage() {
                 .padding(bottom = 16.dp)
         )
 
-        // Email
-        BasicTextField(
-            value = "Test",
-            onValueChange = { email = "" },
-            keyboardOptions = KeyboardOptions.Default,
-            keyboardActions = KeyboardActions(
-                onNext = { }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
+        LoginFormVM()
+    }
+}
+
+@Composable
+private fun LoginFormVM(
+    viewModel: AuthViewModel = viewModel()
+) {
+    LoginForm { email, password ->
+        viewModel.onLoginClicked(email, password)
+    }
+}
+
+@Preview
+@Composable
+private fun LoginForm(onLoginClicked: (String, String) -> Unit = { _, _ -> }) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    // Email
+    BasicTextField(
+        value = "Test",
+        onValueChange = { email = it },
+        keyboardOptions = KeyboardOptions.Default,
+        keyboardActions = KeyboardActions(
+            onNext = { }
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
 //                .color
 //                .background(brush = brushshape = MaterialTheme.shapes.medium)
-                .padding(16.dp),
-            textStyle = TextStyle(color = Color.Black)
-        )
+            .padding(16.dp),
+        textStyle = TextStyle(color = Color.Black)
+    )
 
-        // Password
-        BasicTextField(
-            value = password,
-            onValueChange = { password = "" },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Password
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            textStyle = TextStyle(color = Color.Black)
-        )
+    // Password
+    BasicTextField(
+        value = password,
+        onValueChange = { password = it },
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Password
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { }
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        textStyle = TextStyle(color = Color.Black)
+    )
 
-        // Login
-        Button(
-            onClick = {
-
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Login")
-        }
+    // Login
+    Button(
+        onClick = {
+            onLoginClicked(email, password)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text("Login")
     }
 }

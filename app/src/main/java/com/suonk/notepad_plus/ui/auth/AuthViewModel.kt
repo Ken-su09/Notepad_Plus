@@ -52,4 +52,8 @@ class AuthViewModel @Inject constructor(private val addUserToFirestoreUseCase: A
 //            }
         }
     }
+
+    fun onLoginClicked(email: String, password: String) {
+
+    }
 }

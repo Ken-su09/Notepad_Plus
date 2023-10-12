@@ -2,21 +2,14 @@ package com.suonk.notepad_plus.ui.note.deleted_list
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.FragmentDeletedNotesListBinding
-import com.suonk.notepad_plus.databinding.FragmentNotesListBinding
-import com.suonk.notepad_plus.ui.main.MainActivity
-import com.suonk.notepad_plus.ui.note.details.NoteDetailsFragment
-import com.suonk.notepad_plus.ui.note.list.NotesListAdapter
 import com.suonk.notepad_plus.ui.note.list.NotesListFragment
-import com.suonk.notepad_plus.ui.note.list.NotesListViewModel
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
