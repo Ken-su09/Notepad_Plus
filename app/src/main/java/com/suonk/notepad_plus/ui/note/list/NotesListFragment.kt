@@ -28,9 +28,9 @@ class NotesListFragment : Fragment(R.layout.fragment_notes_list) {
 
         val listAdapter = NotesListAdapter()
 
-        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
-            listAdapter.submitList(list)
-        }
+//        viewModel.notesListLiveData.observe(viewLifecycleOwner) { list ->
+//            listAdapter.submitList(list)
+//        }
         binding.recyclerView.adapter = listAdapter
 
         binding.addNote.setOnClickListener {
