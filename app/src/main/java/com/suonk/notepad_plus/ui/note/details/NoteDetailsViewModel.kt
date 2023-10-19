@@ -21,9 +21,12 @@ import com.suonk.notepad_plus.utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,6 +37,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NoteDetailsViewModel @Inject constructor(
@@ -56,30 +60,33 @@ class NoteDetailsViewModel @Inject constructor(
     val contentFlow = MutableStateFlow("")
     var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
-    val noteDetailsViewState: LiveData<NoteDetailsViewState> = liveData(coroutineDispatcherProvider.io) {
-        combine(
-            noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
-        ) { note, pictures, enabledTextStyles, content ->
-            emit(
-                NoteDetailsViewState(id = note.id,
-                    title = note.title,
-                    content = if (content == "") note.content else content,
-                    dateText = note.dateText,
-                    dateValue = note.dateValue,
-                    actions = ActionsSealed.values().map { availableTextStyle ->
-                        val isEnabled = enabledTextStyles.contains(availableTextStyle)
+    val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
+        noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
+    ) { note, pictures, enabledTextStyles, content ->
+        NoteDetailsViewState(id = note.id,
+            title = note.title,
+            content = if (content == "") note.content else content,
+            dateText = note.dateText,
+            dateValue = note.dateValue,
+            actions = ActionsSealed.values().map { availableTextStyle ->
+                val isEnabled = enabledTextStyles.contains(availableTextStyle)
 
-                        EditTextAction(textStyle = availableTextStyle,
-                            icon = availableTextStyle.icon,
-                            background = availableTextStyle.background,
-                            enabled = isEnabled,
-                            onClickedCallback = EquatableCallback {
-                                onItemClicked(availableTextStyle)
-                            })
+                EditTextAction(textStyle = availableTextStyle,
+                    icon = availableTextStyle.icon,
+                    background = availableTextStyle.background,
+                    enabled = isEnabled,
+                    onClickedCallback = EquatableCallback {
+                        onItemClicked(availableTextStyle)
                     })
-            )
-        }.collect()
-    }
+            })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), NoteDetailsViewState(
+        id = 0,
+        title = "",
+        content = "",
+        dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
+        dateValue = ZonedDateTime.now(fixedClock).toInstant(),
+        actions = listOf()
+    ))
 
     private fun onItemClicked(actionSealed: ActionsSealed) {
         enabledTextStylesMutableStateFlow.update { list ->
@@ -160,9 +167,8 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             getCurrentIdFlowUseCase.invoke().collect { id ->
-                Log.i("GET_NOTE", "id : $id")
-
-                val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
+//                val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
+                val noteWithPictures = getNoteByIdFlowUseCase.invoke(1).firstOrNull()
                 if (noteWithPictures == null) {
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
                         NoteDetailsViewState(

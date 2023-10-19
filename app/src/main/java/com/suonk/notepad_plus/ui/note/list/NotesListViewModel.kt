@@ -53,9 +53,7 @@ class NotesListViewModel @Inject constructor(
         }.map {
             transformEntityToViewState(it)
         }.toList()
-    }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList()
-    )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
 
 
     private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(id = entity.noteEntity.id,
@@ -70,7 +68,7 @@ class NotesListViewModel @Inject constructor(
         setCurrentNoteIdUseCase.invoke(-1)
     }
 
-    fun setSearchParameters(search: String?){
+    fun setSearchParameters(search: String?) {
         setSearchNoteUseCase.invoke(search)
     }
 }
