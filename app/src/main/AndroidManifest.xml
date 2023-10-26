@@ -20,17 +20,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.AuthActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"/>
         <activity
-            android:name=".ui.main.MainActivity"
-            android:exported="true">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".ui.note.list.NoteListActivity"
+            android:name=".ui.note.list.NotesListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

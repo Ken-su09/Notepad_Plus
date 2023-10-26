@@ -53,7 +53,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.ActivityAuthBinding
-import com.suonk.notepad_plus.ui.main.MainActivity
+import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -173,7 +173,7 @@ class AuthActivity : AppCompatActivity() {
                 Log.i("LoginWithGoogle", "FirebaseAuth.getInstance().currentUser : ${FirebaseAuth.getInstance().currentUser}")
                 viewModel.addUserToFirestore()
                 loginSuccessfulToastMessage()
-                startActivity(Intent(this, MainActivity::class.java))
+                startActivity(Intent(this, NotesListActivity::class.java))
                 finish()
             }
         }

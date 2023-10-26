@@ -11,7 +11,7 @@ data class NoteEntity(
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
     @ColumnInfo(name = "date") val date: LocalDateTime,
-    @ColumnInfo(name = "color") val color: Int,
+    @ColumnInfo(name = "color") val color: Long,
     @ColumnInfo(name = "isFavorite") val isFavorite: Boolean,
     @ColumnInfo(name = "isDeleted") val isDeleted: Boolean,
 )

@@ -1,14 +1,12 @@
 package com.suonk.notepad_plus.ui.note.details
 
 import android.util.Log
-import androidx.annotation.DrawableRes
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.domain.use_cases.note.get.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.ui.note.details.actions_list.ActionType
@@ -23,7 +21,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -43,12 +40,22 @@ import kotlin.time.Duration.Companion.seconds
 class NoteDetailsViewModel @Inject constructor(
     private val getNoteByIdFlowUseCase: GetNoteByIdFlowUseCase,
     private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
+    private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val fixedClock: Clock,
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+
+//    private val _noteTitle = mutableStateOf("Enter title...")
+//    val noteTitle: State<String> = _noteTitle
+//
+//    private val _noteContent = mutableStateOf("Enter some content")
+//    val noteContent: State<String> = _noteContent
+//
+//    private val _noteColor = mutableStateOf(listOfColors().random())
+//    val noteColor: State<Long> = _noteColor
 
     private var noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsViewState>(replay = 1)
     private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
@@ -63,9 +70,11 @@ class NoteDetailsViewModel @Inject constructor(
     val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
         noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
     ) { note, pictures, enabledTextStyles, content ->
-        NoteDetailsViewState(id = note.id,
+        NoteDetailsViewState(
+            id = note.id,
             title = note.title,
             content = if (content == "") note.content else content,
+            color = note.color,
             dateText = note.dateText,
             dateValue = note.dateValue,
             actions = ActionsSealed.values().map { availableTextStyle ->
@@ -79,14 +88,17 @@ class NoteDetailsViewModel @Inject constructor(
                         onItemClicked(availableTextStyle)
                     })
             })
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), NoteDetailsViewState(
-        id = 0,
-        title = "",
-        content = "",
-        dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
-        dateValue = ZonedDateTime.now(fixedClock).toInstant(),
-        actions = listOf()
-    ))
+    }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), NoteDetailsViewState(
+            id = 0,
+            title = "",
+            content = "",
+            color = listOfColors().random(),
+            dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
+            dateValue = ZonedDateTime.now(fixedClock).toInstant(),
+            actions = listOf()
+        )
+    )
 
     private fun onItemClicked(actionSealed: ActionsSealed) {
         enabledTextStylesMutableStateFlow.update { list ->
@@ -167,25 +179,31 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             getCurrentIdFlowUseCase.invoke().collect { id ->
-//                val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
-                val noteWithPictures = getNoteByIdFlowUseCase.invoke(1).firstOrNull()
+                Log.i("GetNoteDetails", "id : $id")
+                val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
                 if (noteWithPictures == null) {
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
                         NoteDetailsViewState(
                             id = 0,
                             title = "",
                             content = "",
+                            color = listOfColors().random(),
                             dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
                             dateValue = ZonedDateTime.now(fixedClock).toInstant(),
                             actions = listOf()
                         )
                     )
                 } else {
+//                    _noteTitle.value = noteWithPictures.noteEntity.title
+//                    _noteContent.value = noteWithPictures.noteEntity.content
+//                    _noteColor.value = noteWithPictures.noteEntity.color
+
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
                         NoteDetailsViewState(
                             id = noteWithPictures.noteEntity.id,
                             title = noteWithPictures.noteEntity.title,
                             content = noteWithPictures.noteEntity.content,
+                            color = noteWithPictures.noteEntity.color,
                             dateText = NativeText.Argument(
                                 R.string.last_update, noteWithPictures.noteEntity.date.format(dateTimeFormatter)
                             ),
@@ -202,7 +220,7 @@ class NoteDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onSaveNoteMenuItemClicked(title: String, content: String) {
+    fun onSaveNoteMenuItemClicked(title: String, content: String, updatedColor: Long) {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             getCurrentIdFlowUseCase.invoke().collect { id ->
                 if (isEmptyOrBlank(title) || isEmptyOrBlank(content)) {
@@ -264,10 +282,41 @@ class NoteDetailsViewModel @Inject constructor(
         }
     }
 
+    fun setNoteIdToNull() {
+        setCurrentNoteIdUseCase.invoke(-1)
+    }
+
     private fun fromLocalDateToInstant(value: LocalDateTime): Instant = value.toInstant(ZoneOffset.UTC)
     private fun fromInstantToLocalDate(instant: Instant): LocalDateTime = instant.atZone(ZoneOffset.UTC).toLocalDateTime()
 
     private fun isEmptyOrBlank(value: String): Boolean {
         return value.isEmpty() || value.isBlank() || value == "" || value == " "
     }
+
+    fun onEvent(event: NoteDetailsEvent) {
+        when (event) {
+            is NoteDetailsEvent.ChangeTitle -> {
+
+            }
+
+            is NoteDetailsEvent.ChangeContent -> {
+
+            }
+
+            is NoteDetailsEvent.ChangeColor -> {
+
+            }
+
+
+            is NoteDetailsEvent.SaveNote -> {
+
+            }
+
+            else -> {
+
+            }
+        }
+    }
+
+    fun listOfColors() = listOf(0xFFffab91, 0xFFe8ed9d, 0xFFd095db, 0xFF7fdeea, 0xFFf48fb1)
 }
