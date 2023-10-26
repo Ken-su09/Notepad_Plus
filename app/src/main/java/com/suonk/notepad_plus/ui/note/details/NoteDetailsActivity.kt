@@ -84,10 +84,6 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
 
     val noteDetails by viewModel.noteDetailsFlow.collectAsState()
 
-    val titleState = rememberSaveable { mutableStateOf(noteDetails.title) }
-    val contentState = rememberSaveable { mutableStateOf(noteDetails.content) }
-    val colorState = rememberSaveable { mutableLongStateOf(noteDetails.color) }
-
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -122,10 +118,7 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
                         )
                     }
                     IconButton(onClick = {
-                        val updatedTitle = titleState.value
-                        val updatedContent = contentState.value
-                        val updatedColor = colorState.longValue
-                        viewModel.onSaveNoteMenuItemClicked(updatedTitle, updatedContent, updatedColor)
+                        viewModel.onSaveNoteMenuItemClicked(noteDetails.title, noteDetails.content, noteDetails.color)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Create,
@@ -137,19 +130,16 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
             )
         },
     ) { innerPadding ->
-        EntireLayout(innerPadding, titleState, contentState, colorState)
+        EntireLayout(innerPadding, noteDetails)
     }
 }
 
 @Composable
 private fun EntireLayout(
     padding: PaddingValues,
-    titleState: MutableState<String>,
-    contentState: MutableState<String>,
-    colorState: MutableState<Long>,
+    noteDetails: NoteDetailsViewState,
     viewModel: NoteDetailsViewModel = viewModel()
 ) {
-    val noteDetails by viewModel.noteDetailsFlow.collectAsState()
     val noteBackgroundAnimatable = remember {
         Animatable(
             Color(noteDetails.color)
@@ -186,7 +176,7 @@ private fun EntireLayout(
                         )
                         .clickable {
                             scope.launch {
-                                colorState.value = color
+                                viewModel.onColorSelected(color)
                                 noteBackgroundAnimatable.animateTo(
                                     targetValue = Color(color),
                                     animationSpec = tween(
@@ -214,7 +204,8 @@ private fun EntireLayout(
             contentAlignment = Alignment.CenterStart,
         ) {
             BasicTextField(
-                value = noteDetails.title, maxLines = 2,
+                value = noteDetails.title,
+                maxLines = 2,
                 onValueChange = { newText ->
                     titleState.value = newText
                 },

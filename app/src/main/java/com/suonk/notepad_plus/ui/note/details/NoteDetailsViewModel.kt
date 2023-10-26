@@ -15,12 +15,13 @@ import com.suonk.notepad_plus.ui.note.details.actions_list.EditTextAction
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.NativeText
-import com.suonk.notepad_plus.utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -42,7 +43,6 @@ class NoteDetailsViewModel @Inject constructor(
     private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
-    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val fixedClock: Clock,
 ) : ViewModel() {
 
@@ -57,18 +57,28 @@ class NoteDetailsViewModel @Inject constructor(
 //    private val _noteColor = mutableStateOf(listOfColors().random())
 //    val noteColor: State<Long> = _noteColor
 
-    private var noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsViewState>(replay = 1)
-    private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
+    private val noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsForm>(replay = 1)
+
+    private data class NoteDetailsForm(
+        val title: String,
+        val content: String,
+        val color: Long,
+    )
+
+    private val picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
 
     private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<ActionsSealed>())
 
-    val finishSavingSingleLiveEvent = SingleLiveEvent<Unit>()
-    val editorActionsSingleLiveEvent = SingleLiveEvent<Int>()
+    private val noteDetailsEventMutableSharedFlow = MutableSharedFlow<NoteDetailsEvent>(extraBufferCapacity = 1)
+    val noteDetailsEventFlow: Flow<NoteDetailsEvent> = noteDetailsEventMutableSharedFlow.asSharedFlow()
+
     val contentFlow = MutableStateFlow("")
-    var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
     val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
-        noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
+        noteDetailsViewStateMutableSharedFlow,
+        picturesMutableSharedFlow,
+        enabledTextStylesMutableStateFlow,
+        contentFlow
     ) { note, pictures, enabledTextStyles, content ->
         NoteDetailsViewState(
             id = note.id,
@@ -104,7 +114,7 @@ class NoteDetailsViewModel @Inject constructor(
         enabledTextStylesMutableStateFlow.update { list ->
             when (actionSealed.type) {
                 ActionType.REVERSE -> {
-                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+                    noteDetailsEventMutableSharedFlow.tryEmit(NoteDetailsEvent.Revert(actionSealed.icon))
                     list
                 }
 
@@ -177,56 +187,53 @@ class NoteDetailsViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getCurrentIdFlowUseCase.invoke().collect { id ->
-                Log.i("GetNoteDetails", "id : $id")
-                val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
-                if (noteWithPictures == null) {
-                    noteDetailsViewStateMutableSharedFlow.tryEmit(
-                        NoteDetailsViewState(
-                            id = 0,
-                            title = "",
-                            content = "",
-                            color = listOfColors().random(),
-                            dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
-                            dateValue = ZonedDateTime.now(fixedClock).toInstant(),
-                            actions = listOf()
-                        )
+        viewModelScope.launch {
+            val id = getCurrentIdFlowUseCase.invoke().firstOrNull()
+            Log.i("GetNoteDetails", "id : $id")
+            val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
+            if (noteWithPictures == null) {
+                noteDetailsViewStateMutableSharedFlow.tryEmit(
+                    NoteDetailsForm(
+                        id = 0,
+                        title = "",
+                        content = "",
+                        color = listOfColors().random(),
+                        date = ZonedDateTime.now(fixedClock).format(dateTimeFormatter),
+                        dateValue = ZonedDateTime.now(fixedClock).toInstant(),
+                        actions = listOf()
                     )
-                } else {
+                )
+            } else {
 //                    _noteTitle.value = noteWithPictures.noteEntity.title
 //                    _noteContent.value = noteWithPictures.noteEntity.content
 //                    _noteColor.value = noteWithPictures.noteEntity.color
 
-                    noteDetailsViewStateMutableSharedFlow.tryEmit(
-                        NoteDetailsViewState(
-                            id = noteWithPictures.noteEntity.id,
-                            title = noteWithPictures.noteEntity.title,
-                            content = noteWithPictures.noteEntity.content,
-                            color = noteWithPictures.noteEntity.color,
-                            dateText = NativeText.Argument(
-                                R.string.last_update, noteWithPictures.noteEntity.date.format(dateTimeFormatter)
-                            ),
-                            dateValue = fromLocalDateToInstant(noteWithPictures.noteEntity.date),
-                            actions = listOf()
-                        )
+                noteDetailsViewStateMutableSharedFlow.tryEmit(
+                    NoteDetailsViewState(
+                        id = noteWithPictures.noteEntity.id,
+                        title = noteWithPictures.noteEntity.title,
+                        content = noteWithPictures.noteEntity.content,
+                        color = noteWithPictures.noteEntity.color,
+                        dateText = NativeText.Argument(
+                            R.string.last_update, noteWithPictures.noteEntity.date.format(dateTimeFormatter)
+                        ),
+                        dateValue = fromLocalDateToInstant(noteWithPictures.noteEntity.date),
+                        actions = listOf()
                     )
-                    picturesMutableSharedFlow.tryEmit(noteWithPictures.photos.map {
-                        PictureViewState(it.picture)
-                    }.toSet())
-                    contentFlow.tryEmit(noteWithPictures.noteEntity.content)
-                }
+                )
+                picturesMutableSharedFlow.tryEmit(noteWithPictures.photos.map {
+                    PictureViewState(it.picture)
+                }.toSet())
+                contentFlow.tryEmit(noteWithPictures.noteEntity.content)
             }
         }
     }
 
     fun onSaveNoteMenuItemClicked(title: String, content: String, updatedColor: Long) {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
+        viewModelScope.launch {
             getCurrentIdFlowUseCase.invoke().collect { id ->
                 if (isEmptyOrBlank(title) || isEmptyOrBlank(content)) {
-                    withContext(coroutineDispatcherProvider.main) {
                         toastMessageSingleLiveEvent.setValue(NativeText.Resource(R.string.field_empty_toast_msg))
-                    }
                 } else {
                     val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
@@ -242,16 +249,14 @@ class NoteDetailsViewModel @Inject constructor(
                         )
                     )
 
-                    withContext(coroutineDispatcherProvider.main) {
                         finishSavingSingleLiveEvent.setValue(Unit)
-                    }
                 }
             }
         }
     }
 
     fun onDeleteNoteMenuItemClicked() {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
+        viewModelScope.launch {
             getCurrentIdFlowUseCase.invoke().collect { id ->
                 val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
@@ -269,9 +274,7 @@ class NoteDetailsViewModel @Inject constructor(
                     )
                 }
 
-                withContext(coroutineDispatcherProvider.main) {
                     finishSavingSingleLiveEvent.setValue(Unit)
-                }
             }
         }
     }
