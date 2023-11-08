@@ -131,10 +131,12 @@ private fun NoteLayout(
 
             clipPath(clipPath) {
                 drawRoundRect(
-                    color = Color(0xFF9fdfec), size = size, cornerRadius = CornerRadius(cornerRadius.toPx())
+                    color = Color(note.color), size = size, cornerRadius = CornerRadius(cornerRadius.toPx())
                 )
+                val originalColor = Color(note.color)
+                val darkerColor = makeColorDarker(originalColor, 0.8F)
                 drawRoundRect(
-                    color = Color(ColorUtils.blendARGB(note.color, 0x555555, 0.7f)),
+                    color = darkerColor,
                     topLeft = Offset(size.width - cutCornerSize.toPx(), -100f),
                     size = Size(cutCornerSize.toPx() + 100f, cutCornerSize.toPx() + 100f),
                     cornerRadius = CornerRadius(cornerRadius.toPx())
@@ -244,6 +246,15 @@ private fun AppPortrait(onAddNewNoteClicked: () -> Unit, onItemNoteClicked: () -
         bottomBar = { HorizontalBottomNavigationView() }) { padding ->
         EntireLayout(Modifier.padding(padding), onAddNewNoteClicked, onItemNoteClicked)
     }
+}
+
+fun makeColorDarker(color: Color, scaleFactor: Float): Color {
+    return Color(
+        red = color.red * scaleFactor,
+        green = color.green * scaleFactor,
+        blue = color.blue * scaleFactor,
+        alpha = color.alpha
+    )
 }
 
 //@Preview

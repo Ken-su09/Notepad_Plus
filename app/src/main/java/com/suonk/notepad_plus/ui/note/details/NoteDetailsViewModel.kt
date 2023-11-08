@@ -1,6 +1,9 @@
 package com.suonk.notepad_plus.ui.note.details
 
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -48,17 +53,23 @@ class NoteDetailsViewModel @Inject constructor(
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
-//    private val _noteTitle = mutableStateOf("Enter title...")
-//    val noteTitle: State<String> = _noteTitle
-//
-//    private val _noteContent = mutableStateOf("Enter some content")
-//    val noteContent: State<String> = _noteContent
-//
-//    private val _noteColor = mutableStateOf(listOfColors().random())
-//    val noteColor: State<Long> = _noteColor
-
     private var noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsViewState>(replay = 1)
     private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
+
+    private val _noteTitle = MutableStateFlow("Enter title")
+    val noteTitle = _noteTitle.asStateFlow()
+
+    private val _noteContent = MutableStateFlow("Enter content")
+    val noteContent = _noteContent.asStateFlow()
+
+    private val _noteColor = MutableStateFlow(listOfColors().random())
+    val noteColor = _noteColor.asStateFlow()
+
+    private data class NoteDetailsForm(
+        var title: String,
+        var content: String,
+        var color: Long,
+    )
 
     private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<ActionsSealed>())
 
@@ -67,11 +78,13 @@ class NoteDetailsViewModel @Inject constructor(
     val contentFlow = MutableStateFlow("")
     var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
+    private val _noteDetailsUiEvent = MutableSharedFlow<NoteDetailsUiEvent>()
+    val noteDetailsUiEvent = _noteDetailsUiEvent.asSharedFlow()
+
     val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
         noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
     ) { note, pictures, enabledTextStyles, content ->
-        NoteDetailsViewState(
-            id = note.id,
+        NoteDetailsViewState(id = note.id,
             title = note.title,
             content = if (content == "") note.content else content,
             color = note.color,
@@ -179,7 +192,6 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             getCurrentIdFlowUseCase.invoke().collect { id ->
-                Log.i("GetNoteDetails", "id : $id")
                 val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
                 if (noteWithPictures == null) {
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
@@ -194,9 +206,13 @@ class NoteDetailsViewModel @Inject constructor(
                         )
                     )
                 } else {
-//                    _noteTitle.value = noteWithPictures.noteEntity.title
-//                    _noteContent.value = noteWithPictures.noteEntity.content
-//                    _noteColor.value = noteWithPictures.noteEntity.color
+                    try {
+                        _noteTitle.value = noteWithPictures.noteEntity.title
+                        _noteContent.value = noteWithPictures.noteEntity.content
+                        _noteColor.value = noteWithPictures.noteEntity.color
+                    } catch (e: Exception) {
+                        Log.i("GetNoteDetails", "e : $e")
+                    }
 
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
                         NoteDetailsViewState(
@@ -276,12 +292,6 @@ class NoteDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updateEditTextContent(content: String) {
-        contentFlow.update {
-            content
-        }
-    }
-
     fun setNoteIdToNull() {
         setCurrentNoteIdUseCase.invoke(-1)
     }
@@ -293,23 +303,48 @@ class NoteDetailsViewModel @Inject constructor(
         return value.isEmpty() || value.isBlank() || value == "" || value == " "
     }
 
-    fun onEvent(event: NoteDetailsEvent) {
+    fun onEvent(event: NoteDetailsDataEvent) {
         when (event) {
-            is NoteDetailsEvent.ChangeTitle -> {
-
+            is NoteDetailsDataEvent.ChangeTitle -> {
+                _noteTitle.value = event.title
             }
 
-            is NoteDetailsEvent.ChangeContent -> {
-
+            is NoteDetailsDataEvent.ChangeContent -> {
+                _noteContent.value = event.content
             }
 
-            is NoteDetailsEvent.ChangeColor -> {
-
+            is NoteDetailsDataEvent.ChangeColor -> {
+                _noteColor.value = event.color
             }
 
 
-            is NoteDetailsEvent.SaveNote -> {
+            is NoteDetailsDataEvent.SaveNote -> {
+                viewModelScope.launch {
+                        if (isEmptyOrBlank(_noteTitle.value) || isEmptyOrBlank(_noteContent.value)) {
+                            _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ShowToast(NativeText.Resource(R.string.field_empty_toast_msg)))
+                        } else {
+                            val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
+                            Log.i("GetNoteDetails", "_noteTitle.value : ${_noteTitle.value}")
+                            Log.i("GetNoteDetails", "_noteContent.value : ${_noteContent.value}")
+
+                            noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
+                                upsertNoteUseCase.invoke(
+                                    NoteEntity(
+                                        id = it.id,
+                                        title = _noteTitle.value,
+                                        content = _noteContent.value,
+                                        date = fromInstantToLocalDate(lastUpdateDate),
+                                        color = _noteColor.value,
+                                        isFavorite = false,
+                                        isDeleted = false
+                                    )
+                                )
+                            }
+
+                            _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
+                        }
+                }
             }
 
             else -> {

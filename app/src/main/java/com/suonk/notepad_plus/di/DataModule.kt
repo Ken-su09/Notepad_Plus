@@ -53,7 +53,7 @@ class DataModule {
                                 "- Pas le droit à la même page\n" +
                                 "- Faire un tri entre les 5 ou prendre celui qui paraît être le plus omoshiroi",
                             date = LocalDateTime.now(),
-                            color = 0,
+                            color = 0xFFffab91,
                             isFavorite = false,
                             isDeleted = false
                         )
@@ -72,7 +72,7 @@ class DataModule {
                                 "\n" +
                                 "Parmi les meilleurs musiciens du monde sont passés, dont le plus grand bassiste encore en vie, Victor Wooten.",
                             date = LocalDateTime.now(),
-                            color = 0,
+                            color = 0xFFffab91,
                             isFavorite = false,
                             isDeleted = false
                         )

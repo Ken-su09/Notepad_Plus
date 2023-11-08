@@ -59,7 +59,7 @@ class NotesListViewModel @Inject constructor(
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
-        color = 0x9fdfec,
+        color = entity.noteEntity.color,
         onItemNoteClicked = EquatableCallback {
             setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
         },
