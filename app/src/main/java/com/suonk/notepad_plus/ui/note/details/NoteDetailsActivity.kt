@@ -1,7 +1,9 @@
 package com.suonk.notepad_plus.ui.note.details
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Animatable
@@ -37,14 +39,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,7 +59,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
+import com.suonk.notepad_plus.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -69,7 +71,7 @@ class NoteDetailsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NotepadPlusTheme {
-                AppPortrait({
+                AppPortrait(this@NoteDetailsActivity, {
                     startActivity(Intent(this@NoteDetailsActivity, NotesListActivity::class.java))
                 })
             }
@@ -79,10 +81,26 @@ class NoteDetailsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsViewModel = viewModel()) {
+private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewModel: NoteDetailsViewModel = viewModel()) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val coroutineScope = rememberCoroutineScope()
 
     val noteDetails by viewModel.noteDetailsFlow.collectAsState()
+
+    LaunchedEffect(coroutineScope) {
+        viewModel.noteDetailsUiEvent.collectLatest { noteDetailsUiEvent ->
+            when (noteDetailsUiEvent) {
+                is NoteDetailsUiEvent.ShowToast -> {
+                    noteDetailsUiEvent.message.showToast(context)
+                }
+                is NoteDetailsUiEvent.ActionFinish -> {
+                    onBackIconClicked()
+                }
+
+                else -> {}
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -94,9 +112,7 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
                 ),
                 title = {
                     Text(
-                        "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        "", maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
@@ -105,24 +121,22 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
                         onBackIconClicked()
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            imageVector = Icons.Filled.ArrowBack, contentDescription = "Localized description"
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.onDeleteNoteMenuItemClicked() }) {
                         Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Delete note"
+                            imageVector = Icons.Filled.Delete, contentDescription = "Delete note"
                         )
                     }
                     IconButton(onClick = {
-                        viewModel.onSaveNoteMenuItemClicked(noteDetails.title, noteDetails.content, noteDetails.color)
+                        viewModel.onEvent(NoteDetailsDataEvent.SaveDataNote(noteDetails.title, noteDetails.content, noteDetails.color))
+//                        viewModel.onSaveNoteMenuItemClicked(noteDetails.title, noteDetails.content, noteDetails.color)
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Create,
-                            contentDescription = "Save note"
+                            imageVector = Icons.Default.Create, contentDescription = "Save note"
                         )
                     }
                 },
@@ -130,21 +144,20 @@ private fun AppPortrait(onBackIconClicked: () -> Unit, viewModel: NoteDetailsVie
             )
         },
     ) { innerPadding ->
-        EntireLayout(innerPadding, noteDetails)
+        EntireLayout(innerPadding, noteDetails, viewModel.listOfColors())
     }
 }
 
 @Composable
-private fun EntireLayout(
-    padding: PaddingValues,
-    noteDetails: NoteDetailsViewState,
-    viewModel: NoteDetailsViewModel = viewModel()
-) {
+private fun EntireLayout(padding: PaddingValues, noteDetails: NoteDetailsViewState, listOfColors: List<Long>) {
     val noteBackgroundAnimatable = remember {
         Animatable(
             Color(noteDetails.color)
         )
     }
+
+    val stableNoteDetails by rememberUpdatedState(noteDetails)
+    Log.i("GetNoteDetails", "noteDetails : $stableNoteDetails")
 
     val scope = rememberCoroutineScope()
     Column(
@@ -157,36 +170,30 @@ private fun EntireLayout(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            viewModel.listOfColors().forEach { color ->
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .shadow(15.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(Color(color))
-                        .border(
-                            width = 3.dp,
-                            color = if (noteDetails.color == color) {
-                                Color.Black
-                            } else Color.Transparent,
-                            shape = CircleShape
-                        )
-                        .clickable {
-                            scope.launch {
-                                viewModel.onColorSelected(color)
-                                noteBackgroundAnimatable.animateTo(
-                                    targetValue = Color(color),
-                                    animationSpec = tween(
-                                        durationMillis = 500
-                                    )
+            listOfColors.forEach { color ->
+                Box(modifier = Modifier
+                    .size(50.dp)
+                    .shadow(15.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(Color(color))
+                    .border(
+                        width = 3.dp, color = if (noteDetails.color == color) {
+                            Color.Black
+                        } else Color.Transparent, shape = CircleShape
+                    )
+                    .clickable {
+                        scope.launch {
+//                                viewModel.onColorSelected(color)
+                            noteBackgroundAnimatable.animateTo(
+                                targetValue = Color(color), animationSpec = tween(
+                                    durationMillis = 500
                                 )
-                            }
-//                            viewModel.onEvent(NoteDetailsEvent.ChangeColor(color))
+                            )
                         }
-                )
+//                            viewModel.onEvent(NoteDetailsEvent.ChangeColor(color))
+                    })
             }
         }
 
@@ -203,14 +210,12 @@ private fun EntireLayout(
                 ),
             contentAlignment = Alignment.CenterStart,
         ) {
+            Log.i("GetNoteDetails", "noteDetails.title : ${noteDetails.title}")
+
             BasicTextField(
-                value = noteDetails.title,
-                maxLines = 2,
-                onValueChange = { newText ->
-                    titleState.value = newText
-                },
-                textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
-                modifier = Modifier.padding(start = 16.dp)
+                value = noteDetails.title, maxLines = 2, onValueChange = { newText ->
+//                    titleState.value = newText
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), modifier = Modifier.padding(start = 16.dp)
             )
         }
 
@@ -224,13 +229,12 @@ private fun EntireLayout(
                 ),
             contentAlignment = Alignment.CenterStart,
         ) {
+            Log.i("GetNoteDetails", "noteDetails.content : ${noteDetails.content}")
+
             BasicTextField(
-                value = noteDetails.content,
-                onValueChange = { newText ->
-                    contentState.value = newText
-                },
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                modifier = Modifier.padding(16.dp)
+                value = noteDetails.content, onValueChange = { newText ->
+//                    contentState.value = newText
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), modifier = Modifier.padding(16.dp)
             )
         }
     }

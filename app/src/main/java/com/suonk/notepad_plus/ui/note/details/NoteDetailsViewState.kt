@@ -11,5 +11,4 @@ data class NoteDetailsViewState(
     val color: Long,
     val dateText: NativeText,
     val dateValue: Instant?,
-    val actions: List<EditTextAction>
 )
