@@ -203,8 +203,6 @@ class NoteDetailsViewModel @Inject constructor(
                         _noteContent.value = noteWithPictures.noteEntity.content
                         _noteColor.value = noteWithPictures.noteEntity.color
 
-                        Log.i("GetNoteDetails", "noteWithPictures.noteEntity.color : ${noteWithPictures.noteEntity.color}")
-
                         _isDeleted.value = noteWithPictures.noteEntity.isDeleted
                     } catch (e: Exception) {
                         Log.i("GetNoteDetails", "e : $e")
@@ -287,9 +285,6 @@ class NoteDetailsViewModel @Inject constructor(
                         _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ShowToast(NativeText.Resource(R.string.field_empty_toast_msg)))
                     } else {
                         val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
-
-                        Log.i("GetNoteDetails", "_noteTitle.value : ${_noteTitle.value}")
-                        Log.i("GetNoteDetails", "_noteContent.value : ${_noteContent.value}")
 
                         noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
                             upsertNoteUseCase.invoke(

@@ -3,6 +3,7 @@ package com.suonk.notepad_plus.ui.note.details
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Animatable
@@ -216,10 +217,11 @@ private fun EntireLayout(
             BasicTextField(
                 value = titleState, maxLines = 2, onValueChange = { newTitle ->
                     viewModel.onEvent(NoteDetailsDataEvent.ChangeTitle(newTitle))
-                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), readOnly = isDeleted, modifier = Modifier.padding(start = 16.dp)
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), enabled = !isDeleted, modifier = Modifier.padding(start = 16.dp)
             )
         }
 
+        Log.i("GetNoteDetails", "isDeleted : ${isDeleted}")
 
         Box(
             modifier = Modifier
@@ -234,7 +236,7 @@ private fun EntireLayout(
             BasicTextField(
                 value = contentState, onValueChange = { newContent ->
                     viewModel.onEvent(NoteDetailsDataEvent.ChangeContent(newContent))
-                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), readOnly = isDeleted, modifier = Modifier.padding(16.dp)
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isDeleted, modifier = Modifier.padding(16.dp)
             )
         }
     }
