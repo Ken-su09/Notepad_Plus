@@ -20,10 +20,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -46,7 +43,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,9 +53,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -72,13 +71,15 @@ class NotesListActivity : ComponentActivity() {
                     startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
                 }, {
                     startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
+                }, {
+                    startActivity(Intent(this@NotesListActivity, DeletedNotesListActivity::class.java))
                 })
             }
         }
     }
 }
 
-//region ================================================================ SEARCH BAR ================================================================
+//region ===================================================================== SEARCH BAR =====================================================================
 
 @Composable
 private fun SearchBar(modifier: Modifier = Modifier, viewModel: NotesListViewModel) {
@@ -92,7 +93,7 @@ private fun SearchBar(modifier: Modifier = Modifier, viewModel: NotesListViewMod
 
 //endregion
 
-//region =========================================================== NOTES COLLECTIONS ===========================================================
+//region ===================================================================== NOTES LIST =====================================================================
 
 @Composable
 private fun ListOfNotes(modifier: Modifier, list: List<NotesListViewState>, onItemNoteClicked: () -> Unit) {
@@ -185,7 +186,7 @@ private fun NoteLayout(
 
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(
-                onClick = onDeleteNoteClicked, modifier = Modifier
+                onClick = { note.onDeleteNoteClicked.invoke() }, modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .align(Alignment.BottomEnd)
             ) {
@@ -222,28 +223,51 @@ private fun EntireLayout(
 }
 
 @Composable
-private fun HorizontalBottomNavigationView() {
+private fun HorizontalBottomNavigationView(onDeleteBottomNavClicked: () -> Unit) {
     NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
-        NavigationBarItem(icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home") }, selected = true, onClick = { })
-        NavigationBarItem(icon = { Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Account") },
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_notes),
+                    contentDescription = stringResource(R.string.nav_notes)
+                )
+            },
             selected = true,
-            onClick = { })
+            onClick = {
+
+            },
+            label = {
+                Text(text = stringResource(R.string.nav_notes))
+            })
+        NavigationBarItem(icon = {
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_garbage),
+                contentDescription = stringResource(R.string.nav_garbage)
+            )
+        },
+            selected = true,
+            onClick = {
+                onDeleteBottomNavClicked()
+            },
+            label = {
+                Text(text = stringResource(R.string.nav_garbage))
+            })
     }
 }
 
 @Composable
-private fun AppPortrait(onAddNewNoteClicked: () -> Unit, onItemNoteClicked: () -> Unit) {
+private fun AppPortrait(onAddNewNoteClicked: () -> Unit, onItemNoteClicked: () -> Unit, onDeleteBottomNavClicked: () -> Unit) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddNewNoteClicked,
-                modifier = Modifier.padding(bottom = 100.dp, end = 25.dp),
+                modifier = Modifier.padding(bottom = 30.dp, end = 10.dp),
                 contentColor = Color.Blue
             ) {
-                Icon(Icons.Filled.Add, "Add New Note")
+                Icon(Icons.Filled.Add, stringResource(R.string.a11y_add_note))
             }
         },
-        bottomBar = { HorizontalBottomNavigationView() }) { padding ->
+        bottomBar = { HorizontalBottomNavigationView(onDeleteBottomNavClicked) }) { padding ->
         EntireLayout(Modifier.padding(padding), onAddNewNoteClicked, onItemNoteClicked)
     }
 }
@@ -256,24 +280,3 @@ fun makeColorDarker(color: Color, scaleFactor: Float): Color {
         alpha = color.alpha
     )
 }
-
-//@Preview
-//@Composable
-//fun EntireLayoutPreview(modifier: Modifier = Modifier, viewModel: NotesListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
-//    NotepadPlusTheme {
-//        Box(modifier = Modifier.fillMaxSize()) {
-//            Column(modifier = Modifier.align(Alignment.TopCenter)) {
-//                SearchBar(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp)
-//                        .heightIn(max = 56.dp), viewModel
-//                )
-//            }
-//
-//            FloatingActionButton(onClick = {}, modifier = Modifier.align(Alignment.BottomEnd), contentColor = Color.White) {
-//                Icon(Icons.Filled.Add, "")
-//            }
-//        }
-//    }
-//}

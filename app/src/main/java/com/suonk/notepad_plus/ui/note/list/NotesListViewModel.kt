@@ -1,6 +1,7 @@
 package com.suonk.notepad_plus.ui.note.list
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllNotesFlowUseCase
@@ -8,6 +9,7 @@ import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
@@ -64,12 +66,24 @@ class NotesListViewModel @Inject constructor(
             setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
         },
         onDeleteNoteClicked = EquatableCallback {
+            Log.i("DeleteNote", "entity 1 : $entity")
             onDeleteNoteMenuItemClicked(entity)
         })
 
     private fun onDeleteNoteMenuItemClicked(entity: NoteEntityWithPictures) {
-        viewModelScope.launch(dispatcherProvider.io) {
-            upsertNoteUseCase.invoke(entity.noteEntity)
+        viewModelScope.launch {
+            Log.i("DeleteNote", "entity 2 : $entity")
+            upsertNoteUseCase.invoke(
+                NoteEntity(
+                    id = entity.noteEntity.id,
+                    title = entity.noteEntity.title,
+                    content = entity.noteEntity.content,
+                    date = entity.noteEntity.date,
+                    color = entity.noteEntity.color,
+                    isFavorite = entity.noteEntity.isFavorite,
+                    isDeleted = true,
+                )
+            )
         }
     }
 
