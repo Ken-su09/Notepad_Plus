@@ -65,129 +65,121 @@ class NoteDetailsViewModel @Inject constructor(
     private val _noteColor = MutableStateFlow(listOfColors().random())
     val noteColor = _noteColor.asStateFlow()
 
-    private data class NoteDetailsForm(
-        var title: String,
-        var content: String,
-        var color: Long,
-    )
+    private val _isDeleted = MutableStateFlow(false)
+    val isDeleted = _isDeleted.asStateFlow()
 
     private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<ActionsSealed>())
-
-    val finishSavingSingleLiveEvent = SingleLiveEvent<Unit>()
-    val editorActionsSingleLiveEvent = SingleLiveEvent<Int>()
-    val contentFlow = MutableStateFlow("")
-    var toastMessageSingleLiveEvent = SingleLiveEvent<NativeText>()
 
     private val _noteDetailsUiEvent = MutableSharedFlow<NoteDetailsUiEvent>()
     val noteDetailsUiEvent = _noteDetailsUiEvent.asSharedFlow()
 
-    val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
-        noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
-    ) { note, pictures, enabledTextStyles, content ->
-        NoteDetailsViewState(id = note.id,
-            title = note.title,
-            content = if (content == "") note.content else content,
-            color = note.color,
-            dateText = note.dateText,
-            dateValue = note.dateValue,
-            actions = ActionsSealed.values().map { availableTextStyle ->
-                val isEnabled = enabledTextStyles.contains(availableTextStyle)
+//    val noteDetailsFlow: StateFlow<NoteDetailsViewState> = combine(
+//        noteDetailsViewStateMutableSharedFlow, picturesMutableSharedFlow, enabledTextStylesMutableStateFlow, contentFlow
+//    ) { note, pictures, enabledTextStyles, content ->
+//        NoteDetailsViewState(id = note.id,
+//            title = note.title,
+//            content = if (content == "") note.content else content,
+//            color = note.color,
+//            dateText = note.dateText,
+//            dateValue = note.dateValue,
+//            actions = ActionsSealed.values().map { availableTextStyle ->
+//                val isEnabled = enabledTextStyles.contains(availableTextStyle)
+//
+//                EditTextAction(textStyle = availableTextStyle,
+//                    icon = availableTextStyle.icon,
+//                    background = availableTextStyle.background,
+//                    enabled = isEnabled,
+//                    onClickedCallback = EquatableCallback {
+//                        onItemClicked(availableTextStyle)
+//                    })
+//            })
+//    }.stateIn(
+//        viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), NoteDetailsViewState(
+//            id = 0,
+//            title = "",
+//            content = "",
+//            color = listOfColors().random(),
+//            dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
+//            dateValue = ZonedDateTime.now(fixedClock).toInstant(),
+//            actions = listOf()
+//        )
+//    )
 
-                EditTextAction(textStyle = availableTextStyle,
-                    icon = availableTextStyle.icon,
-                    background = availableTextStyle.background,
-                    enabled = isEnabled,
-                    onClickedCallback = EquatableCallback {
-                        onItemClicked(availableTextStyle)
-                    })
-            })
-    }.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), NoteDetailsViewState(
-            id = 0,
-            title = "",
-            content = "",
-            color = listOfColors().random(),
-            dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
-            dateValue = ZonedDateTime.now(fixedClock).toInstant(),
-            actions = listOf()
-        )
-    )
-
-    private fun onItemClicked(actionSealed: ActionsSealed) {
-        enabledTextStylesMutableStateFlow.update { list ->
-            when (actionSealed.type) {
-                ActionType.REVERSE -> {
-                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                    list
-                }
-
-                ActionType.TEXT_STYLE -> {
-                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                    if (list.contains(actionSealed)) {
-                        actionSealed.background = R.drawable.custom_item_background
-                        list - actionSealed
-                    } else {
-                        actionSealed.background = R.drawable.custom_item_background_pressed
-                        list + actionSealed
-                    }
-                }
-
-                ActionType.X2 -> {
-                    list
-                }
-
-                ActionType.HEADING -> {
-                    var currentList = emptyList<ActionsSealed>()
-                    val headingItem = list.find { it.type == ActionType.HEADING }
-
-                    if (headingItem != null) {
-                        currentList = list - headingItem
-                    }
-
-                    headingItem?.background = R.drawable.custom_item_background
-
-                    if (list.contains(actionSealed)) {
-                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                        actionSealed.background = R.drawable.custom_item_background
-                        currentList - actionSealed
-                    } else {
-                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                        actionSealed.background = R.drawable.custom_item_background_pressed
-                        currentList + actionSealed
-                    }
-                }
-
-                ActionType.COLOR -> {
-                    list
-                }
-
-                ActionType.INSERT -> {
-                    list
-                }
-
-                ActionType.ALIGN -> {
-                    var currentList = emptyList<ActionsSealed>()
-                    val headingItem = list.find { it.type == ActionType.ALIGN }
-
-                    if (headingItem != null) {
-                        currentList = list - headingItem
-                    }
-
-                    headingItem?.background = R.drawable.custom_item_background
-
-                    if (list.contains(actionSealed)) {
-                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                        actionSealed.background = R.drawable.custom_item_background
-                        currentList - actionSealed
-                    } else {
-                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
-                        actionSealed.background = R.drawable.custom_item_background_pressed
-                        currentList + actionSealed
-                    }
-                }
-            }
-        }
-    }
+//    private fun onItemClicked(actionSealed: ActionsSealed) {
+//        enabledTextStylesMutableStateFlow.update { list ->
+//            when (actionSealed.type) {
+//                ActionType.REVERSE -> {
+//                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                    list
+//                }
+//
+//                ActionType.TEXT_STYLE -> {
+//                    editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                    if (list.contains(actionSealed)) {
+//                        actionSealed.background = R.drawable.custom_item_background
+//                        list - actionSealed
+//                    } else {
+//                        actionSealed.background = R.drawable.custom_item_background_pressed
+//                        list + actionSealed
+//                    }
+//                }
+//
+//                ActionType.X2 -> {
+//                    list
+//                }
+//
+//                ActionType.HEADING -> {
+//                    var currentList = emptyList<ActionsSealed>()
+//                    val headingItem = list.find { it.type == ActionType.HEADING }
+//
+//                    if (headingItem != null) {
+//                        currentList = list - headingItem
+//                    }
+//
+//                    headingItem?.background = R.drawable.custom_item_background
+//
+//                    if (list.contains(actionSealed)) {
+//                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                        actionSealed.background = R.drawable.custom_item_background
+//                        currentList - actionSealed
+//                    } else {
+//                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                        actionSealed.background = R.drawable.custom_item_background_pressed
+//                        currentList + actionSealed
+//                    }
+//                }
+//
+//                ActionType.COLOR -> {
+//                    list
+//                }
+//
+//                ActionType.INSERT -> {
+//                    list
+//                }
+//
+//                ActionType.ALIGN -> {
+//                    var currentList = emptyList<ActionsSealed>()
+//                    val headingItem = list.find { it.type == ActionType.ALIGN }
+//
+//                    if (headingItem != null) {
+//                        currentList = list - headingItem
+//                    }
+//
+//                    headingItem?.background = R.drawable.custom_item_background
+//
+//                    if (list.contains(actionSealed)) {
+//                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                        actionSealed.background = R.drawable.custom_item_background
+//                        currentList - actionSealed
+//                    } else {
+//                        editorActionsSingleLiveEvent.setValue(actionSealed.icon)
+//                        actionSealed.background = R.drawable.custom_item_background_pressed
+//                        currentList + actionSealed
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     init {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
@@ -210,6 +202,10 @@ class NoteDetailsViewModel @Inject constructor(
                         _noteTitle.value = noteWithPictures.noteEntity.title
                         _noteContent.value = noteWithPictures.noteEntity.content
                         _noteColor.value = noteWithPictures.noteEntity.color
+
+                        Log.i("GetNoteDetails", "noteWithPictures.noteEntity.color : ${noteWithPictures.noteEntity.color}")
+
+                        _isDeleted.value = noteWithPictures.noteEntity.isDeleted
                     } catch (e: Exception) {
                         Log.i("GetNoteDetails", "e : $e")
                     }
@@ -230,37 +226,6 @@ class NoteDetailsViewModel @Inject constructor(
                     picturesMutableSharedFlow.tryEmit(noteWithPictures.photos.map {
                         PictureViewState(it.picture)
                     }.toSet())
-                    contentFlow.tryEmit(noteWithPictures.noteEntity.content)
-                }
-            }
-        }
-    }
-
-    fun onSaveNoteMenuItemClicked(title: String, content: String, updatedColor: Long) {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getCurrentIdFlowUseCase.invoke().collect { id ->
-                if (isEmptyOrBlank(title) || isEmptyOrBlank(content)) {
-                    withContext(coroutineDispatcherProvider.main) {
-                        toastMessageSingleLiveEvent.setValue(NativeText.Resource(R.string.field_empty_toast_msg))
-                    }
-                } else {
-                    val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
-
-                    upsertNoteUseCase.invoke(
-                        NoteEntity(
-                            id = id ?: 0L,
-                            title = title,
-                            content = content,
-                            date = fromInstantToLocalDate(lastUpdateDate),
-                            color = 0,
-                            isFavorite = false,
-                            isDeleted = false
-                        )
-                    )
-
-                    withContext(coroutineDispatcherProvider.main) {
-                        finishSavingSingleLiveEvent.setValue(Unit)
-                    }
                 }
             }
         }
@@ -286,7 +251,6 @@ class NoteDetailsViewModel @Inject constructor(
                 }
 
                 withContext(coroutineDispatcherProvider.main) {
-                    finishSavingSingleLiveEvent.setValue(Unit)
                 }
             }
         }
@@ -317,33 +281,54 @@ class NoteDetailsViewModel @Inject constructor(
                 _noteColor.value = event.color
             }
 
-
             is NoteDetailsDataEvent.SaveNote -> {
                 viewModelScope.launch {
-                        if (isEmptyOrBlank(_noteTitle.value) || isEmptyOrBlank(_noteContent.value)) {
-                            _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ShowToast(NativeText.Resource(R.string.field_empty_toast_msg)))
-                        } else {
-                            val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
+                    if (isEmptyOrBlank(_noteTitle.value) || isEmptyOrBlank(_noteContent.value)) {
+                        _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ShowToast(NativeText.Resource(R.string.field_empty_toast_msg)))
+                    } else {
+                        val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
-                            Log.i("GetNoteDetails", "_noteTitle.value : ${_noteTitle.value}")
-                            Log.i("GetNoteDetails", "_noteContent.value : ${_noteContent.value}")
+                        Log.i("GetNoteDetails", "_noteTitle.value : ${_noteTitle.value}")
+                        Log.i("GetNoteDetails", "_noteContent.value : ${_noteContent.value}")
 
-                            noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
-                                upsertNoteUseCase.invoke(
-                                    NoteEntity(
-                                        id = it.id,
-                                        title = _noteTitle.value,
-                                        content = _noteContent.value,
-                                        date = fromInstantToLocalDate(lastUpdateDate),
-                                        color = _noteColor.value,
-                                        isFavorite = false,
-                                        isDeleted = false
-                                    )
+                        noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
+                            upsertNoteUseCase.invoke(
+                                NoteEntity(
+                                    id = it.id,
+                                    title = _noteTitle.value,
+                                    content = _noteContent.value,
+                                    date = fromInstantToLocalDate(lastUpdateDate),
+                                    color = _noteColor.value,
+                                    isFavorite = false,
+                                    isDeleted = false
                                 )
-                            }
-
-                            _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
+                            )
                         }
+
+                        _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
+                    }
+                }
+            }
+
+            is NoteDetailsDataEvent.DeleteRestoreNote -> {
+                viewModelScope.launch {
+                    noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let { noteDetails ->
+                        noteDetails.dateValue?.let {
+                            upsertNoteUseCase.invoke(
+                                NoteEntity(
+                                    id = noteDetails.id,
+                                    title = noteDetails.title,
+                                    content = noteDetails.content,
+                                    date = fromInstantToLocalDate(it),
+                                    color = noteDetails.color,
+                                    isFavorite = false,
+                                    isDeleted = isDeleted.value
+                                )
+                            )
+                        }
+                    }
+
+                    _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
                 }
             }
 

@@ -11,6 +11,7 @@
     <string name="title_hint">Title</string>
     <string name="content_hint">Écrivez quelque chose…</string>
 
+    <string name="back_arrow">Retour à la liste de notes</string>
     <string name="toolbar_delete">Supprimer la note</string>
     <string name="toolbar_save">Enregistrer une note</string>
     <string name="field_empty_toast_msg">Les champs ne peuvent être vides</string>

@@ -9,4 +9,5 @@ sealed class NoteDetailsDataEvent {
     data class ChangeContentFocus(val focusState: FocusState) : NoteDetailsDataEvent()
     data class ChangeColor(val color: Long) : NoteDetailsDataEvent()
     object SaveNote : NoteDetailsDataEvent()
+    object DeleteRestoreNote : NoteDetailsDataEvent()
 }

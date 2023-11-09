@@ -3,7 +3,6 @@ package com.suonk.notepad_plus.ui.note.details
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Animatable
@@ -28,7 +27,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,13 +48,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
+import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,6 +88,7 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
     val titleState by viewModel.noteTitle.collectAsState()
     val contentState by viewModel.noteContent.collectAsState()
     val colorState by viewModel.noteColor.collectAsState()
+    val isDeleted by viewModel.isDeleted.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -99,8 +102,6 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
                 is NoteDetailsUiEvent.ActionFinish -> {
                     onBackIconClicked()
                 }
-
-                else -> {}
             }
         }
     }
@@ -115,9 +116,7 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
                 ),
                 title = {
                     Text(
-                        "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        "", maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
@@ -126,24 +125,22 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
                         onBackIconClicked()
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_arrow)
                         )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.onDeleteNoteMenuItemClicked() }) {
+                    IconButton(onClick = { viewModel.onEvent(NoteDetailsDataEvent.DeleteRestoreNote) }) {
                         Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Delete note"
+                            imageVector = ImageVector.vectorResource(id = if (isDeleted) R.drawable.ic_restore else R.drawable.ic_garbage),
+                            contentDescription = stringResource(R.string.toolbar_delete)
                         )
                     }
                     IconButton(onClick = {
                         viewModel.onEvent(NoteDetailsDataEvent.SaveNote)
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Create,
-                            contentDescription = "Save note"
+                            imageVector = Icons.Default.Create, contentDescription = stringResource(R.string.toolbar_save)
                         )
                     }
                 },
@@ -151,7 +148,7 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
             )
         },
     ) { innerPadding ->
-        EntireLayout(innerPadding, titleState, contentState, colorState, viewModel.listOfColors(), viewModel)
+        EntireLayout(innerPadding, titleState, contentState, colorState, viewModel.listOfColors(), viewModel, isDeleted)
     }
 }
 
@@ -163,53 +160,43 @@ private fun EntireLayout(
     colorState: Long,
     listOfColors: List<Long>,
     viewModel: NoteDetailsViewModel,
+    isDeleted: Boolean,
 ) {
-    val noteBackgroundAnimatable = remember {
-        Animatable(
-            Color(colorState)
-        )
-    }
-
+    val noteBackgroundAnimatable = remember { Animatable(Color(colorState)) }
     val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .background(noteBackgroundAnimatable.value)
+            .background(Color(colorState))
             .padding(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             listOfColors.forEach { color ->
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .shadow(15.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(Color(color))
-                        .border(
-                            width = 3.dp,
-                            color = if (colorState == color) {
-                                Color.Black
-                            } else Color.Transparent,
-                            shape = CircleShape
-                        )
-                        .clickable {
-                            scope.launch {
-                                noteBackgroundAnimatable.animateTo(
-                                    targetValue = Color(color),
-                                    animationSpec = tween(
-                                        durationMillis = 500
-                                    )
+                Box(modifier = Modifier
+                    .size(50.dp)
+                    .shadow(15.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(Color(color))
+                    .border(
+                        width = 3.dp, color = if (colorState == color) {
+                            Color.Black
+                        } else Color.Transparent, shape = CircleShape
+                    )
+                    .clickable {
+                        scope.launch {
+                            noteBackgroundAnimatable.animateTo(
+                                targetValue = Color(color), animationSpec = tween(
+                                    durationMillis = 500
                                 )
-                            }
-                            viewModel.onEvent(NoteDetailsDataEvent.ChangeColor(color))
+                            )
                         }
-                )
+                        viewModel.onEvent(NoteDetailsDataEvent.ChangeColor(color))
+                    })
             }
         }
 
@@ -227,15 +214,12 @@ private fun EntireLayout(
             contentAlignment = Alignment.CenterStart,
         ) {
             BasicTextField(
-                value = titleState,
-                maxLines = 2,
-                onValueChange = { newTitle ->
+                value = titleState, maxLines = 2, onValueChange = { newTitle ->
                     viewModel.onEvent(NoteDetailsDataEvent.ChangeTitle(newTitle))
-                },
-                textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
-                modifier = Modifier.padding(start = 16.dp)
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), readOnly = isDeleted, modifier = Modifier.padding(start = 16.dp)
             )
         }
+
 
         Box(
             modifier = Modifier
@@ -248,12 +232,9 @@ private fun EntireLayout(
             contentAlignment = Alignment.CenterStart,
         ) {
             BasicTextField(
-                value = contentState,
-                onValueChange = { newContent ->
-                    viewModel.onEvent(NoteDetailsDataEvent.ChangeTitle(newContent))
-                },
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                modifier = Modifier.padding(16.dp)
+                value = contentState, onValueChange = { newContent ->
+                    viewModel.onEvent(NoteDetailsDataEvent.ChangeContent(newContent))
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), readOnly = isDeleted, modifier = Modifier.padding(16.dp)
             )
         }
     }

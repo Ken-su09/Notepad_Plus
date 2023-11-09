@@ -38,7 +38,6 @@ class DeletedNotesListViewModel @Inject constructor(
 
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val application: Application,
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")

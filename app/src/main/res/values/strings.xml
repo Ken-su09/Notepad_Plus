@@ -11,6 +11,7 @@
     <string name="title_hint">Title</string>
     <string name="content_hint">Type something…</string>
 
+    <string name="back_arrow">Back to notes list</string>
     <string name="toolbar_delete">Delete note</string>
     <string name="toolbar_save">Save note</string>
     <string name="field_empty_toast_msg">Fields can not be empty</string>
