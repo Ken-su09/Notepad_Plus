@@ -17,8 +17,10 @@ import com.suonk.notepad_plus.ui.note.list.NotesListViewState
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -41,6 +43,9 @@ class DeletedNotesListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+
+    private val _searchBarText = MutableStateFlow("")
+    val searchBarText = _searchBarText.asStateFlow()
 
     val deletedNotesListFlow: StateFlow<List<DeletedNoteListViewState>> = combine(
         getAllDeletedNotesFlowUseCase.invoke(),
@@ -89,6 +94,9 @@ class DeletedNotesListViewModel @Inject constructor(
     }
 
     fun setSearchParameters(search: String?) {
+        search?.let {
+            _searchBarText.value = it
+        }
         setSearchNoteUseCase.invoke(search)
     }
 }

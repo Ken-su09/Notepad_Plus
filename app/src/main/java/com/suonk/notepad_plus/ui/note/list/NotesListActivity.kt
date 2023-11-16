@@ -26,12 +26,14 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -83,7 +85,9 @@ class NotesListActivity : ComponentActivity() {
 
 @Composable
 private fun SearchBar(modifier: Modifier = Modifier, viewModel: NotesListViewModel) {
-    TextField(value = "Search", onValueChange = { searchText ->
+    val searchBarText by viewModel.searchBarText.collectAsState()
+
+    TextField(value = searchBarText, label = { Text("Search Note") }, onValueChange = { searchText ->
         viewModel.setSearchParameters(searchText)
     }, leadingIcon = {
         Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
@@ -236,6 +240,11 @@ private fun HorizontalBottomNavigationView(onDeleteBottomNavClicked: () -> Unit)
             onClick = {
 
             },
+            colors = androidx.compose.material3.NavigationBarItemDefaults
+                .colors(
+                    selectedIconColor = Color.Magenta,
+                    selectedTextColor = Color.Magenta,
+                ),
             label = {
                 Text(text = stringResource(R.string.nav_notes))
             })
@@ -245,7 +254,7 @@ private fun HorizontalBottomNavigationView(onDeleteBottomNavClicked: () -> Unit)
                 contentDescription = stringResource(R.string.nav_garbage)
             )
         },
-            selected = true,
+            selected = false,
             onClick = {
                 onDeleteBottomNavClicked()
             },

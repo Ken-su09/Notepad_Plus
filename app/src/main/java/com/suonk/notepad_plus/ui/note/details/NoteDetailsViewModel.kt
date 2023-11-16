@@ -229,31 +229,6 @@ class NoteDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onDeleteNoteMenuItemClicked() {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getCurrentIdFlowUseCase.invoke().collect { id ->
-                val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
-
-                noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
-                    upsertNoteUseCase.invoke(
-                        NoteEntity(
-                            id = id ?: 0L,
-                            title = it.title,
-                            content = it.content,
-                            date = fromInstantToLocalDate(lastUpdateDate),
-                            color = 0,
-                            isFavorite = false,
-                            isDeleted = true
-                        )
-                    )
-                }
-
-                withContext(coroutineDispatcherProvider.main) {
-                }
-            }
-        }
-    }
-
     fun setNoteIdToNull() {
         setCurrentNoteIdUseCase.invoke(-1)
     }

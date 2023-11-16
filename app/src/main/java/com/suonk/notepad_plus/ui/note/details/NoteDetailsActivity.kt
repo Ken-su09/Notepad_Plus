@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
@@ -75,6 +76,8 @@ class NoteDetailsActivity : ComponentActivity() {
             NotepadPlusTheme {
                 AppPortrait(this@NoteDetailsActivity, {
                     startActivity(Intent(this@NoteDetailsActivity, NotesListActivity::class.java))
+                }, {
+                    startActivity(Intent(this@NoteDetailsActivity, DeletedNotesListActivity::class.java))
                 })
             }
         }
@@ -83,15 +86,16 @@ class NoteDetailsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewModel: NoteDetailsViewModel = viewModel()) {
+private fun AppPortrait(
+    context: Context,
+    onBackToNotesListIconClicked: () -> Unit,
+    onBackToDeletedNotesListIconClicked: () -> Unit,
+    viewModel: NoteDetailsViewModel = viewModel()
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
-    val titleState by viewModel.noteTitle.collectAsState()
-    val contentState by viewModel.noteContent.collectAsState()
-    val colorState by viewModel.noteColor.collectAsState()
-    val isDeleted by viewModel.isDeleted.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
+
+    val isDeleted by viewModel.isDeleted.collectAsState()
 
     LaunchedEffect(coroutineScope) {
         viewModel.noteDetailsUiEvent.collectLatest { noteDetailsUiEvent ->
@@ -101,7 +105,12 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
                 }
 
                 is NoteDetailsUiEvent.ActionFinish -> {
-                    onBackIconClicked()
+                    viewModel.setNoteIdToNull()
+                    if (isDeleted) {
+                        onBackToDeletedNotesListIconClicked()
+                    } else {
+                        onBackToNotesListIconClicked()
+                    }
                 }
             }
         }
@@ -123,7 +132,11 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.setNoteIdToNull()
-                        onBackIconClicked()
+                        if (isDeleted) {
+                            onBackToDeletedNotesListIconClicked()
+                        } else {
+                            onBackToNotesListIconClicked()
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_arrow)
@@ -149,20 +162,17 @@ private fun AppPortrait(context: Context, onBackIconClicked: () -> Unit, viewMod
             )
         },
     ) { innerPadding ->
-        EntireLayout(innerPadding, titleState, contentState, colorState, viewModel.listOfColors(), viewModel, isDeleted)
+        EntireLayout(innerPadding, viewModel)
     }
 }
 
 @Composable
 private fun EntireLayout(
-    padding: PaddingValues,
-    titleState: String,
-    contentState: String,
-    colorState: Long,
-    listOfColors: List<Long>,
-    viewModel: NoteDetailsViewModel,
-    isDeleted: Boolean,
+    padding: PaddingValues, viewModel: NoteDetailsViewModel
 ) {
+    val colorState by viewModel.noteColor.collectAsState()
+    val isEnabled by viewModel.isDeleted.collectAsState()
+
     val noteBackgroundAnimatable = remember { Animatable(Color(colorState)) }
     val scope = rememberCoroutineScope()
     Column(
@@ -177,7 +187,7 @@ private fun EntireLayout(
                 .fillMaxWidth()
                 .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            listOfColors.forEach { color ->
+            viewModel.listOfColors().forEach { color ->
                 Box(modifier = Modifier
                     .size(50.dp)
                     .shadow(15.dp, CircleShape)
@@ -188,7 +198,7 @@ private fun EntireLayout(
                             Color.Black
                         } else Color.Transparent, shape = CircleShape
                     )
-                    .clickable {
+                    .clickable(enabled = !isEnabled)  {
                         scope.launch {
                             noteBackgroundAnimatable.animateTo(
                                 targetValue = Color(color), animationSpec = tween(
@@ -214,14 +224,13 @@ private fun EntireLayout(
                 ),
             contentAlignment = Alignment.CenterStart,
         ) {
+            val titleState by viewModel.noteTitle.collectAsState()
             BasicTextField(
                 value = titleState, maxLines = 2, onValueChange = { newTitle ->
                     viewModel.onEvent(NoteDetailsDataEvent.ChangeTitle(newTitle))
-                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), enabled = !isDeleted, modifier = Modifier.padding(start = 16.dp)
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), enabled = !isEnabled, modifier = Modifier.padding(start = 16.dp)
             )
         }
-
-        Log.i("GetNoteDetails", "isDeleted : ${isDeleted}")
 
         Box(
             modifier = Modifier
@@ -233,10 +242,11 @@ private fun EntireLayout(
                 ),
             contentAlignment = Alignment.CenterStart,
         ) {
+            val contentState by viewModel.noteContent.collectAsState()
             BasicTextField(
                 value = contentState, onValueChange = { newContent ->
                     viewModel.onEvent(NoteDetailsDataEvent.ChangeContent(newContent))
-                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isDeleted, modifier = Modifier.padding(16.dp)
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isEnabled, modifier = Modifier.padding(16.dp)
             )
         }
     }
