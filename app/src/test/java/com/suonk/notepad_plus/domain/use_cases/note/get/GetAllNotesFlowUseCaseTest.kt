@@ -1,15 +1,11 @@
 package com.suonk.notepad_plus.domain.use_cases.note.get
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.asLiveData
 import app.cash.turbine.test
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import com.suonk.notepad_plus.domain.repositories.NoteRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.TestCoroutineRule
-import com.suonk.notepad_plus.utils.observeForTesting
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -47,9 +43,10 @@ class GetAllNotesFlowUseCaseTest {
         every { noteRepository.getAllNotesWithPictures() } returns flowOf(emptyList())
 
         // WHEN
-        getAllNotesFlowUseCase.invoke().asLiveData().observeForTesting(this) {
+        getAllNotesFlowUseCase.invoke().test {
             // THEN
-            assertThat(it.value).isEqualTo(emptyList())
+            assertEquals(emptyList<NoteEntityWithPictures>(), awaitItem())
+            awaitComplete()
 
             verify {
                 noteRepository.getAllNotesWithPictures()

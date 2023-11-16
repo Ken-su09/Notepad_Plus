@@ -1,17 +1,19 @@
-package com.suonk.notepad_plus.ui.note.list
+package com.suonk.notepad_plus.ui.note.details
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllNotesFlowUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.get.GetNoteByIdFlowUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
+import com.suonk.notepad_plus.ui.note.list.NotesListViewModelTest
+import com.suonk.notepad_plus.ui.note.list.NotesListViewState
 import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import com.suonk.notepad_plus.utils.observeForTesting
@@ -19,7 +21,8 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
@@ -30,8 +33,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-
-class NotesListViewModelTest {
+class NoteDetailsViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -39,105 +41,70 @@ class NotesListViewModelTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val getAllNotesFlowUseCase: GetAllNotesFlowUseCase = mockk()
-    private val getSearchNoteUseCase: GetSearchNoteUseCase = mockk()
-    private val setSearchNoteUseCase: SetSearchNoteUseCase = mockk()
-    private val upsertNoteUseCase: UpsertNoteUseCase = mockk()
+    private val getNoteByIdFlowUseCase: GetNoteByIdFlowUseCase = mockk()
+    private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase = mockk()
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase = mockk()
+    private val upsertNoteUseCase: UpsertNoteUseCase = mockk()
+    private val fixedClock: Clock = mockk()
+    private val application: Application = mockk()
 
-    private val notesListViewModel = NotesListViewModel(
-        getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-        getSearchNoteUseCase = getSearchNoteUseCase,
-        setSearchNoteUseCase = setSearchNoteUseCase,
-        upsertNoteUseCase = upsertNoteUseCase,
+    private val noteDetailsViewModel = NoteDetailsViewModel(
+        getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+        getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
         setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+        upsertNoteUseCase = upsertNoteUseCase,
+        fixedClock = fixedClock,
+        application = application,
     )
 
     @Before
     fun setup() {
+
     }
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { getAllNotesFlowUseCase.invoke() } returns flowOf(defaultAllNotesWithPicturesList())
-        every { getSearchNoteUseCase.invoke() } returns flowOf(DEFAULT_EMPTY_SEARCH)
-
-        // WHEN
-        notesListViewModel.notesListFlow.test {
-            // THEN
-            assertEquals(defaultAllNotesViewState(), awaitItem())
-            awaitComplete()
-
-            verify(exactly = 1) {
-                getAllNotesFlowUseCase.invoke()
-                getSearchNoteUseCase.invoke()
-            }
-
-            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
-        }
+//        val currentIdStateFlow: StateFlow<>= flowOf()
+//        every { getCurrentIdFlowUseCase.invoke() } returns flowOf(defaultNoteWithPictures())
+//        every { getNoteByIdFlowUseCase.invoke() } returns flowOf(defaultNoteWithPictures())
     }
 
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
-        every { getAllNotesFlowUseCase.invoke() } returns flowOf(emptyList())
 
-        // WHEN
-        notesListViewModel.notesListFlow.asLiveData().observeForTesting(this) {
-            // THEN
-            assertThat(it.value).isEqualTo(emptyList())
-
-            verify {
-                getAllNotesFlowUseCase.invoke()
-                getSearchNoteUseCase.invoke()
-            }
-
-            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
-        }
     }
 
-    private fun defaultAllNotesWithPicturesList() = listOf(
-        NoteEntityWithPictures(
-            NoteEntity(
-                id = NOTE_ID_1,
-                title = NOTE_TITLE_1,
-                content = NOTE_CONTENT_1,
-                date = NOTE_DATE_1,
-                color = NOTE_COLOR_1,
-                isFavorite = false,
-                isDeleted = false
-            ), listOf()
-        ), NoteEntityWithPictures(
-            NoteEntity(
-                id = NOTE_ID_2,
-                title = NOTE_TITLE_2,
-                content = NOTE_CONTENT_2,
-                date = NOTE_DATE_2,
-                color = NOTE_COLOR_2,
-                isFavorite = false,
-                isDeleted = false
-            ), listOf()
-        )
-    )
-
-    private fun defaultAllNotesViewState() = listOf(
-        NotesListViewState(
+    private fun defaultNoteWithPictures() = NoteEntityWithPictures(
+        NoteEntity(
             id = NOTE_ID_1,
             title = NOTE_TITLE_1,
             content = NOTE_CONTENT_1,
-            date = NOTE_FORMAT_DATE_1,
+            date = NOTE_DATE_1,
             color = NOTE_COLOR_1,
-            onItemNoteClicked = EquatableCallback { },
-            onDeleteNoteClicked = EquatableCallback { },
-        ), NotesListViewState(
-            id = NOTE_ID_2,
-            title = NOTE_TITLE_2,
-            content = NOTE_CONTENT_2,
-            date = NOTE_FORMAT_DATE_2,
-            color = NOTE_COLOR_2,
-            onItemNoteClicked = EquatableCallback { },
-            onDeleteNoteClicked = EquatableCallback { },
-        )
+            isFavorite = false,
+            isDeleted = false
+        ), listOf()
+    )
+
+    private fun defaultEmptyNoteDetailsViewState() = NoteDetailsViewState(
+        id = NOTE_ID_1,
+        title = NOTE_TITLE_1,
+        content = NOTE_CONTENT_1,
+        color = NOTE_COLOR_1,
+        dateText = ,
+        dateValue = ,
+        actions = emptyList(),
+    )
+
+    private fun defaultNoteDetailsViewState() = NoteDetailsViewState(
+        id = NOTE_ID_1,
+        title = NOTE_TITLE_1,
+        content = NOTE_CONTENT_1,
+        color = NOTE_COLOR_1,
+        dateText = ,
+        dateValue = ,
+        actions = emptyList(),
     )
 
     companion object {

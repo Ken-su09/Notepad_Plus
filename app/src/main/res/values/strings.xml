@@ -16,4 +16,6 @@
     <string name="toolbar_save">Save note</string>
     <string name="field_empty_toast_msg">Fields can not be empty</string>
     <string name="last_update">Last update : %s</string>
+    <string name="enter_a_title">Enter a title</string>
+    <string name="enter_some_content">Enter some content</string>
 </resources>

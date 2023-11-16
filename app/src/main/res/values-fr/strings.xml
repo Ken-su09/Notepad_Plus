@@ -16,4 +16,6 @@
     <string name="toolbar_save">Enregistrer une note</string>
     <string name="field_empty_toast_msg">Les champs ne peuvent être vides</string>
     <string name="last_update">Dernière modification : %s</string>
+    <string name="enter_a_title">Entrer un titre</string>
+    <string name="enter_some_content">Entrer du contenu</string>
 </resources>

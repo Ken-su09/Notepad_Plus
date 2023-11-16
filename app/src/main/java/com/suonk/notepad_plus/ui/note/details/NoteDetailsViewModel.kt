@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableLongStateOf
@@ -47,8 +48,8 @@ class NoteDetailsViewModel @Inject constructor(
     private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
-    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val fixedClock: Clock,
+    private val application: Application
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
@@ -56,10 +57,10 @@ class NoteDetailsViewModel @Inject constructor(
     private var noteDetailsViewStateMutableSharedFlow = MutableSharedFlow<NoteDetailsViewState>(replay = 1)
     private var picturesMutableSharedFlow = MutableStateFlow<Set<PictureViewState>>(setOf())
 
-    private val _noteTitle = MutableStateFlow("Enter title")
+    private val _noteTitle = MutableStateFlow(application.getString(R.string.enter_a_title))
     val noteTitle = _noteTitle.asStateFlow()
 
-    private val _noteContent = MutableStateFlow("Enter content")
+    private val _noteContent = MutableStateFlow(application.getString(R.string.enter_some_content))
     val noteContent = _noteContent.asStateFlow()
 
     private val _noteColor = MutableStateFlow(listOfColors().random())
@@ -182,7 +183,7 @@ class NoteDetailsViewModel @Inject constructor(
 //    }
 
     init {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
+        viewModelScope.launch() {
             getCurrentIdFlowUseCase.invoke().collect { id ->
                 val noteWithPictures = id?.let { getNoteByIdFlowUseCase.invoke(it).firstOrNull() }
                 if (noteWithPictures == null) {

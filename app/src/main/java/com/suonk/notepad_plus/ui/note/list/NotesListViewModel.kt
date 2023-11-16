@@ -25,12 +25,9 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class NotesListViewModel @Inject constructor(
     getAllNotesFlowUseCase: GetAllNotesFlowUseCase,
-
     getSearchNoteUseCase: GetSearchNoteUseCase,
     private val setSearchNoteUseCase: SetSearchNoteUseCase,
-
     private val upsertNoteUseCase: UpsertNoteUseCase,
-
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
 ) : ViewModel() {
 
@@ -43,7 +40,9 @@ class NotesListViewModel @Inject constructor(
         getAllNotesFlowUseCase.invoke(),
         getSearchNoteUseCase.invoke(),
     ) { notes, search ->
+        println("Test 1")
         notes.asSequence().filter {
+            println("Test 2")
             if (search != null && search != "") {
                 it.noteEntity.title.contains(search, ignoreCase = true) || it.noteEntity.content.contains(search, ignoreCase = true)
             } else {
@@ -55,7 +54,8 @@ class NotesListViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
 
 
-    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(id = entity.noteEntity.id,
+    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(
+        id = entity.noteEntity.id,
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
