@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.domain.use_cases.note.get.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
@@ -15,6 +16,7 @@ import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPicture
 import com.suonk.notepad_plus.ui.note.list.NotesListViewModelTest
 import com.suonk.notepad_plus.ui.note.list.NotesListViewState
 import com.suonk.notepad_plus.utils.EquatableCallback
+import com.suonk.notepad_plus.utils.NativeText
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import com.suonk.notepad_plus.utils.observeForTesting
 import io.mockk.confirmVerified
@@ -22,6 +24,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
@@ -31,6 +35,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class NoteDetailsViewModelTest {
@@ -65,14 +70,56 @@ class NoteDetailsViewModelTest {
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-//        val currentIdStateFlow: StateFlow<>= flowOf()
-//        every { getCurrentIdFlowUseCase.invoke() } returns flowOf(defaultNoteWithPictures())
-//        every { getNoteByIdFlowUseCase.invoke() } returns flowOf(defaultNoteWithPictures())
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+        every { application.getString(R.string.enter_a_title) } returns "Enter a title"
+        every { application.getString(R.string.enter_some_content) } returns "Enter some content"
+
+        noteDetailsViewModel.noteTitle.test {
+            // THEN
+            assertEquals(NOTE_TITLE_1, awaitItem())
+            awaitComplete()
+
+            verify {
+                getCurrentIdFlowUseCase.invoke()
+                getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+            }
+
+            confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+        }
+        noteDetailsViewModel.noteContent.test {
+            // THEN
+            assertEquals(NOTE_CONTENT_1, awaitItem())
+            awaitComplete()
+
+            verify {
+                getCurrentIdFlowUseCase.invoke()
+                getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+            }
+
+            confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+        }
+        noteDetailsViewModel.noteColor.test {
+            // THEN
+            assertEquals(NOTE_COLOR_1, awaitItem())
+            awaitComplete()
+
+            verify {
+                getCurrentIdFlowUseCase.invoke()
+                getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+            }
+
+            confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+        }
     }
 
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
-
+        // GIVEN
+//        val currentIdStateFlow: StateFlow<>= flowOf()
+//        every { getCurrentIdFlowUseCase.invoke() } returns flowOf(defaultNoteWithPictures())
+//        every { getNoteByIdFlowUseCase.invoke() } returns flowOf(defaultEmptyNoteDetailsViewState())
     }
 
     private fun defaultNoteWithPictures() = NoteEntityWithPictures(
@@ -88,12 +135,12 @@ class NoteDetailsViewModelTest {
     )
 
     private fun defaultEmptyNoteDetailsViewState() = NoteDetailsViewState(
-        id = NOTE_ID_1,
-        title = NOTE_TITLE_1,
-        content = NOTE_CONTENT_1,
+        id = EMPTY_NOTE_ID,
+        title = EMPTY_TITLE,
+        content = EMPTY_CONTENT,
         color = NOTE_COLOR_1,
-        dateText = ,
-        dateValue = ,
+        dateText = NativeText.Argument(R.string.last_update, NOTE_FORMAT_DATE_1),
+        dateValue = ZonedDateTime.now(fixedClock).toInstant(),
         actions = emptyList(),
     )
 
@@ -102,12 +149,16 @@ class NoteDetailsViewModelTest {
         title = NOTE_TITLE_1,
         content = NOTE_CONTENT_1,
         color = NOTE_COLOR_1,
-        dateText = ,
-        dateValue = ,
+        dateText = NativeText.Argument(R.string.last_update, NOTE_FORMAT_DATE_2),
+        dateValue = ZonedDateTime.now(fixedClock).toInstant(),
         actions = emptyList(),
     )
 
     companion object {
+        private const val EMPTY_NOTE_ID = 0L
+        private const val EMPTY_TITLE = ""
+        private const val EMPTY_CONTENT = ""
+
         private const val NOTE_ID_1 = 1L
         private const val NOTE_ID_2 = 2L
 
