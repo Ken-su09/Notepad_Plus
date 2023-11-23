@@ -137,6 +137,7 @@ class NotesListViewModelTest {
             color = NOTE_COLOR_1,
             onItemNoteClicked = EquatableCallback { },
             onDeleteNoteClicked = EquatableCallback { },
+            actions = emptyList()
         ), NotesListViewState(
             id = NOTE_ID_2,
             title = NOTE_TITLE_2,
@@ -145,6 +146,7 @@ class NotesListViewModelTest {
             color = NOTE_COLOR_2,
             onItemNoteClicked = EquatableCallback { },
             onDeleteNoteClicked = EquatableCallback { },
+            actions = emptyList()
         )
     )
 

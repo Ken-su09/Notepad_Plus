@@ -110,7 +110,9 @@ class NotesListViewModel @Inject constructor(
         },
         onDeleteNoteClicked = EquatableCallback {
             onDeleteNoteMenuItemClicked(entity)
-        })
+        },
+        actions = emptyList()
+    )
 
     private fun onDeleteNoteMenuItemClicked(entity: NoteEntityWithPictures) {
         viewModelScope.launch {

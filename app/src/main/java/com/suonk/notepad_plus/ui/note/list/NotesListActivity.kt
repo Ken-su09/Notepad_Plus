@@ -24,12 +24,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,7 +34,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -45,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,9 +67,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.design_system.notes_dropdown_menuitem.NotesDropdownMenuItem
+import com.suonk.notepad_plus.design_system.notes_dropdown_menuitem.NotesDropdownMenuItemViewState
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
-import com.suonk.notepad_plus.ui.note.details.NoteDetailsDataEvent
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -103,11 +99,17 @@ class NotesListActivity : ComponentActivity() {
 private fun SearchBar(modifier: Modifier = Modifier, viewModel: NotesListViewModel) {
     val searchBarText by viewModel.searchBarText.collectAsState()
 
-    TextField(value = searchBarText, label = { Text("Search Note") }, onValueChange = { searchText ->
-        viewModel.setSearchParameters(searchText)
-    }, leadingIcon = {
-        Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
-    }, textStyle = TextStyle(color = Color(0xFF484644)), modifier = modifier
+    TextField(
+        value = searchBarText,
+        label = { Text("Search Note") },
+        onValueChange = { searchText ->
+            viewModel.setSearchParameters(searchText)
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
+        },
+        textStyle = TextStyle(color = Color(0xFF484644)),
+        modifier = modifier
     )
 }
 
@@ -305,7 +307,8 @@ private fun AppPortrait(
                         modifier = Modifier
                             .weight(2f)
                             .padding(16.dp)
-                            .heightIn(max = 56.dp), viewModel
+                            .heightIn(max = 56.dp),
+                        viewModel
                     )
                     Row(
                         modifier = Modifier
@@ -330,11 +333,13 @@ private fun AppPortrait(
                             onDismissRequest = { sortMenuExpanded = false },
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                         ) {
-                            DropdownMenuItem(text = { Text(text = stringResource(R.string.date_asc)) }, onClick = {
-                                sortMenuExpanded = false
-                                viewModel.setCurrentSortFilterParameters(R.string.date_asc)
-                            })
-                            Divider()
+                            val actions = mutableListOf<NotesDropdownMenuItemViewState>()
+
+                            actions.forEach { action ->
+                                NotesDropdownMenuItem(actions)
+                            }
+
+
                             DropdownMenuItem(text = { Text(text = stringResource(R.string.date_desc)) }, onClick = {
                                 sortMenuExpanded = false
                                 viewModel.setCurrentSortFilterParameters(R.string.date_desc)
