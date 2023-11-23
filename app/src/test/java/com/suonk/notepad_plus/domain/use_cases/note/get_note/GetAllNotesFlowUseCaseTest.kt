@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.domain.use_cases.note.get
+package com.suonk.notepad_plus.domain.use_cases.note.get_note
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test

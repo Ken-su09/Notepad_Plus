@@ -1,19 +1,14 @@
 package com.suonk.notepad_plus.ui.note.deleted_list
 
-import android.app.Application
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllDeletedNotesFlowUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.get.GetAllNotesFlowUseCase
+import com.suonk.notepad_plus.domain.use_cases.note.get_note.GetAllDeletedNotesFlowUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
-import com.suonk.notepad_plus.ui.note.list.NotesListViewState
 import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch

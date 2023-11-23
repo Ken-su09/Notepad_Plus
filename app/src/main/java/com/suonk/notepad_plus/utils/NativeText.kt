@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 sealed class NativeText {
     data class Simple(val text: String) : NativeText()
     data class Resource(@StringRes val id: Int) : NativeText()
+    data class SimpleOrResource(val text: String, @StringRes val id: Int) : NativeText()
     data class Plural(@PluralsRes val id: Int, val number: Int, val args: List<Any>) : NativeText()
     data class Argument(@StringRes val id: Int, val arg: Any) : NativeText()
     data class Arguments(@StringRes val id: Int, val args: List<Any>) : NativeText()
@@ -28,9 +29,17 @@ fun NativeText.toCharSequence(context: Context): CharSequence {
             }
             builder.toString()
         }
+
         is NativeText.Plural -> context.resources.getQuantityString(id, number, *args.toTypedArray())
         is NativeText.Resource -> context.getString(id)
         is NativeText.Simple -> text
+        is NativeText.SimpleOrResource -> {
+            if (text.isBlank()) {
+                context.getString(id)
+            } else {
+                text
+            }
+        }
     }
 }
 

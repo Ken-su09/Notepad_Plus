@@ -12,10 +12,26 @@
     <string name="content_hint">Type something…</string>
 
     <string name="back_arrow">Back to notes list</string>
+    <string name="toolbar_sort">Sort the list</string>
+    <string name="toolbar_filter">Filter the list</string>
     <string name="toolbar_delete">Delete note</string>
     <string name="toolbar_save">Save note</string>
     <string name="field_empty_toast_msg">Fields can not be empty</string>
     <string name="last_update">Last update : %s</string>
     <string name="enter_a_title">Enter a title</string>
     <string name="enter_some_content">Enter some content</string>
+    <string name="date_asc">Du + récent au + ancien</string>
+    <string name="date_desc">Du + ancien au + récent</string>
+    <string name="title_asc">Titre A-Z</string>
+    <string name="title_desc">Titre Z-A</string>
+    <string name="content_a_z">Content A-Z</string>
+    <string name="content_z_a">Content Z-A</string>
+    <string name="by_color">By color</string>
+    <string name="orange">Orange</string>
+    <string name="pink">Pink</string>
+    <string name="green">Green</string>
+    <string name="yellow">Yellow</string>
+    <string name="purple">Purple</string>
+    <string name="blue">Blue</string>
+    <string name="remove_filter">Remove filter</string>
 </resources>

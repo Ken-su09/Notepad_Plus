@@ -50,7 +50,7 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 
     implementation "androidx.core:core-ktx:1.12.0"
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -62,7 +62,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
-    implementation 'androidx.fragment:fragment-ktx:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
 
     // Room
     def room_version = "2.6.0"
@@ -83,7 +83,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
-    implementation 'com.google.firebase:firebase-firestore:24.9.0'
+    implementation 'com.google.firebase:firebase-firestore:24.9.1'
 
     // Dagger - Hilt
     implementation 'com.google.dagger:hilt-android:2.47'
@@ -101,9 +101,12 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    implementation 'androidx.activity:activity-compose:1.8.0'
+    implementation 'androidx.activity:activity-compose:1.8.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.2'
+
+    //
+    implementation 'com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-beta03'
 
     // Unit tests
     testImplementation "androidx.arch.core:core-testing:2.2.0"
@@ -130,4 +133,59 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     androidTestImplementation composeBom
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+}
+
+koverReport {
+    // filters for all report types of all build variants
+    filters {
+        excludes {
+            annotatedBy("dagger.Module",
+                    "dagger.internal.DaggerGenerated",
+                    "androidx.room.Database",)
+            packages("hilt_aggregated_deps", // Hilt: GeneratedInjectors (NOT annotated by DaggerGenerated)
+                    "dagger.hilt.internal.aggregatedroot.codegen",
+                    "com.suonk.notepad_plus.databinding", // ViewBinding
+            )
+            classes(
+                    // Hilt
+                    // TODO Nino Delete when this is fixed: https://github.com/Kotlin/kotlinx-kover/issues/331
+                    "*_*Factory\$*",
+
+                    // Room
+                    "*_Impl",
+                    "*_Impl\$*",
+
+                    // Content Provider
+//                    "*Contract",
+                    "*Helper",
+
+                    // TODO Nino Delete when this is fixed: https://github.com/Kotlin/kotlinx-kover/issues/331
+                    "*AppDatabase\$*",
+                    "*PermissionChecker",
+
+                    // Gradle Generated
+                    "com.suonk.notepad_plus.BuildConfig", // TODO Nino: Why Kover doesn't understand tests on BuildConfig ?!
+
+                    // TODO Nino: Remove below when Kover can handle Android integration tests!
+                    // Android UI
+                    "*di.App",
+                    "*Fragment",
+                    "*Fragment\$*",
+                    "*Activity",
+                    "*Activity\$*",
+                    "*Adapter",
+                    "*Adapter\$*",
+
+                    // Utils
+                    "*Constants",
+                    "*Constants\$*",
+                    "*Converters",
+                    "*Converters\$*",
+                    "*Sorting\$*",
+                    "*ViewBindingDelegatesKt",
+                    "*ViewBindingDelegatesKt\$*",
+                    "*Utils",
+                    "*Utils\$*",)
+        }
+    }
 }
