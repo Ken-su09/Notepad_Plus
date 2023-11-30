@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.design_system.top_app_bar.sort
+package com.suonk.notepad_plus.designsystem.top_app_bar.sort
 
 
 data class NotesSortDropdownMenuItemViewState(

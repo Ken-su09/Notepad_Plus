@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.design_system.top_app_bar
+package com.suonk.notepad_plus.designsystem.top_app_bar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -30,7 +30,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.design_system.top_app_bar.filter.NotesFilterDropdownMenuItem
-import com.suonk.notepad_plus.design_system.top_app_bar.sort.NotesSortDropdownMenuItem
+import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItem
 import com.suonk.notepad_plus.ui.note.list.NotesListViewModel
 
 
