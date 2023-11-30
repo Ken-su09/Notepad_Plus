@@ -9,9 +9,9 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.8.22' apply false
     id 'com.google.dagger.hilt.android' version "$hilt_version" apply false
     id 'org.jetbrains.kotlinx.kover' version '0.7.2' apply false
-    id("com.google.gms.google-services") version "4.3.15" apply false
+    id 'com.google.gms.google-services' version "4.3.15" apply false
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

@@ -9,7 +9,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
@@ -19,15 +19,14 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-
-class GetAllNotesFlowUseCaseTest {
+class GetAllDeletedNotesFlowUseCaseTest {
 
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
     private val noteRepository: NoteRepository = mockk()
 
-    private val getAllNotesFlowUseCase = GetAllNotesFlowUseCase(noteRepository)
+    private val getAllDeletedNotesFlowUseCase = GetAllDeletedNotesFlowUseCase(noteRepository)
 
     @Before
     fun setup() {
@@ -36,16 +35,16 @@ class GetAllNotesFlowUseCaseTest {
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(emptyList())
+        every { noteRepository.getAllDeletedNotesWithPictures() } returns flowOf(emptyList())
 
         // WHEN
-        getAllNotesFlowUseCase.invoke().test {
+        getAllDeletedNotesFlowUseCase.invoke().test {
             // THEN
-            assertEquals(emptyList<NoteEntityWithPictures>(), awaitItem())
+            TestCase.assertEquals(emptyList<NoteEntityWithPictures>(), awaitItem())
             awaitComplete()
 
             verify {
-                noteRepository.getAllNotesWithPictures()
+                noteRepository.getAllDeletedNotesWithPictures()
             }
 
             confirmVerified(noteRepository)
@@ -55,31 +54,20 @@ class GetAllNotesFlowUseCaseTest {
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
+        every { noteRepository.getAllDeletedNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
 
         // WHEN
-        getAllNotesFlowUseCase.invoke().test {
+        getAllDeletedNotesFlowUseCase.invoke().test {
             // THEN
-            assertEquals(defaultAllNotesWithPicturesList(), awaitItem())
+            TestCase.assertEquals(defaultAllNotesWithPicturesList(), awaitItem())
             awaitComplete()
 
             verify {
-                noteRepository.getAllNotesWithPictures()
+                noteRepository.getAllDeletedNotesWithPictures()
             }
 
             confirmVerified(noteRepository)
         }
-        // WHEN
-//        getAllNotesFlowUseCase.invoke().asLiveData().observeForTesting(this) {
-//            // THEN
-//            assertThat(it.value).isEqualTo(defaultAllNotesWithPicturesList())
-//
-//            verify {
-//                noteRepository.getAllNotesWithPictures()
-//            }
-//
-//            confirmVerified(noteRepository)
-//        }
     }
 
     private fun defaultAllNotesWithPicturesList() = listOf(
@@ -91,7 +79,7 @@ class GetAllNotesFlowUseCaseTest {
                 date = NOTE_DATE_1,
                 color = NOTE_COLOR_1,
                 isFavorite = false,
-                isDeleted = false
+                isDeleted = true
             ), listOf()
         ), NoteEntityWithPictures(
             NoteEntity(
@@ -101,7 +89,7 @@ class GetAllNotesFlowUseCaseTest {
                 date = NOTE_DATE_2,
                 color = NOTE_COLOR_2,
                 isFavorite = false,
-                isDeleted = false
+                isDeleted = true
             ), listOf()
         )
     )

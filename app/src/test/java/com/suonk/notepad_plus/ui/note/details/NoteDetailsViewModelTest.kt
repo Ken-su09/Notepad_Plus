@@ -11,6 +11,9 @@ import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.NativeText
 import com.suonk.notepad_plus.utils.TestCoroutineRule
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -120,6 +123,257 @@ class NoteDetailsViewModelTest {
         confirmVerified(getCurrentIdFlowUseCase)
     }
 
+    @Test
+    fun `user change title`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // THEN
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
+
+        runCurrent()
+
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_NEW_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+
+        verify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+    }
+
+    @Test
+    fun `user change content`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // THEN
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
+
+        runCurrent()
+
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_NEW_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+
+        verify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+    }
+
+    @Test
+    fun `user change color`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // THEN
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_NEW_COLOR_1, awaitItem())
+        }
+
+        coVerify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+    }
+
+//    @Test
+//    fun `edit note then save`() = testCoroutineRule.runTest {
+//        // GIVEN
+//        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+//        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+//        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+//        coEvery { upsertNoteUseCase.invoke(updateNoteWithPictures()) } returns NOTE_ID_1
+//
+//        noteDetailsViewModel = NoteDetailsViewModel(
+//            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+//            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+//            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+//            upsertNoteUseCase = upsertNoteUseCase,
+//            fixedClock = fixedClock,
+//        )
+//
+//        runCurrent()
+//
+//        // THEN
+//        noteDetailsViewModel.noteTitle.test {
+//            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+//        }
+//        noteDetailsViewModel.noteContent.test {
+//            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+//        }
+//        noteDetailsViewModel.noteColor.test {
+//            assertEquals(NOTE_COLOR_1, awaitItem())
+//        }
+//
+//        // THEN
+//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
+//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
+//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+//
+//        runCurrent()
+//
+//        noteDetailsViewModel.noteTitle.test {
+//            assertEquals(NOTE_NEW_TITLE_NATIVE_TEXT_1, awaitItem())
+//        }
+//
+//        noteDetailsViewModel.noteContent.test {
+//            assertEquals(NOTE_NEW_CONTENT_NATIVE_TEXT_1, awaitItem())
+//        }
+//        noteDetailsViewModel.noteColor.test {
+//            assertEquals(NOTE_NEW_COLOR_1, awaitItem())
+//        }
+//
+//        noteDetailsViewModel.onEvent(SAVE_NOTE)
+//
+//        coVerify {
+//            getCurrentIdFlowUseCase.invoke()
+//            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+//            upsertNoteUseCase.invoke(updateNoteWithPictures())
+//        }
+//
+//        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase, upsertNoteUseCase)
+//    }
+
+    @Test
+    fun `edit note to empty data then save`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+        coJustRun { upsertNoteUseCase.invoke(updateNoteWithPictures()) }
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock,
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // THEN
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE_TO_EMPTY)
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT_TO_EMPTY)
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+
+        runCurrent()
+
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_EMPTY_TITLE_NATIVE_TEXT, awaitItem())
+        }
+
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_EMPTY_CONTENT_NATIVE_TEXT, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_NEW_COLOR_1, awaitItem())
+        }
+
+        noteDetailsViewModel.onEvent(SAVE_NOTE)
+
+        coVerify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
+    }
+
     private fun defaultNoteWithPictures() = NoteEntityWithPictures(
         NoteEntity(
             id = NOTE_ID_1,
@@ -132,9 +386,19 @@ class NoteDetailsViewModelTest {
         ), listOf()
     )
 
+    private fun updateNoteWithPictures() = NoteEntity(
+        id = NOTE_ID_1,
+        title = NOTE_NEW_TITLE,
+        content = NOTE_NEW_CONTENT_1,
+        date = NOTE_DATE_1,
+        color = NOTE_NEW_COLOR_1,
+        isFavorite = false,
+        isDeleted = false
+    )
+
     private fun defaultEmptyNoteWithPictures() = NoteEntityWithPictures(
         NoteEntity(
-            id = EMPTY_NOTE_ID,
+            id = NOTE_ID_1,
             title = EMPTY_TITLE,
             content = EMPTY_CONTENT,
             date = NOTE_DATE_1,
@@ -142,6 +406,16 @@ class NoteDetailsViewModelTest {
             isFavorite = false,
             isDeleted = false
         ), listOf()
+    )
+
+    private fun saveEmptyNoteEntity() = NoteEntity(
+        id = NOTE_ID_1,
+        title = EMPTY_TITLE,
+        content = EMPTY_CONTENT,
+        date = NOTE_DATE_1,
+        color = NOTE_COLOR_1,
+        isFavorite = false,
+        isDeleted = false
     )
 
     companion object {
@@ -155,7 +429,9 @@ class NoteDetailsViewModelTest {
         private const val NOTE_ID_2 = 2L
 
         private val NOTE_TITLE_1 = "First News of the Week"
+        private val NOTE_NEW_TITLE = "Second News of the Week"
         private val NOTE_TITLE_NATIVE_TEXT_1 = NativeText.SimpleOrResource("First News of the Week", R.string.enter_a_title)
+        private val NOTE_NEW_TITLE_NATIVE_TEXT_1 = NativeText.SimpleOrResource("Second News of the Week", R.string.enter_a_title)
         private val NOTE_TITLE_2 = NativeText.SimpleOrResource("Je pense que Studio Jams est meilleur", R.string.enter_a_title)
 
         private val NOTE_CONTENT_1 =
@@ -164,12 +440,16 @@ class NoteDetailsViewModelTest {
             "Règle : \n" + "- Nombre aléatoire en 10 - 255\n" + "- Le faire 5 fois\n" + "- Tirer 5 max mangas intéressants dans chaque page (peut aller page avant et après)\n" + "- Pas le droit à la même page\n" + "- Faire un tri entre les 5 ou prendre celui qui paraît être le plus omoshiroi",
             R.string.enter_some_content
         )
+        private val NOTE_NEW_CONTENT_1 = "Nombre aléatoire entre 15 et 2077"
+        private val NOTE_NEW_CONTENT_NATIVE_TEXT_1 = NativeText.SimpleOrResource("Nombre aléatoire entre 15 et 2077", R.string.enter_some_content)
+
         private val NOTE_CONTENT_2 = NativeText.SimpleOrResource(
             "Très souvent, ils connaissent pas les morceaux, n'ont pour la plupart jamais joué ensemble, on leur file juste la structure du standard, on se met d'accord sur l'ordre des impros, le pont, le chorus et ça part.\n" + "\n" + "Imagine la difficulté et le niveau qu'il faut pour se coordonner à plusieurs instruments avec des gens que t'as jamais vu et avec la complexité des morceaux.\n" + "Le pianiste et le bassiste ne doivent pas se marcher dessus sur les notes basses, \n" + "Y'a des solos de folie, une écoute de malade entre chaque zicos, l'écoute des batteurs me bluffent à chaque fois\n" + "Une seule take, pas d'artifice.\n" + "\n" + "Parmi les meilleurs musiciens du monde sont passés, dont le plus grand bassiste encore en vie, Victor Wooten.",
             R.string.enter_some_content
         )
 
         private const val NOTE_COLOR_1 = 0xFFffab91
+        private const val NOTE_NEW_COLOR_1 = 0xFF7fdeea
         private const val NOTE_COLOR_2 = 0xFFe8ed9d
 
         private const val DEFAULT_TIMESTAMP_LONG = 1_000_000_000L // 09/09/2001 - 01:46:40
@@ -185,6 +465,15 @@ class NoteDetailsViewModelTest {
 
         private const val ENTER_TITLE = "Enter a title"
         private const val ENTER_CONTENT = "Enter some content"
+
+        private val DEFAULT_CHANGE_TITLE = NoteDetailsDataEvent.ChangeTitle(NOTE_NEW_TITLE)
+        private val DEFAULT_CHANGE_CONTENT = NoteDetailsDataEvent.ChangeContent(NOTE_NEW_CONTENT_1)
+
+        private val DEFAULT_CHANGE_TITLE_TO_EMPTY   = NoteDetailsDataEvent.ChangeTitle(EMPTY_TITLE)
+        private val DEFAULT_CHANGE_CONTENT_TO_EMPTY = NoteDetailsDataEvent.ChangeContent(EMPTY_CONTENT)
+        private val DEFAULT_CHANGE_COLOR = NoteDetailsDataEvent.ChangeColor(NOTE_NEW_COLOR_1)
+
+        private val SAVE_NOTE = NoteDetailsDataEvent.SaveNote
 
         fun listOfColors() = listOf(0xFFffab91, 0xFFe8ed9d, 0xFFd095db, 0xFF7fdeea, 0xFFf48fb1)
     }

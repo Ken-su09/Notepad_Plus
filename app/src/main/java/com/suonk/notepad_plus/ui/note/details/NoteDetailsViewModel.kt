@@ -59,12 +59,9 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             getCurrentIdFlowUseCase.invoke().collect { id ->
-                println("id : $id")
                 val noteWithPictures = id?.let {
-                    println("it : $it")
                     getNoteByIdFlowUseCase.invoke(it).firstOrNull()
                 }
-                println("noteWithPictures : $noteWithPictures")
                 if (noteWithPictures == null) {
                     noteDetailsViewStateMutableSharedFlow.tryEmit(
                         NoteDetailsViewState(
@@ -137,6 +134,13 @@ class NoteDetailsViewModel @Inject constructor(
                         val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
                         noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
+                            println("Passe par là")
+                            println("it.id : ${it.id}")
+                            println("_noteTitle.value.text : ${_noteTitle.value.text}")
+                            println("_noteContent.value.text : ${_noteContent.value.text}")
+                            println("fromInstantToLocalDate(lastUpdateDate) : ${fromInstantToLocalDate(lastUpdateDate)}")
+                            println("_noteColor.value : ${_noteColor.value}")
+
                             upsertNoteUseCase.invoke(
                                 NoteEntity(
                                     id = it.id,

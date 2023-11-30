@@ -1,9 +1,11 @@
 package com.suonk.notepad_plus.ui.note.list
 
-import android.util.Log
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.design_system.top_app_bar.filter.NotesFilterDropdownMenuItemViewState
+import com.suonk.notepad_plus.design_system.top_app_bar.sort.NotesSortDropdownMenuItemViewState
 import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetCurrentSortFilterUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetSortingParametersUseCase
 import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.SetCurrentSortFilterUseCase
@@ -41,12 +43,19 @@ class NotesListViewModel @Inject constructor(
 
     private val upsertNoteUseCase: UpsertNoteUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
+    private val application: Application
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
     private val _searchBarText = MutableStateFlow("")
     val searchBarText = _searchBarText.asStateFlow()
+
+    private val _listOfSortItems = MutableStateFlow(listOfSortItems())
+    val listOfSortItems: StateFlow<List<NotesSortDropdownMenuItemViewState>> = _listOfSortItems.asStateFlow()
+
+    private val _listOfFilterItems = MutableStateFlow(listOfFilterItems())
+    val listOfFilterItems: StateFlow<List<NotesFilterDropdownMenuItemViewState>> = _listOfFilterItems.asStateFlow()
 
     val notesListFlow: StateFlow<List<NotesListViewState>> = combine(
         getAllNotesFlowUseCase.invoke(),
@@ -55,6 +64,7 @@ class NotesListViewModel @Inject constructor(
         getCurrentSortFilterNoteUseCase.invoke(),
     ) { notes, search, sorting, filterId ->
         notes.asSequence().filter {
+            println("search : $search")
             if (search != null && search != "") {
                 it.noteEntity.title.contains(search, ignoreCase = true) || it.noteEntity.content.contains(search, ignoreCase = true)
             } else {
@@ -63,6 +73,7 @@ class NotesListViewModel @Inject constructor(
         }.sortedWith(sorting.comparator).map {
             transformEntityToViewState(it)
         }.filter {
+            println("filterId : $filterId")
             when (filterId) {
                 R.string.remove_filter -> {
                     it.id != 0L
@@ -97,7 +108,9 @@ class NotesListViewModel @Inject constructor(
                 }
             }
         }.toList()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
+    }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList()
+    )
 
     private fun transformEntityToViewState(entity: NoteEntityWithPictures) = NotesListViewState(
         id = entity.noteEntity.id,
@@ -111,7 +124,7 @@ class NotesListViewModel @Inject constructor(
         onDeleteNoteClicked = EquatableCallback {
             onDeleteNoteMenuItemClicked(entity)
         },
-        actions = emptyList()
+        actions = emptyList(),
     )
 
     private fun onDeleteNoteMenuItemClicked(entity: NoteEntityWithPictures) {
@@ -137,8 +150,117 @@ class NotesListViewModel @Inject constructor(
         setSearchNoteUseCase.invoke(search)
     }
 
-    fun setCurrentSortFilterParameters(itemId: Int) {
-        Log.i("SortNote", "viewModel itemId : $itemId")
-        setCurrentSortFilterNoteUseCase.invoke(itemId)
-    }
+    private fun listOfSortItems() = listOf(
+        NotesSortDropdownMenuItemViewState(
+            text = application.getString(R.string.date_asc),
+            textResource = R.string.date_asc,
+            hasDivider = false,
+            isSelected = true,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(
+            text = application.getString(R.string.date_desc),
+            textResource = R.string.date_desc,
+            hasDivider = true,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(
+            text = application.getString(R.string.title_asc),
+            textResource = R.string.title_asc,
+            hasDivider = false,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(text = application.getString(R.string.title_desc),
+            textResource = R.string.title_desc,
+            hasDivider = true,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(text = application.getString(R.string.content_a_z),
+            textResource = R.string.content_a_z,
+            hasDivider = false,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(text = application.getString(R.string.content_z_a),
+            textResource = R.string.content_z_a,
+            hasDivider = true,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesSortDropdownMenuItemViewState(text = application.getString(R.string.by_color),
+            textResource = R.string.by_color,
+            hasDivider = true,
+            isSelected = false,
+            onSelectedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+    )
+
+    private fun listOfFilterItems() = listOf(
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.remove_filter),
+            textResource = R.string.remove_filter,
+            hasDivider = true,
+            isChecked = true,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.pink),
+            textResource = R.string.pink,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.green),
+            textResource = R.string.green,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.orange),
+            textResource = R.string.orange,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.yellow),
+            textResource = R.string.yellow,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.purple),
+            textResource = R.string.purple,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+        NotesFilterDropdownMenuItemViewState(
+            text = application.getString(R.string.blue),
+            textResource = R.string.blue,
+            hasDivider = false,
+            isChecked = false,
+            onCheckedChanged = { isChecked, textResource ->
+                setCurrentSortFilterNoteUseCase.invoke(textResource)
+            }),
+    )
 }

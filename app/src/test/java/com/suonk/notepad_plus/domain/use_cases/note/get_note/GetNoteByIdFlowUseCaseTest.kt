@@ -20,90 +20,48 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 
-class GetAllNotesFlowUseCaseTest {
+class GetNoteByIdFlowUseCaseTest {
 
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
     private val noteRepository: NoteRepository = mockk()
 
-    private val getAllNotesFlowUseCase = GetAllNotesFlowUseCase(noteRepository)
+    private val getNoteByIdFlowUseCase = GetNoteByIdFlowUseCase(noteRepository)
 
     @Before
     fun setup() {
     }
 
     @Test
-    fun `initial case`() = testCoroutineRule.runTest {
-        // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(emptyList())
-
-        // WHEN
-        getAllNotesFlowUseCase.invoke().test {
-            // THEN
-            assertEquals(emptyList<NoteEntityWithPictures>(), awaitItem())
-            awaitComplete()
-
-            verify {
-                noteRepository.getAllNotesWithPictures()
-            }
-
-            confirmVerified(noteRepository)
-        }
-    }
-
-    @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
+        every { noteRepository.getNoteById(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
 
         // WHEN
-        getAllNotesFlowUseCase.invoke().test {
+        getNoteByIdFlowUseCase.invoke(NOTE_ID_1).test {
             // THEN
-            assertEquals(defaultAllNotesWithPicturesList(), awaitItem())
+            assertEquals(defaultNoteWithPictures(), awaitItem())
             awaitComplete()
 
             verify {
-                noteRepository.getAllNotesWithPictures()
+                noteRepository.getNoteById(NOTE_ID_1)
             }
 
             confirmVerified(noteRepository)
         }
-        // WHEN
-//        getAllNotesFlowUseCase.invoke().asLiveData().observeForTesting(this) {
-//            // THEN
-//            assertThat(it.value).isEqualTo(defaultAllNotesWithPicturesList())
-//
-//            verify {
-//                noteRepository.getAllNotesWithPictures()
-//            }
-//
-//            confirmVerified(noteRepository)
-//        }
     }
 
-    private fun defaultAllNotesWithPicturesList() = listOf(
-        NoteEntityWithPictures(
-            NoteEntity(
-                id = NOTE_ID_1,
-                title = NOTE_TITLE_1,
-                content = NOTE_CONTENT_1,
-                date = NOTE_DATE_1,
-                color = NOTE_COLOR_1,
-                isFavorite = false,
-                isDeleted = false
-            ), listOf()
-        ), NoteEntityWithPictures(
-            NoteEntity(
-                id = NOTE_ID_2,
-                title = NOTE_TITLE_2,
-                content = NOTE_CONTENT_2,
-                date = NOTE_DATE_2,
-                color = NOTE_COLOR_2,
-                isFavorite = false,
-                isDeleted = false
-            ), listOf()
-        )
+    private fun defaultNoteWithPictures() = NoteEntityWithPictures(
+        NoteEntity(
+            id = NOTE_ID_1,
+            title = NOTE_TITLE_1,
+            content = NOTE_CONTENT_1,
+            date = NOTE_DATE_1,
+            color = NOTE_COLOR_1,
+            isFavorite = false,
+            isDeleted = false
+        ), listOf()
     )
 
     companion object {
