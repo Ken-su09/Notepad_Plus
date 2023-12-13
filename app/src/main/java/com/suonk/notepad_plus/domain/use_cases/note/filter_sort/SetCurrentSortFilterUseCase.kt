@@ -8,7 +8,6 @@ import javax.inject.Inject
 class SetCurrentSortFilterUseCase @Inject constructor(private val searchRepository: SearchRepository) {
 
     fun invoke(sortFilterParameter: Int) {
-        Log.i("SortNote", "use case sortFilterParameter : ${sortFilterParameter}")
         searchRepository.setCurrentSortFilterParametersFlow(sortFilterParameter)
     }
 }

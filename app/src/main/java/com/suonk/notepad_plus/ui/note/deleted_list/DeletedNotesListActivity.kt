@@ -84,7 +84,9 @@ class DeletedNotesListActivity : ComponentActivity() {
 
 @Composable
 private fun SearchBar(modifier: Modifier = Modifier, viewModel: DeletedNotesListViewModel) {
-    TextField(value = "Search", onValueChange = { searchText ->
+    val searchBarText by viewModel.searchBarText.collectAsState()
+
+    TextField(value = searchBarText, label = { Text("Search Note") }, onValueChange = { searchText ->
         viewModel.setSearchParameters(searchText)
     }, leadingIcon = {
         Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
@@ -97,7 +99,7 @@ private fun SearchBar(modifier: Modifier = Modifier, viewModel: DeletedNotesList
 //region ===================================================================== NOTES LIST =====================================================================
 
 @Composable
-private fun ListOfNotes(modifier: Modifier, list: List<DeletedNoteListViewState>, onItemNoteClicked: () -> Unit) {
+private fun ListOfNotes(modifier: Modifier, list: List<DeletedNotesListViewState>, onItemNoteClicked: () -> Unit) {
     Spacer(modifier = Modifier.height(16.dp))
 
     LazyVerticalGrid(
@@ -115,7 +117,7 @@ private fun ListOfNotes(modifier: Modifier, list: List<DeletedNoteListViewState>
 @Composable
 private fun NoteLayout(
     modifier: Modifier,
-    note: DeletedNoteListViewState,
+    note: DeletedNotesListViewState,
     onItemNoteClicked: () -> Unit,
     cornerRadius: Dp = 10.dp,
     cutCornerSize: Dp = 30.dp

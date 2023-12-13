@@ -39,6 +39,7 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        buildConfig true
     }
     hilt {
         enableAggregatingTask = true
@@ -177,6 +178,12 @@ koverReport {
                     "*Activity\$*",
                     "*Adapter",
                     "*Adapter\$*",
+                    "*Kt",
+                    "*Kt\$*",
+                    "*Singletons",
+                    "*Singletons\$*",
+                    "*Provider",
+                    "*Provider\$*",
 
                     // Utils
                     "*Constants",

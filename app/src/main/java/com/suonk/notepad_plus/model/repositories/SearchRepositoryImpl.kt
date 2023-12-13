@@ -1,12 +1,10 @@
 package com.suonk.notepad_plus.model.repositories
 
-import android.util.Log
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.domain.repositories.SearchRepository
 import com.suonk.notepad_plus.utils.Sorting
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +30,6 @@ class SearchRepositoryImpl @Inject constructor() : SearchRepository {
     }
 
     override fun setCurrentSortFilterParametersFlow(itemId: Int) {
-        Log.i("SortNote", "repository itemId : ${itemId}")
         when (itemId) {
             R.string.date_asc -> currentSortParameterFlow.tryEmit(Sorting.DATE_ASC)
             R.string.date_desc -> currentSortParameterFlow.tryEmit(Sorting.DATE_DESC)
@@ -53,16 +50,4 @@ class SearchRepositoryImpl @Inject constructor() : SearchRepository {
             }
         }
     }
-
-//    override fun addFilter(filter: Filter) {
-//        currentMoreCriteriaFilterParameterFlow.update { filters ->
-//            filters + filter
-//        }
-//    }
-//
-//    override fun removeFilter(filter: Filter) {
-//        currentMoreCriteriaFilterParameterFlow.update { filters ->
-//            filters - filter
-//        }
-//    }
 }

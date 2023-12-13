@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseFirebaseUsersRepositoryImpl @Inject constructor(private val firebaseFirestore: FirebaseFirestore) : FirebaseUsersRepository {
+class FirebaseUsersRepositoryImpl @Inject constructor(private val firebaseFirestore: FirebaseFirestore) : FirebaseUsersRepository {
 
     private val ALL_USERS = "ALL_USERS"
     private val ID = "ID"

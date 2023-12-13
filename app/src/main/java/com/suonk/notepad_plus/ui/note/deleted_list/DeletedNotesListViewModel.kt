@@ -25,15 +25,13 @@ import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DeletedNotesListViewModel @Inject constructor(
-    private val getAllDeletedNotesFlowUseCase: GetAllDeletedNotesFlowUseCase,
-
-    private val getSearchNoteUseCase: GetSearchNoteUseCase,
+    getAllDeletedNotesFlowUseCase: GetAllDeletedNotesFlowUseCase,
+    getSearchNoteUseCase: GetSearchNoteUseCase,
     private val setSearchNoteUseCase: SetSearchNoteUseCase,
 
     private val upsertNoteUseCase: UpsertNoteUseCase,
 
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
@@ -41,7 +39,7 @@ class DeletedNotesListViewModel @Inject constructor(
     private val _searchBarText = MutableStateFlow("")
     val searchBarText = _searchBarText.asStateFlow()
 
-    val deletedNotesListFlow: StateFlow<List<DeletedNoteListViewState>> = combine(
+    val deletedNotesListFlow: StateFlow<List<DeletedNotesListViewState>> = combine(
         getAllDeletedNotesFlowUseCase.invoke(),
         getSearchNoteUseCase.invoke(),
     ) { notes, search ->
@@ -59,7 +57,7 @@ class DeletedNotesListViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
 
 
-    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = DeletedNoteListViewState(id = entity.noteEntity.id,
+    private fun transformEntityToViewState(entity: NoteEntityWithPictures) = DeletedNotesListViewState(id = entity.noteEntity.id,
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
@@ -72,7 +70,7 @@ class DeletedNotesListViewModel @Inject constructor(
         })
 
     private fun onRestoreNoteMenuItemClicked(entity: NoteEntityWithPictures) {
-        viewModelScope.launch(dispatcherProvider.io) {
+        viewModelScope.launch {
             upsertNoteUseCase.invoke(
                 NoteEntity(
                     id = entity.noteEntity.id,

@@ -7,5 +7,7 @@ data class DeletedNotesListViewState(
     val title: String,
     val content: String,
     val date: String,
-    val onClickedCallback: EquatableCallback,
+    val color: Long,
+    val onItemNoteClicked: EquatableCallback,
+    val onRestoreNoteClicked: EquatableCallback,
 )

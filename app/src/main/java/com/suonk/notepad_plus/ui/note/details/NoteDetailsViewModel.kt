@@ -134,13 +134,6 @@ class NoteDetailsViewModel @Inject constructor(
                         val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
                         noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let {
-                            println("Passe par là")
-                            println("it.id : ${it.id}")
-                            println("_noteTitle.value.text : ${_noteTitle.value.text}")
-                            println("_noteContent.value.text : ${_noteContent.value.text}")
-                            println("fromInstantToLocalDate(lastUpdateDate) : ${fromInstantToLocalDate(lastUpdateDate)}")
-                            println("_noteColor.value : ${_noteColor.value}")
-
                             upsertNoteUseCase.invoke(
                                 NoteEntity(
                                     id = it.id,
@@ -161,20 +154,20 @@ class NoteDetailsViewModel @Inject constructor(
 
             is NoteDetailsDataEvent.DeleteRestoreNote -> {
                 viewModelScope.launch {
+                    val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
+
                     noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let { noteDetails ->
-                        noteDetails.dateValue?.let {
                             upsertNoteUseCase.invoke(
                                 NoteEntity(
                                     id = noteDetails.id,
                                     title = noteDetails.title,
                                     content = noteDetails.content,
-                                    date = fromInstantToLocalDate(it),
+                                    date = fromInstantToLocalDate(lastUpdateDate),
                                     color = noteDetails.color,
                                     isFavorite = false,
-                                    isDeleted = isDeleted.value
+                                    isDeleted = !isDeleted.value
                                 )
                             )
-                        }
                     }
 
                     _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)

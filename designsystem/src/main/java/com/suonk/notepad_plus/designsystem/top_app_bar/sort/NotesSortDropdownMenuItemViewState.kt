@@ -5,6 +5,4 @@ data class NotesSortDropdownMenuItemViewState(
     val text: String,
     val textResource: Int,
     val hasDivider: Boolean,
-    val isSelected: Boolean,
-    val onSelectedChanged: (Boolean, Int) -> Unit,
 )

@@ -17,13 +17,22 @@ import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPicture
 import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.Sorting
 import com.suonk.notepad_plus.utils.TestCoroutineRule
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
@@ -83,17 +92,16 @@ class NotesListViewModelTest {
         every { application.getString(R.string.purple) } returns PURPLE
         every { application.getString(R.string.blue) } returns BLUE
 
-        every { getSearchNoteUseCase.invoke() } returns flowOf(DEFAULT_EMPTY_SEARCH)
+        val currentSearchParameterFlow = MutableStateFlow<String?>(null)
+        every { getSearchNoteUseCase.invoke() } returns currentSearchParameterFlow
         every { getSortingParametersUseCase.invoke() } returns flowOf(DATE_ASC)
         every { getCurrentSortFilterNoteUseCase.invoke() } returns flowOf(REMOVE_FILTER_INT)
+        every { getAllNotesFlowUseCase.invoke() } returns flowOf(defaultAllNotesWithPicturesList())
     }
 
-    @OptIn(ExperimentalTime::class)
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { getAllNotesFlowUseCase.invoke() } returns flowOf(defaultAllNotesWithPicturesList())
-
         notesListViewModel = NotesListViewModel(
             getAllNotesFlowUseCase = getAllNotesFlowUseCase,
 
@@ -111,17 +119,20 @@ class NotesListViewModelTest {
         )
 
         // WHEN
-//        notesListViewModel.notesListFlow.test {
-//            // THEN
-//            assertEquals(defaultAllNotesViewState(), awaitItem())
-//
-//            verify(exactly = 1) {
-//                getAllNotesFlowUseCase.invoke()
-//                getSearchNoteUseCase.invoke()
-//            }
-//
-//            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
-//        }
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            assertEquals(defaultAllNotesViewState(), expectedListOfNotes)
+
+            verify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
+        }
     }
 
     @Test
@@ -159,17 +170,315 @@ class NotesListViewModelTest {
         }
     }
 
+    @Test
+    fun `nominal case then filter in pink`() = testCoroutineRule.runTest {
+        // GIVEN
+        coJustRun { setCurrentSortFilterNoteUseCase.invoke(PINK_FILTER_INT) }
+        val currentSortFilterFlow = MutableStateFlow(REMOVE_FILTER_INT)
+        every { getCurrentSortFilterNoteUseCase.invoke() } returns currentSortFilterFlow
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        notesListViewModel.notesListFlow.test {
+            awaitItem()
+            assertEquals(defaultAllNotesViewState(), awaitItem())
+
+            // WHEN
+            currentSortFilterFlow.tryEmit(PINK_FILTER_INT)
+
+            // THEN
+            assertTrue(awaitItem().isEmpty())
+            println(5)
+
+            coVerify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+                getCurrentSortFilterNoteUseCase.invoke()
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, getCurrentSortFilterNoteUseCase)
+        }
+    }
+
+    //region ===================================================================== SEARCH =====================================================================
+
+    @Test
+    fun `set search parameters`() = testCoroutineRule.runTest {
+        // GIVEN
+        justRun { setSearchNoteUseCase.invoke(DEFAULT_SEARCH) }
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        notesListViewModel.setSearchParameters(DEFAULT_SEARCH)
+
+        coVerify(exactly = 1) {
+            getAllNotesFlowUseCase.invoke()
+            getSearchNoteUseCase.invoke()
+            setSearchNoteUseCase.invoke(DEFAULT_SEARCH)
+        }
+
+        confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, setSearchNoteUseCase)
+    }
+
+    @Test
+    fun `nominal case with search with value that is in both title and content`() = testCoroutineRule.runTest {
+        // GIVEN
+        every { getSearchNoteUseCase.invoke() } returns flowOf(BOTH_SEARCH)
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        // WHEN
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            assertEquals(defaultAllNotesViewStateAfterSearchForBothTitleContent(), expectedListOfNotes)
+
+            verify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
+        }
+    }
+
+    @Test
+    fun `nominal case with search with value that is in the title`() = testCoroutineRule.runTest {
+        // GIVEN
+        every { getSearchNoteUseCase.invoke() } returns flowOf(FIRST_NEWS_SEARCH)
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        // WHEN
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            assertEquals(defaultAllNotesViewStateAfterSearchForTitleOrContent(), expectedListOfNotes)
+
+            verify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
+        }
+    }
+
+    @Test
+    fun `nominal case with search with value that is in the content`() = testCoroutineRule.runTest {
+        // GIVEN
+        every { getSearchNoteUseCase.invoke() } returns flowOf(RANDOM_NUMBER_SEARCH)
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        // WHEN
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            assertEquals(defaultAllNotesViewStateAfterSearchForTitleOrContent(), expectedListOfNotes)
+
+            verify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase)
+        }
+    }
+
+    @Test
+    fun `set search parameters with null`() = testCoroutineRule.runTest {
+        // GIVEN
+        justRun { setSearchNoteUseCase.invoke(null) }
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase, setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase, setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase, setCurrentNoteIdUseCase = setCurrentNoteIdUseCase, application = application
+        )
+
+        notesListViewModel.setSearchParameters(null)
+
+        coVerify(exactly = 1) {
+            getAllNotesFlowUseCase.invoke()
+            getSearchNoteUseCase.invoke()
+            setSearchNoteUseCase.invoke(null)
+        }
+
+        confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, setSearchNoteUseCase)
+    }
+
+    //endregion
+
+    //region =============================================================== EQUATABLE CALLBACK ===============================================================
+
+    @Test
+    fun `nominal case leads to on item note clicked`() = testCoroutineRule.runTest {
+        // GIVEN
+        justRun { setCurrentNoteIdUseCase.invoke(NOTE_ID_1) }
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        // WHEN
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            expectedListOfNotes[0].onItemNoteClicked()
+
+            coVerify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+                setCurrentNoteIdUseCase.invoke(NOTE_ID_1)
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, setCurrentNoteIdUseCase)
+        }
+    }
+
+    @Test
+    fun `nominal case leads to delete clicked`() = testCoroutineRule.runTest {
+        // GIVEN
+        coEvery { upsertNoteUseCase.invoke(firstNoteEntityDeleted()) } returns NOTE_ID_1
+
+        notesListViewModel = NotesListViewModel(
+            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
+
+            getSearchNoteUseCase = getSearchNoteUseCase,
+            setSearchNoteUseCase = setSearchNoteUseCase,
+
+            getSortingParametersUseCase = getSortingParametersUseCase,
+
+            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
+            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+
+            upsertNoteUseCase = upsertNoteUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            application = application,
+        )
+
+        // WHEN
+        notesListViewModel.notesListFlow.test {
+            // THEN
+            awaitItem()
+
+            val expectedListOfNotes = awaitItem()
+            expectedListOfNotes[0].onDeleteNoteClicked()
+
+            coVerify(exactly = 1) {
+                getAllNotesFlowUseCase.invoke()
+                getSearchNoteUseCase.invoke()
+//                upsertNoteUseCase.invoke(firstNoteEntityDeleted())
+            }
+
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, upsertNoteUseCase)
+        }
+    }
+
+    //endregion
+
+    //region ================================================================= DEFAULT VALUES =================================================================
+
     private fun defaultAllNotesWithPicturesList() = listOf(
         NoteEntityWithPictures(
-            NoteEntity(
-                id = NOTE_ID_1,
-                title = NOTE_TITLE_1,
-                content = NOTE_CONTENT_1,
-                date = NOTE_DATE_1,
-                color = NOTE_COLOR_1,
-                isFavorite = false,
-                isDeleted = false
-            ), listOf()
+            firstNoteEntity(), listOf()
         ), NoteEntityWithPictures(
             NoteEntity(
                 id = NOTE_ID_2,
@@ -183,6 +492,20 @@ class NotesListViewModelTest {
         )
     )
 
+    private fun firstNoteEntity() = NoteEntity(
+        id = NOTE_ID_1,
+        title = NOTE_TITLE_1,
+        content = NOTE_CONTENT_1,
+        date = NOTE_DATE_1,
+        color = NOTE_COLOR_1,
+        isFavorite = false,
+        isDeleted = false
+    )
+
+    private fun firstNoteEntityDeleted() = NoteEntity(
+        id = NOTE_ID_1, title = NOTE_TITLE_1, content = NOTE_CONTENT_1, date = NOTE_DATE_1, color = NOTE_COLOR_1, isFavorite = false, isDeleted = true
+    )
+
     private fun defaultAllNotesViewState() = listOf(
         NotesListViewState(
             id = NOTE_ID_1,
@@ -194,6 +517,32 @@ class NotesListViewModelTest {
             onDeleteNoteClicked = EquatableCallback { },
             actions = emptyList()
         ), NotesListViewState(
+            id = NOTE_ID_2,
+            title = NOTE_TITLE_2,
+            content = NOTE_CONTENT_2,
+            date = NOTE_FORMAT_DATE_2,
+            color = NOTE_COLOR_2,
+            onItemNoteClicked = EquatableCallback { },
+            onDeleteNoteClicked = EquatableCallback { },
+            actions = emptyList()
+        )
+    )
+
+    private fun defaultAllNotesViewStateAfterSearchForTitleOrContent() = listOf(
+        NotesListViewState(
+            id = NOTE_ID_1,
+            title = NOTE_TITLE_1,
+            content = NOTE_CONTENT_1,
+            date = NOTE_FORMAT_DATE_1,
+            color = NOTE_COLOR_1,
+            onItemNoteClicked = EquatableCallback { },
+            onDeleteNoteClicked = EquatableCallback { },
+            actions = emptyList()
+        )
+    )
+
+    private fun defaultAllNotesViewStateAfterSearchForBothTitleContent() = listOf(
+        NotesListViewState(
             id = NOTE_ID_2,
             title = NOTE_TITLE_2,
             content = NOTE_CONTENT_2,
@@ -227,7 +576,10 @@ class NotesListViewModelTest {
         private val NOTE_DATE_2 = LocalDateTime.now(fixedClock)
         private val NOTE_FORMAT_DATE_2 = NOTE_DATE_2.format(dateTimeFormatter)
 
-        private const val DEFAULT_EMPTY_SEARCH = ""
+        private const val FIRST_NEWS_SEARCH = "First News"
+        private const val RANDOM_NUMBER_SEARCH = "Nombre aléatoire"
+        private const val BOTH_SEARCH = "que"
+        private const val DEFAULT_SEARCH = "DEFAULT_SEARCH"
 
         private const val DEFAULT_DATE_ASC = "Du + récent au + ancien"
         private val DATE_ASC = Sorting.DATE_ASC
@@ -244,9 +596,12 @@ class NotesListViewModelTest {
 
         private const val ORANGE = "Orange"
         private const val PINK = "Pink"
+        private const val PINK_FILTER_INT = R.string.pink
         private const val GREEN = "Green"
         private const val YELLOW = "Yellow"
         private const val PURPLE = "Purple"
         private const val BLUE = "Blue"
     }
+
+    //endregion
 }

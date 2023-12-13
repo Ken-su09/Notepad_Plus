@@ -5,7 +5,7 @@ import com.suonk.notepad_plus.domain.repositories.NoteRepository
 import com.suonk.notepad_plus.model.repositories.CurrentNoteIdRepositoryImpl
 import com.suonk.notepad_plus.domain.repositories.SearchRepository
 import com.suonk.notepad_plus.firebase.user.FirebaseUsersRepository
-import com.suonk.notepad_plus.firebase.user.FirebaseFirebaseUsersRepositoryImpl
+import com.suonk.notepad_plus.firebase.user.FirebaseUsersRepositoryImpl
 import com.suonk.notepad_plus.model.repositories.NoteRepositoryImpl
 import com.suonk.notepad_plus.model.repositories.SearchRepositoryImpl
 import dagger.Binds
@@ -32,5 +32,5 @@ abstract class DataBindingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindUsersRepositoryImpl(impl: FirebaseFirebaseUsersRepositoryImpl): FirebaseUsersRepository
+    abstract fun bindUsersRepositoryImpl(impl: FirebaseUsersRepositoryImpl): FirebaseUsersRepository
 }

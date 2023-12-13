@@ -1,6 +1,5 @@
 package com.suonk.notepad_plus.model.repositories
 
-import android.util.Log
 import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel

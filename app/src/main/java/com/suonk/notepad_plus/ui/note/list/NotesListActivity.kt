@@ -2,7 +2,6 @@ package com.suonk.notepad_plus.ui.note.list
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -52,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.design_system.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
@@ -98,7 +96,11 @@ private fun ListOfNotes(modifier: Modifier, list: List<NotesListViewState>, onIt
 
 @Composable
 private fun NoteLayout(
-    modifier: Modifier, note: NotesListViewState, onItemNoteClicked: () -> Unit, cornerRadius: Dp = 10.dp, cutCornerSize: Dp = 10.dp
+    modifier: Modifier,
+    note: NotesListViewState,
+    onItemNoteClicked: () -> Unit,
+    cornerRadius: Dp = 10.dp,
+    cutCornerSize: Dp = 10.dp
 ) {
     Box(modifier = Modifier.padding(top = 50.dp, bottom = 50.dp)) {
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -234,7 +236,6 @@ private fun AppPortrait(
     }, topBar = {
         TopAppBar(modifier = Modifier.padding(bottom = 10.dp, end = 10.dp), viewModel)
     }, bottomBar = { HorizontalBottomNavigationView(onDeleteBottomNavClicked) }) { padding ->
-        Log.i("GetPadding", "padding : $padding")
         EntireLayout(Modifier.padding(top = 60.dp), onItemNoteClicked)
     }
 }

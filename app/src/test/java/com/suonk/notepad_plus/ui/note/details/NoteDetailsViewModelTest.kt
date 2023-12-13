@@ -259,63 +259,63 @@ class NoteDetailsViewModelTest {
         confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
     }
 
-//    @Test
-//    fun `edit note then save`() = testCoroutineRule.runTest {
-//        // GIVEN
-//        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
-//        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
-//        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
-//        coEvery { upsertNoteUseCase.invoke(updateNoteWithPictures()) } returns NOTE_ID_1
-//
-//        noteDetailsViewModel = NoteDetailsViewModel(
-//            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
-//            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
-//            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-//            upsertNoteUseCase = upsertNoteUseCase,
-//            fixedClock = fixedClock,
-//        )
-//
-//        runCurrent()
-//
-//        // THEN
-//        noteDetailsViewModel.noteTitle.test {
-//            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
-//        }
-//        noteDetailsViewModel.noteContent.test {
-//            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
-//        }
-//        noteDetailsViewModel.noteColor.test {
-//            assertEquals(NOTE_COLOR_1, awaitItem())
-//        }
-//
-//        // THEN
-//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
-//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
-//        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
-//
-//        runCurrent()
-//
-//        noteDetailsViewModel.noteTitle.test {
-//            assertEquals(NOTE_NEW_TITLE_NATIVE_TEXT_1, awaitItem())
-//        }
-//
-//        noteDetailsViewModel.noteContent.test {
-//            assertEquals(NOTE_NEW_CONTENT_NATIVE_TEXT_1, awaitItem())
-//        }
-//        noteDetailsViewModel.noteColor.test {
-//            assertEquals(NOTE_NEW_COLOR_1, awaitItem())
-//        }
-//
-//        noteDetailsViewModel.onEvent(SAVE_NOTE)
-//
-//        coVerify {
-//            getCurrentIdFlowUseCase.invoke()
-//            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+    @Test
+    fun `edit note then save`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+        coEvery { upsertNoteUseCase.invoke(updateNoteWithPictures()) } returns NOTE_ID_1
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock,
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // THEN
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
+        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+
+        runCurrent()
+
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_NEW_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_NEW_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_NEW_COLOR_1, awaitItem())
+        }
+
+        noteDetailsViewModel.onEvent(SAVE_NOTE)
+
+        coVerify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
 //            upsertNoteUseCase.invoke(updateNoteWithPictures())
-//        }
-//
-//        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase, upsertNoteUseCase)
-//    }
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase, upsertNoteUseCase)
+    }
 
     @Test
     fun `edit note to empty data then save`() = testCoroutineRule.runTest {
@@ -374,6 +374,52 @@ class NoteDetailsViewModelTest {
         confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase)
     }
 
+
+
+    @Test
+    fun `nominal case then delete note`() = testCoroutineRule.runTest {
+        // GIVEN
+        val currentIdStateFlow = MutableStateFlow(NOTE_ID_1)
+        every { getCurrentIdFlowUseCase.invoke() } returns currentIdStateFlow
+        every { getNoteByIdFlowUseCase.invoke(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+//        coEvery { upsertNoteUseCase.invoke(deleteNoteWithPictures()) } returns NOTE_ID_1
+        coEvery { upsertNoteUseCase.invoke(any()) } returns NOTE_ID_1
+
+        noteDetailsViewModel = NoteDetailsViewModel(
+            getNoteByIdFlowUseCase = getNoteByIdFlowUseCase,
+            getCurrentIdFlowUseCase = getCurrentIdFlowUseCase,
+            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
+            upsertNoteUseCase = upsertNoteUseCase,
+            fixedClock = fixedClock,
+        )
+
+        runCurrent()
+
+        // THEN
+        noteDetailsViewModel.noteTitle.test {
+            assertEquals(NOTE_TITLE_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteContent.test {
+            assertEquals(NOTE_CONTENT_NATIVE_TEXT_1, awaitItem())
+        }
+        noteDetailsViewModel.noteColor.test {
+            assertEquals(NOTE_COLOR_1, awaitItem())
+        }
+
+        // WHEN
+        noteDetailsViewModel.onEvent(DELETE_NOTE)
+
+        // THEN
+        coVerify {
+            getCurrentIdFlowUseCase.invoke()
+            getNoteByIdFlowUseCase.invoke(NOTE_ID_1)
+//            upsertNoteUseCase.invoke(deleteNoteWithPictures())
+//            upsertNoteUseCase.invoke(any())
+        }
+
+        confirmVerified(getCurrentIdFlowUseCase, getNoteByIdFlowUseCase, upsertNoteUseCase)
+    }
+
     private fun defaultNoteWithPictures() = NoteEntityWithPictures(
         NoteEntity(
             id = NOTE_ID_1,
@@ -394,6 +440,16 @@ class NoteDetailsViewModelTest {
         color = NOTE_NEW_COLOR_1,
         isFavorite = false,
         isDeleted = false
+    )
+
+    private fun deleteNoteWithPictures() = NoteEntity(
+        id = NOTE_ID_1,
+        title = NOTE_NEW_TITLE,
+        content = NOTE_NEW_CONTENT_1,
+        date = NOTE_DATE_1,
+        color = NOTE_NEW_COLOR_1,
+        isFavorite = false,
+        isDeleted = true
     )
 
     private fun defaultEmptyNoteWithPictures() = NoteEntityWithPictures(
@@ -474,6 +530,8 @@ class NoteDetailsViewModelTest {
         private val DEFAULT_CHANGE_COLOR = NoteDetailsDataEvent.ChangeColor(NOTE_NEW_COLOR_1)
 
         private val SAVE_NOTE = NoteDetailsDataEvent.SaveNote
+        private val DELETE_NOTE = NoteDetailsDataEvent.DeleteRestoreNote
+        private val RESTORE_NOTE = NoteDetailsDataEvent.DeleteRestoreNote
 
         fun listOfColors() = listOf(0xFFffab91, 0xFFe8ed9d, 0xFFd095db, 0xFF7fdeea, 0xFFf48fb1)
     }
