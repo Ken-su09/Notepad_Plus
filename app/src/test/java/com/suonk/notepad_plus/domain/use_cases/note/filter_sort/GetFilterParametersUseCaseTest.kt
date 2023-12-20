@@ -1,8 +1,7 @@
 package com.suonk.notepad_plus.domain.use_cases.note.filter_sort
 
 import app.cash.turbine.test
-import com.suonk.notepad_plus.domain.repositories.NoteRepository
-import com.suonk.notepad_plus.domain.repositories.SearchRepository
+import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
@@ -11,6 +10,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.filter.GetCurrentSortFilterUseCase
 import io.mockk.confirmVerified
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
