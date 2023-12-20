@@ -1,6 +1,5 @@
-package com.suonk.notepad_plus.domain.use_cases.note.id
+package com.suonk.notepad_plus.domain.note.id
 
-import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton

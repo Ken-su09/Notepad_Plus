@@ -1,8 +1,8 @@
 package com.suonk.notepad_plus.domain.use_cases.note.filter_sort
 
 import app.cash.turbine.test
-import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.repositories.SearchRepository
+import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
+import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.utils.Sorting
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified

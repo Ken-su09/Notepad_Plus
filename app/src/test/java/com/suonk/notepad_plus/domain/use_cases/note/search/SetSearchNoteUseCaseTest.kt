@@ -1,6 +1,7 @@
 package com.suonk.notepad_plus.domain.use_cases.note.search
 
-import com.suonk.notepad_plus.domain.repositories.SearchRepository
+import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
 import io.mockk.justRun

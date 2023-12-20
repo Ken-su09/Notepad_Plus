@@ -1,12 +1,10 @@
-package com.suonk.notepad_plus.domain.filter
+package com.suonk.notepad_plus.domain.sort
 
-import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.utils.Sorting
 import javax.inject.Inject
 
-class SetCurrentSortFilterUseCase @Inject constructor(private val searchRepository: SearchRepository) {
-
+class SetSortingParametersUseCase @Inject constructor(private val sortRepository: SortRepository) {
     fun invoke(sortFilterParameter: Sorting) {
-        searchRepository.setCurrentSortFilterParametersFlow(sortFilterParameter)
+        sortRepository.setCurrentSortingParametersFlow(sortFilterParameter)
     }
 }

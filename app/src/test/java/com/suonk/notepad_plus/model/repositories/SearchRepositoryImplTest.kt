@@ -3,6 +3,7 @@ package com.suonk.notepad_plus.model.repositories
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.search.SearchRepositoryImpl
 import com.suonk.notepad_plus.utils.Sorting
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import junit.framework.TestCase.assertEquals

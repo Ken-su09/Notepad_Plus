@@ -1,6 +1,5 @@
-package com.suonk.notepad_plus.domain.use_cases.note.get_note
+package com.suonk.notepad_plus.domain.note.get_note
 
-import com.suonk.notepad_plus.domain.repositories.NoteRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

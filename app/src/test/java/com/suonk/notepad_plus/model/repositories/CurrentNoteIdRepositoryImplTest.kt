@@ -2,6 +2,7 @@ package com.suonk.notepad_plus.model.repositories
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
+import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepositoryImpl
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.channels.BufferOverflow

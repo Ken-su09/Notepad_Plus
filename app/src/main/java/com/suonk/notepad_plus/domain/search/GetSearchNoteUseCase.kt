@@ -1,6 +1,5 @@
-package com.suonk.notepad_plus.domain.use_cases.note.search
+package com.suonk.notepad_plus.domain.search
 
-import com.suonk.notepad_plus.domain.repositories.SearchRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.domain.sort
+package com.suonk.notepad_plus.utils
 
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import java.time.LocalDateTime

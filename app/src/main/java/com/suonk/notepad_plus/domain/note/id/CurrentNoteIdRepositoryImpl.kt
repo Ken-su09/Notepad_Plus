@@ -1,6 +1,6 @@
-package com.suonk.notepad_plus.model.repositories
+package com.suonk.notepad_plus.domain.note.id
 
-import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
+import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepository
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

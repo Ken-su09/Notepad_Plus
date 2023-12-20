@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.domain.repositories
+package com.suonk.notepad_plus.domain.note.id
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.StateFlow

@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.domain.repositories
+package com.suonk.notepad_plus.domain.note.get_note
 
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures

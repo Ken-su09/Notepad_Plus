@@ -1,6 +1,7 @@
 package com.suonk.notepad_plus.domain.use_cases.note.id
 
-import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
+import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepository
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
 import io.mockk.justRun

@@ -1,7 +1,8 @@
 package com.suonk.notepad_plus.domain.use_cases.note.get_note
 
 import app.cash.turbine.test
-import com.suonk.notepad_plus.domain.repositories.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
+import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.TestCoroutineRule

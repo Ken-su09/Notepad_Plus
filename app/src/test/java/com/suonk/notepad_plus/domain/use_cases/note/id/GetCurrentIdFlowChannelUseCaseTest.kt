@@ -1,7 +1,8 @@
 package com.suonk.notepad_plus.domain.use_cases.note.id
 
 import app.cash.turbine.test
-import com.suonk.notepad_plus.domain.repositories.CurrentNoteIdRepository
+import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowChannelUseCase
+import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepository
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
 import io.mockk.every

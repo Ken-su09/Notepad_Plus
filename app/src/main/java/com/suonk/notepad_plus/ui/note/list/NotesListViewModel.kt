@@ -1,22 +1,24 @@
 package com.suonk.notepad_plus.ui.note.list
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.filter.NotesFilterDropdownMenuItemViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItemViewState
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetCurrentSortFilterUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetSortingParametersUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.SetCurrentSortFilterUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.get_note.GetAllNotesFlowUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.SetSearchNoteUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
+import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
+import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
+import com.suonk.notepad_plus.domain.filter.SetFilterParametersUseCase
+import com.suonk.notepad_plus.domain.note.get_note.GetAllNotesFlowUseCase
+import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.domain.sort.SetSortingParametersUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.EquatableCallback
+import com.suonk.notepad_plus.utils.Filtering
+import com.suonk.notepad_plus.utils.Sorting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,32 +39,23 @@ class NotesListViewModel @Inject constructor(
     private val setSearchNoteUseCase: SetSearchNoteUseCase,
 
     getSortingParametersUseCase: GetSortingParametersUseCase,
+    private val setSortingParametersUseCase: SetSortingParametersUseCase,
 
-    getCurrentSortFilterNoteUseCase: GetCurrentSortFilterUseCase,
-    private val setCurrentSortFilterNoteUseCase: SetCurrentSortFilterUseCase,
+    getCurrentSortFilterNoteUseCase: GetFilterParametersUseCase,
+    private val setFilterParametersUseCase: SetFilterParametersUseCase,
 
     private val upsertNoteUseCase: UpsertNoteUseCase,
-    private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
-    private val application: Application
+    private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-
-    private val _searchBarText = MutableStateFlow("")
-    val searchBarText = _searchBarText.asStateFlow()
-
-    private val _listOfSortItems = MutableStateFlow(listOfSortItems())
-    val listOfSortItems: StateFlow<List<NotesSortDropdownMenuItemViewState>> = _listOfSortItems.asStateFlow()
-
-    private val _listOfFilterItems = MutableStateFlow(listOfFilterItems())
-    val listOfFilterItems: StateFlow<List<NotesFilterDropdownMenuItemViewState>> = _listOfFilterItems.asStateFlow()
 
     val notesListFlow: StateFlow<List<NotesListViewState>> = combine(
         getAllNotesFlowUseCase.invoke(),
         getSearchNoteUseCase.invoke(),
         getSortingParametersUseCase.invoke(),
         getCurrentSortFilterNoteUseCase.invoke(),
-    ) { notes, search, sorting, filterId ->
+    ) { notes, search, sorting, filter ->
         notes.asSequence().filter {
             if (search != null && search != "") {
                 it.noteEntity.title.contains(search, ignoreCase = true) || it.noteEntity.content.contains(search, ignoreCase = true)
@@ -72,32 +65,32 @@ class NotesListViewModel @Inject constructor(
         }.sortedWith(sorting.comparator).map {
             transformEntityToViewState(it)
         }.filter {
-            when (filterId) {
-                R.string.remove_filter -> {
+            when (filter) {
+                Filtering.REMOVE_FILTER -> {
                     it.id != 0L
                 }
 
-                R.string.pink -> {
+                Filtering.PINK -> {
                     it.color == 0xFF7fdeea
                 }
 
-                R.string.purple -> {
+                Filtering.PURPLE -> {
                     it.color == 0xFFd095db
                 }
 
-                R.string.green -> {
+                Filtering.GREEN -> {
                     it.color == 0xFFd095db
                 }
 
-                R.string.blue -> {
+                Filtering.BLUE -> {
                     it.color == 0xFF7fdeea
                 }
 
-                R.string.orange -> {
+                Filtering.ORANGE -> {
                     it.color == 0xFFffab91
                 }
 
-                R.string.yellow -> {
+                Filtering.YELLOW -> {
                     it.color == 0xFFe8ed9d
                 }
 
@@ -141,89 +134,78 @@ class NotesListViewModel @Inject constructor(
     }
 
     fun setSearchParameters(search: String?) {
-        search?.let {
-            _searchBarText.value = it
-        }
         setSearchNoteUseCase.invoke(search)
     }
 
-    fun setCurrentSortFilter(textResource: Int) {
-        setCurrentSortFilterNoteUseCase.invoke(textResource)
+    fun setCurrentFilter(filteringEntity: FilteringEntity) {
+        when (filteringEntity) {
+            FilteringEntity.REMOVE_FILTER -> {
+                setFilterParametersUseCase.invoke(Filtering.REMOVE_FILTER)
+            }
+
+            FilteringEntity.ORANGE -> {
+                setFilterParametersUseCase.invoke(Filtering.ORANGE)
+            }
+
+            FilteringEntity.PINK -> {
+                setFilterParametersUseCase.invoke(Filtering.PINK)
+            }
+
+            FilteringEntity.GREEN -> {
+                setFilterParametersUseCase.invoke(Filtering.GREEN)
+            }
+
+            FilteringEntity.YELLOW -> {
+                setFilterParametersUseCase.invoke(Filtering.YELLOW)
+            }
+
+            FilteringEntity.PURPLE -> {
+                setFilterParametersUseCase.invoke(Filtering.PURPLE)
+            }
+
+            FilteringEntity.BLUE -> {
+                setFilterParametersUseCase.invoke(Filtering.BLUE)
+            }
+
+            else -> {
+                setFilterParametersUseCase.invoke(Filtering.REMOVE_FILTER)
+            }
+        }
     }
 
-    private fun listOfSortItems() = listOf(
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.date_asc),
-            textResource = R.string.date_asc,
-            hasDivider = false
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.date_desc),
-            textResource = R.string.date_desc,
-            hasDivider = true
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.title_asc),
-            textResource = R.string.title_asc,
-            hasDivider = false
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.title_desc),
-            textResource = R.string.title_desc,
-            hasDivider = true
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.content_a_z),
-            textResource = R.string.content_a_z,
-            hasDivider = false
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.content_z_a),
-            textResource = R.string.content_z_a,
-            hasDivider = true
-        ),
-        NotesSortDropdownMenuItemViewState(
-            text = application.getString(R.string.by_color),
-            textResource = R.string.by_color,
-            hasDivider = true
-        ),
-    )
+    fun setCurrentSort(sortingEntity: SortingEntity) {
+        when (sortingEntity) {
+            SortingEntity.DATE_ASC -> {
+                setSortingParametersUseCase.invoke(Sorting.DATE_ASC)
+            }
 
-    private fun listOfFilterItems() = listOf(
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.remove_filter),
-            textResource = R.string.remove_filter,
-            hasDivider = true
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.pink),
-            textResource = R.string.pink,
-            hasDivider = false
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.green),
-            textResource = R.string.green,
-            hasDivider = false
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.orange),
-            textResource = R.string.orange,
-            hasDivider = false
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.yellow),
-            textResource = R.string.yellow,
-            hasDivider = false
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.purple),
-            textResource = R.string.purple,
-            hasDivider = false
-        ),
-        NotesFilterDropdownMenuItemViewState(
-            text = application.getString(R.string.blue),
-            textResource = R.string.blue,
-            hasDivider = false
-        ),
-    )
+            SortingEntity.DATE_DESC -> {
+                setSortingParametersUseCase.invoke(Sorting.DATE_DESC)
+            }
+
+            SortingEntity.TITLE_ASC -> {
+                setSortingParametersUseCase.invoke(Sorting.TITLE_ASC)
+            }
+
+            SortingEntity.TITLE_DESC -> {
+                setSortingParametersUseCase.invoke(Sorting.TITLE_DESC)
+            }
+
+            SortingEntity.CONTENT_ASC -> {
+                setSortingParametersUseCase.invoke(Sorting.CONTENT_ASC)
+            }
+
+            SortingEntity.CONTENT_DESC -> {
+                setSortingParametersUseCase.invoke(Sorting.CONTENT_DESC)
+            }
+
+            SortingEntity.COLOR_ASC -> {
+                setSortingParametersUseCase.invoke(Sorting.COLOR_ASC)
+            }
+
+            else -> {
+
+            }
+        }
+    }
 }

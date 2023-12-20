@@ -1,6 +1,6 @@
-package com.suonk.notepad_plus.domain.use_cases.note.upsert
+package com.suonk.notepad_plus.domain.note.upsert
 
-import com.suonk.notepad_plus.domain.repositories.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import javax.inject.Inject
 import javax.inject.Singleton

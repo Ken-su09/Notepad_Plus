@@ -51,9 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
 import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
+import com.suonk.notepad_plus.utils.Sorting
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -64,13 +67,27 @@ class NotesListActivity : ComponentActivity() {
 
         setContent {
             NotepadPlusTheme {
-                AppPortrait({
-                    startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
-                }, {
-                    startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
-                }, {
-                    startActivity(Intent(this@NotesListActivity, DeletedNotesListActivity::class.java))
-                })
+                val viewModel: NotesListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                AppPortrait(
+                    {
+                        startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
+                    },
+                    {
+                        startActivity(Intent(this@NotesListActivity, NoteDetailsActivity::class.java))
+                    },
+                    {
+                        startActivity(Intent(this@NotesListActivity, DeletedNotesListActivity::class.java))
+                    },
+                    { sorting ->
+                        viewModel.setCurrentSort(sorting)
+                    },
+                    { filtering ->
+                        viewModel.setCurrentFilter(filtering)
+                    },
+                    { searchText ->
+                        viewModel.setSearchParameters(searchText)
+                    },
+                )
             }
         }
     }
@@ -225,7 +242,9 @@ private fun AppPortrait(
     onAddNewNoteClicked: () -> Unit,
     onItemNoteClicked: () -> Unit,
     onDeleteBottomNavClicked: () -> Unit,
-    viewModel: NotesListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    onSortItemSelected: (SortingEntity) -> Unit,
+    onFilterItemChecked: (FilteringEntity) -> Unit,
+    onSearchTextChanged: (String) -> Unit
 ) {
     Scaffold(floatingActionButton = {
         FloatingActionButton(
@@ -234,8 +253,9 @@ private fun AppPortrait(
             Icon(Icons.Filled.Add, stringResource(R.string.a11y_add_note))
         }
     }, topBar = {
-        TopAppBar(modifier = Modifier.padding(bottom = 10.dp, end = 10.dp), viewModel)
-    }, bottomBar = { HorizontalBottomNavigationView(onDeleteBottomNavClicked) }) { padding ->
+        TopAppBar(modifier = Modifier.padding(bottom = 10.dp, end = 10.dp), onSearchTextChanged, onSortItemSelected, onFilterItemChecked)
+    }, bottomBar = { HorizontalBottomNavigationView(onDeleteBottomNavClicked) })
+    { padding ->
         EntireLayout(Modifier.padding(top = 60.dp), onItemNoteClicked)
     }
 }

@@ -4,14 +4,14 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetCurrentSortFilterUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.GetSortingParametersUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.filter_sort.SetCurrentSortFilterUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.get_note.GetAllNotesFlowUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.GetSearchNoteUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.search.SetSearchNoteUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
+import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
+import com.suonk.notepad_plus.domain.filter.SetFilterParametersUseCase
+import com.suonk.notepad_plus.domain.note.get_note.GetAllNotesFlowUseCase
+import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
+import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.EquatableCallback
@@ -27,16 +27,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,9 +37,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 class NotesListViewModelTest {
 
@@ -64,8 +53,8 @@ class NotesListViewModelTest {
 
     private val getSortingParametersUseCase: GetSortingParametersUseCase = mockk()
 
-    private val getCurrentSortFilterNoteUseCase: GetCurrentSortFilterUseCase = mockk()
-    private val setCurrentSortFilterNoteUseCase: SetCurrentSortFilterUseCase = mockk()
+    private val getCurrentSortFilterNoteUseCase: GetFilterParametersUseCase = mockk()
+    private val setCurrentSortFilterNoteUseCase: SetFilterParametersUseCase = mockk()
 
     private val upsertNoteUseCase: UpsertNoteUseCase = mockk()
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase = mockk()

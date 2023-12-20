@@ -1,7 +1,8 @@
 package com.suonk.notepad_plus.domain.use_cases.note.filter_sort
 
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.repositories.SearchRepository
+import com.suonk.notepad_plus.domain.filter.SetFilterParametersUseCase
+import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
 import io.mockk.justRun
@@ -18,7 +19,7 @@ class SetCurrentSortFilterUseCaseTest {
 
     private val searchRepository: SearchRepository = mockk()
 
-    private val setCurrentSortFilterUseCase = SetCurrentSortFilterUseCase(searchRepository)
+    private val setFilterParametersUseCase = SetFilterParametersUseCase(searchRepository)
 
     @Before
     fun setup() {
@@ -27,7 +28,7 @@ class SetCurrentSortFilterUseCaseTest {
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
-        setCurrentSortFilterUseCase.invoke(DEFAULT_SORT_FILTER_PARAMETER)
+        setFilterParametersUseCase.invoke(DEFAULT_SORT_FILTER_PARAMETER)
 
         verify {
             searchRepository.setCurrentSortFilterParametersFlow(DEFAULT_SORT_FILTER_PARAMETER)

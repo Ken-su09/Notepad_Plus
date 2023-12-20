@@ -3,10 +3,10 @@ package com.suonk.notepad_plus.ui.note.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.use_cases.note.get_note.GetNoteByIdFlowUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.id.GetCurrentIdFlowUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.id.SetCurrentNoteIdUseCase
-import com.suonk.notepad_plus.domain.use_cases.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
+import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowUseCase
+import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
+import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.ui.note.details.actions_list.ActionsSealed
 import com.suonk.notepad_plus.utils.NativeText

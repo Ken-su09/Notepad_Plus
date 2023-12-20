@@ -10,20 +10,20 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.filter.GetCurrentSortFilterUseCase
+import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
 import io.mockk.confirmVerified
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 
 
-class GetCurrentSortFilterUseCaseTest {
+class GetFilterParametersUseCaseTest {
 
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
     private val searchRepository: SearchRepository = mockk()
 
-    private val getCurrentSortFilterUseCase = GetCurrentSortFilterUseCase(searchRepository)
+    private val getFilterParametersUseCase = GetFilterParametersUseCase(searchRepository)
 
     @Before
     fun setup() {
@@ -34,7 +34,7 @@ class GetCurrentSortFilterUseCaseTest {
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
 
-        getCurrentSortFilterUseCase.invoke().test {
+        getFilterParametersUseCase.invoke().test {
             assertEquals(REMOVE_FILTER, awaitItem())
 
             verify {
