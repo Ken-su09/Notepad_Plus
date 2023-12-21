@@ -8,13 +8,13 @@ import javax.inject.Singleton
 
 @Singleton
 class FilterRepositoryImpl @Inject constructor() : FilterRepository {
-    private val currentFilterParameterFlow = MutableStateFlow(Filtering.REMOVE_FILTER)
+    private val currentFilterParameterFlow = MutableStateFlow(FilterEntity.REMOVE_FILTER)
 
-    override fun getCurrentFilterParameterFlow(): StateFlow<Filtering> {
+    override fun getCurrentFilterParameterFlow(): StateFlow<FilterEntity> {
         return currentFilterParameterFlow
     }
 
-    override fun setCurrentFilterParametersFlow(filtering: Filtering) {
-        currentFilterParameterFlow.tryEmit(filtering)
+    override fun setCurrentFilterParametersFlow(filterEntity: FilterEntity) {
+        currentFilterParameterFlow.tryEmit(filterEntity)
     }
 }

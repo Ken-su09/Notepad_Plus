@@ -2,7 +2,6 @@ package com.suonk.notepad_plus.ui.note.list
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -52,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
-import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.top_app_bar.SortingViewState
 import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
@@ -242,8 +241,8 @@ private fun AppPortrait(
     onAddNewNoteClicked: () -> Unit,
     onItemNoteClicked: () -> Unit,
     onDeleteBottomNavClicked: () -> Unit,
-    onSortItemSelected: (SortingEntity) -> Unit,
-    onFilterItemChecked: (FilteringEntity) -> Unit,
+    onSortItemSelected: (SortingViewState) -> Unit,
+    onFilterItemChecked: (FilteringViewState) -> Unit,
     onSearchTextChanged: (String) -> Unit
 ) {
     Scaffold(floatingActionButton = {

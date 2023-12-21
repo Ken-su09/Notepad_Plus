@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface FilterRepository {
 
-    fun getCurrentFilterParameterFlow(): StateFlow<Filtering>
+    fun getCurrentFilterParameterFlow(): StateFlow<FilterEntity>
 
-    fun setCurrentFilterParametersFlow(filtering: Filtering)
+    fun setCurrentFilterParametersFlow(filterEntity: FilterEntity)
 }

@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.suonk.notepad_plus.designsystem.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
 import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBarViewModel
 import com.suonk.notepad_plus.designsystem.utils.toCharSequence
 
 @Composable
 fun NotesFilterDropdownMenuItem(
-    onFilterItemChecked: (FilteringEntity) -> Unit,
+    onFilterItemChecked: (FilteringViewState) -> Unit,
     filterItem: NotesFilterDropdownMenuItemViewState,
     defaultIntFilterState: MutableList<Int>,
     viewModel: TopAppBarViewModel

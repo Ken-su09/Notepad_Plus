@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 class SetFilterParametersUseCase @Inject constructor(private val filterRepository: FilterRepository) {
 
-    fun invoke(filtering: Filtering) {
-        filterRepository.setCurrentFilterParametersFlow(filtering)
+    fun invoke(filterEntity: FilterEntity) {
+        filterRepository.setCurrentFilterParametersFlow(filterEntity)
     }
 }

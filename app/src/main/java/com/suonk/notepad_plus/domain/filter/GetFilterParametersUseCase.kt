@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class GetFilterParametersUseCase @Inject constructor(private val filterRepository: FilterRepository) {
 
-    fun invoke(): Flow<Filtering> {
+    fun invoke(): Flow<FilterEntity> {
         return filterRepository.getCurrentFilterParameterFlow()
     }
 }

@@ -3,6 +3,7 @@ package com.suonk.notepad_plus.ui.note.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
@@ -45,7 +46,7 @@ class NoteDetailsViewModel @Inject constructor(
     private val _noteContent = MutableStateFlow(NativeText.SimpleOrResource("", R.string.enter_some_content))
     val noteContent = _noteContent.asStateFlow()
 
-    private val _noteColor = MutableStateFlow(listOfColors().random())
+    private val _noteColor = MutableStateFlow(ColorEntity.values().random())
     val noteColor = _noteColor.asStateFlow()
 
     private val _isDeleted = MutableStateFlow(false)
@@ -68,7 +69,7 @@ class NoteDetailsViewModel @Inject constructor(
                             id = 0,
                             title = "",
                             content = "",
-                            color = listOfColors().random(),
+                            color = ColorEntity.values().random(),
                             dateText = NativeText.Argument(R.string.last_update, ZonedDateTime.now(fixedClock).format(dateTimeFormatter)),
                             dateValue = ZonedDateTime.now(fixedClock).toInstant(),
                             actions = listOf()
@@ -123,7 +124,7 @@ class NoteDetailsViewModel @Inject constructor(
             }
 
             is NoteDetailsDataEvent.ChangeColor -> {
-                _noteColor.value = event.color
+                _noteColor.value = event.colorEntity
             }
 
             is NoteDetailsDataEvent.SaveNote -> {
@@ -157,17 +158,17 @@ class NoteDetailsViewModel @Inject constructor(
                     val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
                     noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let { noteDetails ->
-                            upsertNoteUseCase.invoke(
-                                NoteEntity(
-                                    id = noteDetails.id,
-                                    title = noteDetails.title,
-                                    content = noteDetails.content,
-                                    date = fromInstantToLocalDate(lastUpdateDate),
-                                    color = noteDetails.color,
-                                    isFavorite = false,
-                                    isDeleted = !isDeleted.value
-                                )
+                        upsertNoteUseCase.invoke(
+                            NoteEntity(
+                                id = noteDetails.id,
+                                title = noteDetails.title,
+                                content = noteDetails.content,
+                                date = fromInstantToLocalDate(lastUpdateDate),
+                                color = noteDetails.color,
+                                isFavorite = false,
+                                isDeleted = !isDeleted.value
                             )
+                        )
                     }
 
                     _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
@@ -179,6 +180,4 @@ class NoteDetailsViewModel @Inject constructor(
             }
         }
     }
-
-    fun listOfColors() = listOf(0xFFffab91, 0xFFe8ed9d, 0xFFd095db, 0xFF7fdeea, 0xFFf48fb1)
 }

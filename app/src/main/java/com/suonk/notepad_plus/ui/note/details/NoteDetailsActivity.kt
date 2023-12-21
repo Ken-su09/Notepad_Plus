@@ -78,6 +78,7 @@ import com.mohamedrejeb.richeditor.model.RichTextValue
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.showToast
@@ -191,13 +192,13 @@ private fun EntireLayout(
     val colorState by viewModel.noteColor.collectAsState()
     val isEnabled by viewModel.isDeleted.collectAsState()
 
-    val noteBackgroundAnimatable = remember { Animatable(Color(colorState)) }
+    val noteBackgroundAnimatable = remember { Animatable(Color(colorState.toARGB())) }
     val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .background(Color(colorState))
+            .background(Color(colorState.toARGB()))
             .padding(16.dp)
     ) {
         Row(
@@ -205,12 +206,13 @@ private fun EntireLayout(
                 .fillMaxWidth()
                 .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            viewModel.listOfColors().forEach { color ->
+            // TODO Exposer le ViewModel (Par le ViewState)
+            ColorEntity.values().forEach { color ->
                 Box(modifier = Modifier
                     .size(50.dp)
                     .shadow(15.dp, CircleShape)
                     .clip(CircleShape)
-                    .background(Color(color))
+                    .background(Color(color.toARGB()))
                     .border(
                         width = 3.dp, color = if (colorState == color) {
                             Color.Black
@@ -219,7 +221,7 @@ private fun EntireLayout(
                     .clickable(enabled = !isEnabled) {
                         scope.launch {
                             noteBackgroundAnimatable.animateTo(
-                                targetValue = Color(color), animationSpec = tween(
+                                targetValue = Color(color.toARGB()), animationSpec = tween(
                                     durationMillis = 500
                                 )
                             )
@@ -342,6 +344,13 @@ private fun EntireLayout(
 //                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isEnabled, modifier = Modifier.padding(16.dp)
 //            )
 //        }
+    }
+}
+
+// TODO Foutre dans le design system
+private fun ColorEntity.toARGB(): Int {
+    return when (this) {
+        ColorEntity.PINK -> android.graphics.Color.parseColor("FF7fdeea")
     }
 }
 

@@ -7,7 +7,7 @@ data class NotesListViewState(
     val title: String,
     val content: String,
     val date: String,
-    val color: Long,
+    val color: Int,
     val onItemNoteClicked: EquatableCallback,
     val onDeleteNoteClicked: EquatableCallback,
     val actions: List<NotesListActionViewState>,

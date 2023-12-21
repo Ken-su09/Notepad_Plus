@@ -3,6 +3,7 @@ package com.suonk.notepad_plus.model.database.data.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.suonk.notepad_plus.domain.ColorEntity
 import java.time.LocalDateTime
 
 @Entity(tableName = "note_entity")
@@ -11,7 +12,7 @@ data class NoteEntity(
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
     @ColumnInfo(name = "date") val date: LocalDateTime,
-    @ColumnInfo(name = "color") val color: Long,
+    @ColumnInfo(name = "color") val color: ColorEntity,
     @ColumnInfo(name = "isFavorite") val isFavorite: Boolean,
     @ColumnInfo(name = "isDeleted") val isDeleted: Boolean,
 )

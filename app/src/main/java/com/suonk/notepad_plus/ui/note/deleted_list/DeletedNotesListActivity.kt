@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListViewModel
@@ -134,9 +135,9 @@ private fun NoteLayout(
 
             clipPath(clipPath) {
                 drawRoundRect(
-                    color = Color(note.color), size = size, cornerRadius = CornerRadius(cornerRadius.toPx())
+                    color = Color(note.color.toARGB()), size = size, cornerRadius = CornerRadius(cornerRadius.toPx())
                 )
-                val originalColor = Color(note.color)
+                val originalColor = Color(note.color.toARGB())
                 val darkerColor = makeColorDarker(originalColor, 0.8F)
                 drawRoundRect(
                     color = darkerColor,
@@ -276,4 +277,11 @@ fun makeColorDarker(color: Color, scaleFactor: Float): Color {
         blue = color.blue * scaleFactor,
         alpha = color.alpha
     )
+}
+
+// TODO Foutre dans le design system
+private fun ColorEntity.toARGB(): Int {
+    return when (this) {
+        ColorEntity.PINK -> android.graphics.Color.parseColor("FF7fdeea")
+    }
 }

@@ -2,6 +2,7 @@ package com.suonk.notepad_plus.ui.note.deleted_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.domain.note.get_note.GetAllDeletedNotesFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
@@ -55,7 +56,6 @@ class DeletedNotesListViewModel @Inject constructor(
             transformEntityToViewState(it)
         }.toList()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
-
 
     private fun transformEntityToViewState(entity: NoteEntityWithPictures) = DeletedNotesListViewState(id = entity.noteEntity.id,
         title = entity.noteEntity.title,

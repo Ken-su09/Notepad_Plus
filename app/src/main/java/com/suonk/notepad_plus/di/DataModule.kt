@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.model.database.AppDatabase
 import com.suonk.notepad_plus.model.database.data.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
@@ -42,7 +43,7 @@ class DataModule {
 
             private fun prepopulateDatabase(noteDao: NoteDao, pictureDao: PictureDao) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val colors = listOf(0xFFffab91, 0xFFe8ed9d, 0xFFd095db, 0xFF7fdeea, 0xFFf48fb1)
+                    val colors = listOf("FFffab91", "FFe8ed9d", "FFd095db", "FF7fdeea", "FFf48fb1")
 
                     noteDao.upsertNoteEntity(
                         NoteEntity(
@@ -55,7 +56,7 @@ class DataModule {
                                     "- Pas le droit à la même page\n" +
                                     "- Faire un tri entre les 5 ou prendre celui qui paraît être le plus omoshiroi",
                             date = LocalDateTime.of(2022, 10, 24, 12, 30, 0),
-                            color = colors.random(),
+                            color = ColorEntity.values().random(),
                             isFavorite = false,
                             isDeleted = false
                         )
@@ -74,7 +75,7 @@ class DataModule {
                                     "\n" +
                                     "Parmi les meilleurs musiciens du monde sont passés, dont le plus grand bassiste encore en vie, Victor Wooten.",
                             date = LocalDateTime.of(2023, 5, 10, 21, 5, 0),
-                            color = colors.random(),
+                            color = ColorEntity.values().random(),
                             isFavorite = false,
                             isDeleted = false
                         )
@@ -86,7 +87,7 @@ class DataModule {
                             title = "TEST",
                             content = "Test SORT",
                             date = LocalDateTime.of(2023, 11, 11, 11, 11, 11),
-                            color = colors.random(),
+                            color = ColorEntity.values().random(),
                             isFavorite = false,
                             isDeleted = false
                         )
@@ -98,7 +99,7 @@ class DataModule {
                             title = "ZZZZZZZZZZ 32",
                             content = "Test FILTER",
                             date = LocalDateTime.now(),
-                            color = colors.random(),
+                            color = ColorEntity.values().random(),
                             isFavorite = false,
                             isDeleted = false
                         )

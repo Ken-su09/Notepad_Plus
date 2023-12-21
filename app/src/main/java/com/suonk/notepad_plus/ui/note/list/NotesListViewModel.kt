@@ -1,9 +1,12 @@
 package com.suonk.notepad_plus.ui.note.list
 
+import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
-import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.top_app_bar.SortingViewState
+import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.domain.filter.FilterEntity
 import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
 import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
 import com.suonk.notepad_plus.domain.filter.SetFilterParametersUseCase
@@ -59,38 +62,10 @@ class NotesListViewModel @Inject constructor(
             } else {
                 true
             }
+        }.filter {
+            filter.isMatching.invoke(it.noteEntity)
         }.sortedWith(sorting.comparator).map {
             transformEntityToViewState(it)
-        }.filter {
-            when (filter) {
-                Filtering.REMOVE_FILTER -> {
-                    it.id != 0L
-                }
-
-                Filtering.PINK -> {
-                    it.color == 0xFF7fdeea
-                }
-
-                Filtering.PURPLE -> {
-                    it.color == 0xFFd095db
-                }
-
-                Filtering.GREEN -> {
-                    it.color == 0xFFd095db
-                }
-
-                Filtering.BLUE -> {
-                    it.color == 0xFF7fdeea
-                }
-
-                Filtering.ORANGE -> {
-                    it.color == 0xFFffab91
-                }
-
-                Filtering.YELLOW -> {
-                    it.color == 0xFFe8ed9d
-                }
-            }
         }.toList()
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList()
@@ -101,7 +76,9 @@ class NotesListViewModel @Inject constructor(
         title = entity.noteEntity.title,
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
-        color = entity.noteEntity.color,
+        color = when (entity.noteEntity.color) {
+            ColorEntity.PINK -> Color.parseColor("FF7fdeea")
+        },
         onItemNoteClicked = EquatableCallback {
             setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
         },
@@ -130,69 +107,69 @@ class NotesListViewModel @Inject constructor(
         setSearchNoteUseCase.invoke(search)
     }
 
-    fun setCurrentFilter(filteringEntity: FilteringEntity) {
-        when (filteringEntity) {
-            FilteringEntity.REMOVE_FILTER -> {
-                setFilterParametersUseCase.invoke(Filtering.REMOVE_FILTER)
+    fun setCurrentFilter(filteringViewState: FilteringViewState) {
+        when (filteringViewState) {
+            FilteringViewState.REMOVE_FILTER -> {
+                setFilterParametersUseCase.invoke(FilterEntity.REMOVE_FILTER)
             }
 
-            FilteringEntity.ORANGE -> {
-                setFilterParametersUseCase.invoke(Filtering.ORANGE)
+            FilteringViewState.ORANGE -> {
+                setFilterParametersUseCase.invoke(FilterEntity.PINK)
             }
 
-            FilteringEntity.PINK -> {
-                setFilterParametersUseCase.invoke(Filtering.PINK)
-            }
-
-            FilteringEntity.GREEN -> {
-                setFilterParametersUseCase.invoke(Filtering.GREEN)
-            }
-
-            FilteringEntity.YELLOW -> {
-                setFilterParametersUseCase.invoke(Filtering.YELLOW)
-            }
-
-            FilteringEntity.PURPLE -> {
-                setFilterParametersUseCase.invoke(Filtering.PURPLE)
-            }
-
-            FilteringEntity.BLUE -> {
-                setFilterParametersUseCase.invoke(Filtering.BLUE)
-            }
+//            FilteringViewState.PINK -> {
+//                setFilterParametersUseCase.invoke(Filtering.PINK)
+//            }
+//
+//            FilteringViewState.GREEN -> {
+//                setFilterParametersUseCase.invoke(Filtering.GREEN)
+//            }
+//
+//            FilteringViewState.YELLOW -> {
+//                setFilterParametersUseCase.invoke(Filtering.YELLOW)
+//            }
+//
+//            FilteringViewState.PURPLE -> {
+//                setFilterParametersUseCase.invoke(Filtering.PURPLE)
+//            }
+//
+//            FilteringViewState.BLUE -> {
+//                setFilterParametersUseCase.invoke(Filtering.BLUE)
+//            }
 
             else -> {
-                setFilterParametersUseCase.invoke(Filtering.REMOVE_FILTER)
+                setFilterParametersUseCase.invoke(FilterEntity.REMOVE_FILTER)
             }
         }
     }
 
-    fun setCurrentSort(sortingEntity: SortingEntity) {
-        when (sortingEntity) {
-            SortingEntity.DATE_ASC -> {
+    fun setCurrentSort(sortingViewState: SortingViewState) {
+        when (sortingViewState) {
+            SortingViewState.DATE_ASC -> {
                 setSortingParametersUseCase.invoke(Sorting.DATE_ASC)
             }
 
-            SortingEntity.DATE_DESC -> {
+            SortingViewState.DATE_DESC -> {
                 setSortingParametersUseCase.invoke(Sorting.DATE_DESC)
             }
 
-            SortingEntity.TITLE_ASC -> {
+            SortingViewState.TITLE_ASC -> {
                 setSortingParametersUseCase.invoke(Sorting.TITLE_ASC)
             }
 
-            SortingEntity.TITLE_DESC -> {
+            SortingViewState.TITLE_DESC -> {
                 setSortingParametersUseCase.invoke(Sorting.TITLE_DESC)
             }
 
-            SortingEntity.CONTENT_ASC -> {
+            SortingViewState.CONTENT_ASC -> {
                 setSortingParametersUseCase.invoke(Sorting.CONTENT_ASC)
             }
 
-            SortingEntity.CONTENT_DESC -> {
+            SortingViewState.CONTENT_DESC -> {
                 setSortingParametersUseCase.invoke(Sorting.CONTENT_DESC)
             }
 
-            SortingEntity.COLOR_ASC -> {
+            SortingViewState.COLOR_ASC -> {
                 setSortingParametersUseCase.invoke(Sorting.COLOR_ASC)
             }
 

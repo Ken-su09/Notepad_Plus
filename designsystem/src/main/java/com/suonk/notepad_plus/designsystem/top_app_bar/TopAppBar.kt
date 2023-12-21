@@ -37,8 +37,8 @@ import com.suonk.notepad_plus.designsystem.utils.NativeText
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
-    modifier: Modifier = Modifier, onSearchTextChanged: (String) -> Unit, onSortItemSelected: (SortingEntity) -> Unit,
-    onFilterItemChecked: (FilteringEntity) -> Unit, viewModel: TopAppBarViewModel = viewModel()
+    modifier: Modifier = Modifier, onSearchTextChanged: (String) -> Unit, onSortItemSelected: (SortingViewState) -> Unit,
+    onFilterItemChecked: (FilteringViewState) -> Unit, viewModel: TopAppBarViewModel = viewModel()
 ) {
     CenterAlignedTopAppBar(
         title = { }, colors = TopAppBarDefaults.topAppBarColors(
@@ -64,8 +64,8 @@ fun TopAppBar(
 @Composable
 private fun NotesDropdownMenu(
     modifier: Modifier = Modifier,
-    onSortItemSelected: (SortingEntity) -> Unit,
-    onFilterItemChecked: (FilteringEntity) -> Unit,
+    onSortItemSelected: (SortingViewState) -> Unit,
+    onFilterItemChecked: (FilteringViewState) -> Unit,
     viewModel: TopAppBarViewModel
 ) {
     var sortMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -127,7 +127,7 @@ private fun SearchBar(modifier: Modifier = Modifier, onSearchTextChanged: (Strin
     )
 }
 
-enum class FilteringEntity(resource: NativeText.Resource, textResource: Int, hasDivider: Boolean) {
+enum class FilteringViewState(resource: NativeText.Resource, textResource: Int, hasDivider: Boolean) {
     REMOVE_FILTER(NativeText.Resource(R.string.remove_filter), R.string.remove_filter, true),
     ORANGE(NativeText.Resource(R.string.pink), R.string.pink, false),
     PINK(NativeText.Resource(R.string.green), R.string.green, false),
@@ -136,7 +136,7 @@ enum class FilteringEntity(resource: NativeText.Resource, textResource: Int, has
     PURPLE(NativeText.Resource(R.string.purple), R.string.purple, false),
     BLUE(NativeText.Resource(R.string.blue), R.string.blue, false),
 }
-enum class SortingEntity(resource: NativeText.Resource, textResource: Int, hasDivider: Boolean) {
+enum class SortingViewState(resource: NativeText.Resource, textResource: Int, hasDivider: Boolean) {
     DATE_ASC(NativeText.Resource(R.string.date_asc), R.string.date_asc, false),
     DATE_DESC(NativeText.Resource(R.string.date_desc), R.string.date_desc, true),
 

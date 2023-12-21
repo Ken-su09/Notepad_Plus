@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.deleted_list
 
+import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.utils.EquatableCallback
 
 data class DeletedNotesListViewState(
@@ -7,7 +8,7 @@ data class DeletedNotesListViewState(
     val title: String,
     val content: String,
     val date: String,
-    val color: Long,
+    val color: ColorEntity,
     val onItemNoteClicked: EquatableCallback,
     val onRestoreNoteClicked: EquatableCallback,
 )

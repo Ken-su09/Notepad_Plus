@@ -31,43 +31,43 @@ class TopAppBarViewModel : ViewModel() {
             text = NativeText.Resource(R.string.date_asc),
             textResource = R.string.date_asc,
             hasDivider = false,
-            sortingType = SortingEntity.DATE_ASC
+            sortingType = SortingViewState.DATE_ASC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.date_desc),
             textResource = R.string.date_desc,
             hasDivider = true,
-            sortingType = SortingEntity.DATE_DESC
+            sortingType = SortingViewState.DATE_DESC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.title_asc),
             textResource = R.string.title_asc,
             hasDivider = false,
-            sortingType = SortingEntity.TITLE_ASC
+            sortingType = SortingViewState.TITLE_ASC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.title_desc),
             textResource = R.string.title_desc,
             hasDivider = true,
-            sortingType = SortingEntity.TITLE_DESC
+            sortingType = SortingViewState.TITLE_DESC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.content_a_z),
             textResource = R.string.content_a_z,
             hasDivider = false,
-            sortingType = SortingEntity.CONTENT_ASC
+            sortingType = SortingViewState.CONTENT_ASC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.content_z_a),
             textResource = R.string.content_z_a,
             hasDivider = true,
-            sortingType = SortingEntity.CONTENT_DESC
+            sortingType = SortingViewState.CONTENT_DESC
         ),
         NotesSortDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.by_color),
             textResource = R.string.by_color,
             hasDivider = true,
-            sortingType = SortingEntity.COLOR_ASC
+            sortingType = SortingViewState.COLOR_ASC
         ),
     )
 
@@ -77,43 +77,43 @@ class TopAppBarViewModel : ViewModel() {
             text = NativeText.Resource(R.string.remove_filter),
             textResource = R.string.remove_filter,
             hasDivider = true,
-            filterType = FilteringEntity.REMOVE_FILTER
+            filterType = FilteringViewState.REMOVE_FILTER
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.orange),
             textResource = R.string.orange,
             hasDivider = false,
-            filterType = FilteringEntity.ORANGE
+            filterType = FilteringViewState.ORANGE
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.pink),
             textResource = R.string.pink,
             hasDivider = false,
-            filterType = FilteringEntity.PINK
+            filterType = FilteringViewState.PINK
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.green),
             textResource = R.string.green,
             hasDivider = false,
-            filterType = FilteringEntity.GREEN
+            filterType = FilteringViewState.GREEN
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.yellow),
             textResource = R.string.yellow,
             hasDivider = false,
-            filterType = FilteringEntity.YELLOW
+            filterType = FilteringViewState.YELLOW
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.purple),
             textResource = R.string.purple,
             hasDivider = false,
-            filterType = FilteringEntity.PURPLE
+            filterType = FilteringViewState.PURPLE
         ),
         NotesFilterDropdownMenuItemViewState(
             text = NativeText.Resource(R.string.blue),
             textResource = R.string.blue,
             hasDivider = false,
-            filterType = FilteringEntity.BLUE
+            filterType = FilteringViewState.BLUE
         ),
     )
 
