@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.designsystem.top_app_bar.filter
 
+import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,12 +12,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.suonk.notepad_plus.designsystem.R
 import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
+import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBarViewModel
+import com.suonk.notepad_plus.designsystem.utils.toCharSequence
 
 @Composable
-fun NotesFilterDropdownMenuItem(onFilterItemChecked: (FilteringEntity) -> Unit, filterItem: NotesFilterDropdownMenuItemViewState, defaultIntFilterState: MutableList<Int>) {
+fun NotesFilterDropdownMenuItem(
+    onFilterItemChecked: (FilteringEntity) -> Unit,
+    filterItem: NotesFilterDropdownMenuItemViewState,
+    defaultIntFilterState: MutableList<Int>,
+    viewModel: TopAppBarViewModel
+) {
+    Log.i("GetFilter", "defaultIntFilterState 1 : $defaultIntFilterState")
     DropdownMenuItem(
         text = {
             Row(
@@ -24,7 +34,7 @@ fun NotesFilterDropdownMenuItem(onFilterItemChecked: (FilteringEntity) -> Unit, 
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = filterItem.text.toString(),
+                    text = filterItem.text.toCharSequence(LocalContext.current).toString(),
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -42,6 +52,7 @@ fun NotesFilterDropdownMenuItem(onFilterItemChecked: (FilteringEntity) -> Unit, 
                             defaultIntFilterState.add(filterItem.textResource)
                             onFilterItemChecked(filterItem.filterType)
                         }
+                        Log.i("GetFilter", "defaultIntFilterState 3 : $defaultIntFilterState")
                     },
                     modifier = Modifier
                         .align(Alignment.CenterVertically)

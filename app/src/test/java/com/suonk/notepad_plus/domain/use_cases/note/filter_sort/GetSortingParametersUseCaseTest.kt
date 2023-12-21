@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.domain.use_cases.note.filter_sort
 
 import app.cash.turbine.test
 import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
-import com.suonk.notepad_plus.domain.search.SearchRepository
+import com.suonk.notepad_plus.domain.sort.SortRepository
 import com.suonk.notepad_plus.utils.Sorting
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
@@ -20,30 +20,49 @@ class GetSortingParametersUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val searchRepository: SearchRepository = mockk()
+    private val sortRepository: SortRepository = mockk()
 
-    private val getSortingParametersUseCase = GetSortingParametersUseCase(searchRepository)
+    private val getSortingParametersUseCase = GetSortingParametersUseCase(sortRepository)
 
     @Before
     fun setup() {
-        val sortingValueFlow = MutableStateFlow(DEFAULT_SORTING_VALUE)
-        every { searchRepository.getCurrentSortParameterFlow() } returns sortingValueFlow
+        val sortingValueFlow = MutableStateFlow(DATE_ASC_SORT)
+        every { sortRepository.getCurrentSortParameterFlow() } returns sortingValueFlow
     }
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
-
+        // WHEN
         getSortingParametersUseCase.invoke().test {
-            TestCase.assertEquals(DEFAULT_SORTING_VALUE, awaitItem())
+            // THEN
+            TestCase.assertEquals(DATE_ASC_SORT, awaitItem())
 
             verify {
-                searchRepository.getCurrentSortParameterFlow()
+                sortRepository.getCurrentSortParameterFlow()
             }
-            confirmVerified(searchRepository)
+            confirmVerified(sortRepository)
+        }
+    }
+    @Test
+    fun `nominal case 2`() = testCoroutineRule.runTest {
+        // GIVEN
+        val sortingValueFlow = MutableStateFlow(COLOR_ASC_SORT)
+        every { sortRepository.getCurrentSortParameterFlow() } returns sortingValueFlow
+
+        // WHEN
+        getSortingParametersUseCase.invoke().test {
+            // THEN
+            TestCase.assertEquals(COLOR_ASC_SORT, awaitItem())
+
+            verify {
+                sortRepository.getCurrentSortParameterFlow()
+            }
+            confirmVerified(sortRepository)
         }
     }
 
     companion object {
-        private val DEFAULT_SORTING_VALUE = Sorting.DATE_ASC
+        private val DATE_ASC_SORT = Sorting.DATE_ASC
+        private val COLOR_ASC_SORT = Sorting.COLOR_ASC
     }
 }

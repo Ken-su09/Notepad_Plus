@@ -2,7 +2,6 @@ package com.suonk.notepad_plus.ui.note.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringEntity
 import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
 import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
@@ -20,10 +19,8 @@ import com.suonk.notepad_plus.utils.EquatableCallback
 import com.suonk.notepad_plus.utils.Filtering
 import com.suonk.notepad_plus.utils.Sorting
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,7 +38,7 @@ class NotesListViewModel @Inject constructor(
     getSortingParametersUseCase: GetSortingParametersUseCase,
     private val setSortingParametersUseCase: SetSortingParametersUseCase,
 
-    getCurrentSortFilterNoteUseCase: GetFilterParametersUseCase,
+    getFilterParametersNoteUseCase: GetFilterParametersUseCase,
     private val setFilterParametersUseCase: SetFilterParametersUseCase,
 
     private val upsertNoteUseCase: UpsertNoteUseCase,
@@ -54,7 +51,7 @@ class NotesListViewModel @Inject constructor(
         getAllNotesFlowUseCase.invoke(),
         getSearchNoteUseCase.invoke(),
         getSortingParametersUseCase.invoke(),
-        getCurrentSortFilterNoteUseCase.invoke(),
+        getFilterParametersNoteUseCase.invoke(),
     ) { notes, search, sorting, filter ->
         notes.asSequence().filter {
             if (search != null && search != "") {
@@ -92,10 +89,6 @@ class NotesListViewModel @Inject constructor(
 
                 Filtering.YELLOW -> {
                     it.color == 0xFFe8ed9d
-                }
-
-                else -> {
-                    it.id != 0L
                 }
             }
         }.toList()

@@ -27,17 +27,17 @@ class DemoActivity : ComponentActivity() {
                     Column {
                         Text(text = "Demo: Sorting Menu Item")
                         repeat(3) { index ->
-                            NotesSortDropdownMenuItem(
-                                NotesSortDropdownMenuItemViewState(
-                                    "TEXT n°$index",
-                                    0,
-                                    hasDivider = index % 2 == 0,
-                                   isSelected =  index % 3 == 0,
-                                    onSelectedChanged = {
-                                        Toast(currentCompositionLocalContext)
-                                    }
-                                )
-                            )
+//                            NotesSortDropdownMenuItem(
+//                                NotesSortDropdownMenuItemViewState(
+//                                    "TEXT n°$index",
+//                                    0,
+//                                    hasDivider = index % 2 == 0,
+//                                   isSelected =  index % 3 == 0,
+//                                    onSelectedChanged = {
+//                                        Toast(currentCompositionLocalContext)
+//                                    }
+//                                )
+//                            )
                         }
                     }
                 }

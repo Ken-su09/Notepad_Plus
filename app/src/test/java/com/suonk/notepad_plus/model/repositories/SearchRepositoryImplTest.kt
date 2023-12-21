@@ -35,32 +35,7 @@ class SearchRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `test get current sort parameters flow`() = testCoroutineRule.runTest {
-        // GIVEN
-        searchRepositoryImpl.setCurrentSortFilterParametersFlow(DATE_ASC_RES)
-
-        searchRepositoryImpl.getCurrentSortParameterFlow().test {
-            assertEquals(DATE_ASC_SORTING, awaitItem())
-        }
-    }
-
-    @Test
-    fun `test get current sort filter parameters flow`() = testCoroutineRule.runTest {
-        // GIVEN
-        searchRepositoryImpl.setCurrentSortFilterParametersFlow(PINK_RES)
-
-        searchRepositoryImpl.getCurrentSortFilterParametersFlow().test {
-            assertEquals(PINK_RES, awaitItem())
-        }
-    }
-
     companion object {
         private const val DEFAULT_SEARCH = "DEFAULT_SEARCH"
-
-        private const val DATE_ASC_RES = R.string.date_asc
-        private val DATE_ASC_SORTING = Sorting.DATE_ASC
-
-        private const val PINK_RES = R.string.pink
     }
 }

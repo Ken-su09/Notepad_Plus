@@ -2,6 +2,7 @@ package com.suonk.notepad_plus.ui.note.list
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -56,7 +57,6 @@ import com.suonk.notepad_plus.designsystem.top_app_bar.SortingEntity
 import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
-import com.suonk.notepad_plus.utils.Sorting
 import dagger.hilt.android.AndroidEntryPoint
 
 

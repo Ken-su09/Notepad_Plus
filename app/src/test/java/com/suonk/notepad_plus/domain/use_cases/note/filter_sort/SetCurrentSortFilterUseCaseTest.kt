@@ -1,8 +1,8 @@
 package com.suonk.notepad_plus.domain.use_cases.note.filter_sort
 
-import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.filter.FilterRepository
 import com.suonk.notepad_plus.domain.filter.SetFilterParametersUseCase
-import com.suonk.notepad_plus.domain.search.SearchRepository
+import com.suonk.notepad_plus.utils.Filtering
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.confirmVerified
 import io.mockk.justRun
@@ -17,27 +17,40 @@ class SetCurrentSortFilterUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val searchRepository: SearchRepository = mockk()
+    private val filterRepository: FilterRepository = mockk()
 
-    private val setFilterParametersUseCase = SetFilterParametersUseCase(searchRepository)
+    private val setFilterParametersUseCase = SetFilterParametersUseCase(filterRepository)
 
     @Before
     fun setup() {
-        justRun { searchRepository.setCurrentSortFilterParametersFlow(DEFAULT_SORT_FILTER_PARAMETER) }
+        justRun { filterRepository.setCurrentFilterParametersFlow(REMOVE_FILTER_PARAMETER) }
     }
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
-        setFilterParametersUseCase.invoke(DEFAULT_SORT_FILTER_PARAMETER)
+        setFilterParametersUseCase.invoke(REMOVE_FILTER_PARAMETER)
 
         verify {
-            searchRepository.setCurrentSortFilterParametersFlow(DEFAULT_SORT_FILTER_PARAMETER)
+            filterRepository.setCurrentFilterParametersFlow(REMOVE_FILTER_PARAMETER)
         }
 
-        confirmVerified(searchRepository)
+        confirmVerified(filterRepository)
+    }
+
+    @Test
+    fun `nominal case 2`() = testCoroutineRule.runTest {
+        justRun { filterRepository.setCurrentFilterParametersFlow(PINK_FILTER_PARAMETER) }
+        setFilterParametersUseCase.invoke(PINK_FILTER_PARAMETER)
+
+        verify {
+            filterRepository.setCurrentFilterParametersFlow(PINK_FILTER_PARAMETER)
+        }
+
+        confirmVerified(filterRepository)
     }
 
     companion object {
-        private const val DEFAULT_SORT_FILTER_PARAMETER = R.string.pink
+        private val REMOVE_FILTER_PARAMETER = Filtering.REMOVE_FILTER
+        private val PINK_FILTER_PARAMETER = Filtering.PINK
     }
 }

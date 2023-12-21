@@ -12,9 +12,11 @@ import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.domain.sort.SetSortingParametersUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.EquatableCallback
+import com.suonk.notepad_plus.utils.Filtering
 import com.suonk.notepad_plus.utils.Sorting
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.coEvery
@@ -52,9 +54,10 @@ class NotesListViewModelTest {
     private val setSearchNoteUseCase: SetSearchNoteUseCase = mockk()
 
     private val getSortingParametersUseCase: GetSortingParametersUseCase = mockk()
+    private val setSortingParametersUseCase: SetSortingParametersUseCase = mockk()
 
-    private val getCurrentSortFilterNoteUseCase: GetFilterParametersUseCase = mockk()
-    private val setCurrentSortFilterNoteUseCase: SetFilterParametersUseCase = mockk()
+    private val getFilterParametersNoteUseCase: GetFilterParametersUseCase = mockk()
+    private val setFilterParametersUseCase: SetFilterParametersUseCase = mockk()
 
     private val upsertNoteUseCase: UpsertNoteUseCase = mockk()
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase = mockk()
@@ -63,34 +66,7 @@ class NotesListViewModelTest {
 
     private lateinit var notesListViewModel: NotesListViewModel
 
-    @Before
-    fun setup() {
-        every { application.getString(R.string.date_asc) } returns DEFAULT_DATE_ASC
-        every { application.getString(R.string.date_desc) } returns DEFAULT_DATE_DESC
-        every { application.getString(R.string.title_asc) } returns DEFAULT_TITLE_ASC
-        every { application.getString(R.string.title_desc) } returns DEFAULT_TITLE_DESC
-        every { application.getString(R.string.content_a_z) } returns DEFAULT_CONTENT_ASC
-        every { application.getString(R.string.content_z_a) } returns DEFAULT_CONTENT_DESC
-        every { application.getString(R.string.by_color) } returns DEFAULT_BY_COLOR
-
-        every { application.getString(R.string.remove_filter) } returns REMOVE_FILTER
-        every { application.getString(R.string.orange) } returns ORANGE
-        every { application.getString(R.string.pink) } returns PINK
-        every { application.getString(R.string.green) } returns GREEN
-        every { application.getString(R.string.yellow) } returns YELLOW
-        every { application.getString(R.string.purple) } returns PURPLE
-        every { application.getString(R.string.blue) } returns BLUE
-
-        val currentSearchParameterFlow = MutableStateFlow<String?>(null)
-        every { getSearchNoteUseCase.invoke() } returns currentSearchParameterFlow
-        every { getSortingParametersUseCase.invoke() } returns flowOf(DATE_ASC)
-        every { getCurrentSortFilterNoteUseCase.invoke() } returns flowOf(REMOVE_FILTER_INT)
-        every { getAllNotesFlowUseCase.invoke() } returns flowOf(defaultAllNotesWithPicturesList())
-    }
-
-    @Test
-    fun `nominal case`() = testCoroutineRule.runTest {
-        // GIVEN
+    private fun setupViewModel() {
         notesListViewModel = NotesListViewModel(
             getAllNotesFlowUseCase = getAllNotesFlowUseCase,
 
@@ -98,14 +74,29 @@ class NotesListViewModelTest {
             setSearchNoteUseCase = setSearchNoteUseCase,
 
             getSortingParametersUseCase = getSortingParametersUseCase,
+            setSortingParametersUseCase = setSortingParametersUseCase,
 
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
+            getFilterParametersNoteUseCase = getFilterParametersNoteUseCase,
+            setFilterParametersUseCase = setFilterParametersUseCase,
 
             upsertNoteUseCase = upsertNoteUseCase,
             setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
         )
+    }
+
+    @Before
+    fun setup() {
+        val currentSearchParameterFlow = MutableStateFlow<String?>(null)
+        every { getSearchNoteUseCase.invoke() } returns currentSearchParameterFlow
+        every { getSortingParametersUseCase.invoke() } returns flowOf(DATE_ASC)
+        every { getFilterParametersNoteUseCase.invoke() } returns flowOf(REMOVE_FILTER)
+        every { getAllNotesFlowUseCase.invoke() } returns flowOf(defaultAllNotesWithPicturesList())
+    }
+
+    @Test
+    fun `nominal case`() = testCoroutineRule.runTest {
+        // GIVEN
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -128,22 +119,7 @@ class NotesListViewModelTest {
     fun `initial case`() = testCoroutineRule.runTest {
         every { getAllNotesFlowUseCase.invoke() } returns flowOf(emptyList())
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -162,32 +138,18 @@ class NotesListViewModelTest {
     @Test
     fun `nominal case then filter in pink`() = testCoroutineRule.runTest {
         // GIVEN
-        coJustRun { setCurrentSortFilterNoteUseCase.invoke(PINK_FILTER_INT) }
-        val currentSortFilterFlow = MutableStateFlow(REMOVE_FILTER_INT)
-        every { getCurrentSortFilterNoteUseCase.invoke() } returns currentSortFilterFlow
+        coJustRun { setFilterParametersUseCase.invoke(PINK_FILTER) }
+        val currentSortFilterFlow = MutableStateFlow(REMOVE_FILTER)
+        every { getFilterParametersNoteUseCase.invoke() } returns currentSortFilterFlow
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         notesListViewModel.notesListFlow.test {
             awaitItem()
             assertEquals(defaultAllNotesViewState(), awaitItem())
 
             // WHEN
-            currentSortFilterFlow.tryEmit(PINK_FILTER_INT)
+            currentSortFilterFlow.tryEmit(PINK_FILTER)
 
             // THEN
             assertTrue(awaitItem().isEmpty())
@@ -196,10 +158,10 @@ class NotesListViewModelTest {
             coVerify(exactly = 1) {
                 getAllNotesFlowUseCase.invoke()
                 getSearchNoteUseCase.invoke()
-                getCurrentSortFilterNoteUseCase.invoke()
+                getFilterParametersNoteUseCase.invoke()
             }
 
-            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, getCurrentSortFilterNoteUseCase)
+            confirmVerified(getAllNotesFlowUseCase, getSearchNoteUseCase, getFilterParametersNoteUseCase)
         }
     }
 
@@ -210,21 +172,7 @@ class NotesListViewModelTest {
         // GIVEN
         justRun { setSearchNoteUseCase.invoke(DEFAULT_SEARCH) }
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         notesListViewModel.setSearchParameters(DEFAULT_SEARCH)
 
@@ -242,21 +190,7 @@ class NotesListViewModelTest {
         // GIVEN
         every { getSearchNoteUseCase.invoke() } returns flowOf(BOTH_SEARCH)
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -280,21 +214,7 @@ class NotesListViewModelTest {
         // GIVEN
         every { getSearchNoteUseCase.invoke() } returns flowOf(FIRST_NEWS_SEARCH)
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -318,21 +238,7 @@ class NotesListViewModelTest {
         // GIVEN
         every { getSearchNoteUseCase.invoke() } returns flowOf(RANDOM_NUMBER_SEARCH)
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -356,17 +262,7 @@ class NotesListViewModelTest {
         // GIVEN
         justRun { setSearchNoteUseCase.invoke(null) }
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase, setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase, setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase, setCurrentNoteIdUseCase = setCurrentNoteIdUseCase, application = application
-        )
+        setupViewModel()
 
         notesListViewModel.setSearchParameters(null)
 
@@ -388,21 +284,7 @@ class NotesListViewModelTest {
         // GIVEN
         justRun { setCurrentNoteIdUseCase.invoke(NOTE_ID_1) }
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -427,21 +309,7 @@ class NotesListViewModelTest {
         // GIVEN
         coEvery { upsertNoteUseCase.invoke(firstNoteEntityDeleted()) } returns NOTE_ID_1
 
-        notesListViewModel = NotesListViewModel(
-            getAllNotesFlowUseCase = getAllNotesFlowUseCase,
-
-            getSearchNoteUseCase = getSearchNoteUseCase,
-            setSearchNoteUseCase = setSearchNoteUseCase,
-
-            getSortingParametersUseCase = getSortingParametersUseCase,
-
-            getCurrentSortFilterNoteUseCase = getCurrentSortFilterNoteUseCase,
-            setCurrentSortFilterNoteUseCase = setCurrentSortFilterNoteUseCase,
-
-            upsertNoteUseCase = upsertNoteUseCase,
-            setCurrentNoteIdUseCase = setCurrentNoteIdUseCase,
-            application = application,
-        )
+        setupViewModel()
 
         // WHEN
         notesListViewModel.notesListFlow.test {
@@ -570,26 +438,10 @@ class NotesListViewModelTest {
         private const val BOTH_SEARCH = "que"
         private const val DEFAULT_SEARCH = "DEFAULT_SEARCH"
 
-        private const val DEFAULT_DATE_ASC = "Du + récent au + ancien"
         private val DATE_ASC = Sorting.DATE_ASC
-
-        private const val DEFAULT_DATE_DESC = "Du + ancien au + récent"
-        private const val DEFAULT_TITLE_ASC = "Titre A-Z"
-        private const val DEFAULT_TITLE_DESC = "Titre Z-A"
-        private const val DEFAULT_CONTENT_ASC = "Content A-Z"
-        private const val DEFAULT_CONTENT_DESC = "Content Z-A"
-        private const val DEFAULT_BY_COLOR = "By color"
-
-        private const val REMOVE_FILTER = "Remove filter"
+        private val REMOVE_FILTER = Filtering.REMOVE_FILTER
         private val REMOVE_FILTER_INT = R.string.remove_filter
-
-        private const val ORANGE = "Orange"
-        private const val PINK = "Pink"
-        private const val PINK_FILTER_INT = R.string.pink
-        private const val GREEN = "Green"
-        private const val YELLOW = "Yellow"
-        private const val PURPLE = "Purple"
-        private const val BLUE = "Blue"
+        private val PINK_FILTER = Filtering.PINK
     }
 
     //endregion

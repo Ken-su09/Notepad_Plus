@@ -15,6 +15,6 @@ class SortRepositoryImpl @Inject constructor() : SortRepository {
     }
 
     override fun setCurrentSortingParametersFlow(sorting: Sorting) {
-        currentSortParameterFlow.tryEmit(Sorting.DATE_ASC)
+        currentSortParameterFlow.tryEmit(sorting)
     }
 }
