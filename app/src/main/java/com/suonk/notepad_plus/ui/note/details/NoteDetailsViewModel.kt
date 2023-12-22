@@ -3,7 +3,7 @@ package com.suonk.notepad_plus.ui.note.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
@@ -48,6 +48,9 @@ class NoteDetailsViewModel @Inject constructor(
 
     private val _noteColor = MutableStateFlow(ColorEntity.values().random())
     val noteColor = _noteColor.asStateFlow()
+
+    private val _noteAllColors = MutableStateFlow(ColorEntity.values())
+    val noteAllColors = _noteAllColors.asStateFlow()
 
     private val _isDeleted = MutableStateFlow(false)
     val isDeleted = _isDeleted.asStateFlow()
@@ -113,7 +116,7 @@ class NoteDetailsViewModel @Inject constructor(
         return value.isEmpty() || value.isBlank() || value == "" || value == " "
     }
 
-    fun onEvent(event: NoteDetailsDataEvent) {
+    fun onDataEvent(event: NoteDetailsDataEvent) {
         when (event) {
             is NoteDetailsDataEvent.ChangeTitle -> {
                 _noteTitle.value = NativeText.SimpleOrResource(event.title, R.string.enter_a_title)
@@ -173,10 +176,6 @@ class NoteDetailsViewModel @Inject constructor(
 
                     _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
                 }
-            }
-
-            else -> {
-
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.suonk.notepad_plus.ui.note.deleted_list
 
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import com.suonk.notepad_plus.utils.EquatableCallback
 
 data class DeletedNotesListViewState(

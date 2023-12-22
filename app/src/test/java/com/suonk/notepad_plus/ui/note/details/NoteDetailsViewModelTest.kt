@@ -152,7 +152,7 @@ class NoteDetailsViewModelTest {
         }
 
         // THEN
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_TITLE)
 
         runCurrent()
 
@@ -197,7 +197,7 @@ class NoteDetailsViewModelTest {
         }
 
         // THEN
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_CONTENT)
 
         runCurrent()
 
@@ -242,7 +242,7 @@ class NoteDetailsViewModelTest {
         }
 
         // THEN
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_COLOR)
 
         runCurrent()
 
@@ -289,9 +289,9 @@ class NoteDetailsViewModelTest {
         }
 
         // THEN
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE)
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT)
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_TITLE)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_CONTENT)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_COLOR)
 
         runCurrent()
 
@@ -306,7 +306,7 @@ class NoteDetailsViewModelTest {
             assertEquals(NOTE_NEW_COLOR_1, awaitItem())
         }
 
-        noteDetailsViewModel.onEvent(SAVE_NOTE)
+        noteDetailsViewModel.onDataEvent(SAVE_NOTE)
 
         coVerify {
             getCurrentIdFlowUseCase.invoke()
@@ -347,9 +347,9 @@ class NoteDetailsViewModelTest {
         }
 
         // THEN
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_TITLE_TO_EMPTY)
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_CONTENT_TO_EMPTY)
-        noteDetailsViewModel.onEvent(DEFAULT_CHANGE_COLOR)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_TITLE_TO_EMPTY)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_CONTENT_TO_EMPTY)
+        noteDetailsViewModel.onDataEvent(DEFAULT_CHANGE_COLOR)
 
         runCurrent()
 
@@ -364,7 +364,7 @@ class NoteDetailsViewModelTest {
             assertEquals(NOTE_NEW_COLOR_1, awaitItem())
         }
 
-        noteDetailsViewModel.onEvent(SAVE_NOTE)
+        noteDetailsViewModel.onDataEvent(SAVE_NOTE)
 
         coVerify {
             getCurrentIdFlowUseCase.invoke()
@@ -407,7 +407,7 @@ class NoteDetailsViewModelTest {
         }
 
         // WHEN
-        noteDetailsViewModel.onEvent(DELETE_NOTE)
+        noteDetailsViewModel.onDataEvent(DELETE_NOTE)
 
         // THEN
         coVerify {

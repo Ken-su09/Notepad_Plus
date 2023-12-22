@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.designsystem.top_app_bar
+package com.suonk.notepad_plus.designsystem.note_list.top_app_bar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -30,8 +30,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suonk.notepad_plus.designsystem.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.filter.NotesFilterDropdownMenuItem
-import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItem
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.filter.NotesFilterDropdownMenuItem
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.sort.NotesSortDropdownMenuItem
 import com.suonk.notepad_plus.designsystem.utils.NativeText
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,6 +135,7 @@ enum class FilteringViewState(resource: NativeText.Resource, textResource: Int, 
     YELLOW(NativeText.Resource(R.string.yellow), R.string.yellow, false),
     PURPLE(NativeText.Resource(R.string.purple), R.string.purple, false),
     BLUE(NativeText.Resource(R.string.blue), R.string.blue, false),
+    RED(NativeText.Resource(R.string.blue), R.string.blue, false),
 }
 enum class SortingViewState(resource: NativeText.Resource, textResource: Int, hasDivider: Boolean) {
     DATE_ASC(NativeText.Resource(R.string.date_asc), R.string.date_asc, false),

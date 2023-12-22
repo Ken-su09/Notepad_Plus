@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.SortingViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBar
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.SortingViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.TopAppBar
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import dagger.hilt.android.AndroidEntryPoint

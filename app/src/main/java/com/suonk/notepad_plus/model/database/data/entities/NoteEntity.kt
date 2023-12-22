@@ -3,7 +3,7 @@ package com.suonk.notepad_plus.model.database.data.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import java.time.LocalDateTime
 
 @Entity(tableName = "note_entity")

@@ -6,10 +6,9 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import com.suonk.notepad_plus.model.database.AppDatabase
 import com.suonk.notepad_plus.model.database.data.dao.NoteDao
-import com.suonk.notepad_plus.model.database.data.entities.PictureEntity
 import com.suonk.notepad_plus.model.database.data.dao.PictureDao
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import dagger.Module

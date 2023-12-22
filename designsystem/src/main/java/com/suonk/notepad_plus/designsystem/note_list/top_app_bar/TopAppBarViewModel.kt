@@ -1,9 +1,9 @@
-package com.suonk.notepad_plus.designsystem.top_app_bar
+package com.suonk.notepad_plus.designsystem.note_list.top_app_bar
 
 import androidx.lifecycle.ViewModel
 import com.suonk.notepad_plus.designsystem.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.filter.NotesFilterDropdownMenuItemViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItemViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.filter.NotesFilterDropdownMenuItemViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.sort.NotesSortDropdownMenuItemViewState
 import com.suonk.notepad_plus.designsystem.utils.NativeText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

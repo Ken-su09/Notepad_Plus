@@ -1,6 +1,6 @@
-package com.suonk.notepad_plus.designsystem.top_app_bar.sort
+package com.suonk.notepad_plus.designsystem.note_list.top_app_bar.sort
 
-import com.suonk.notepad_plus.designsystem.top_app_bar.SortingViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.SortingViewState
 import com.suonk.notepad_plus.designsystem.utils.NativeText
 
 data class NotesSortDropdownMenuItemViewState(

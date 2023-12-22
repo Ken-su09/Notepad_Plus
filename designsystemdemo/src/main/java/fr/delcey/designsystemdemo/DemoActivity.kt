@@ -10,11 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItem
-import com.suonk.notepad_plus.designsystem.top_app_bar.sort.NotesSortDropdownMenuItemViewState
 import fr.delcey.designsystemdemo.ui.theme.Notepad_plusTheme
 
 class DemoActivity : ComponentActivity() {

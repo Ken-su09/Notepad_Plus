@@ -1,6 +1,6 @@
-package com.suonk.notepad_plus.designsystem.top_app_bar.filter
+package com.suonk.notepad_plus.designsystem.note_list.top_app_bar.filter
 
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.FilteringViewState
 import com.suonk.notepad_plus.designsystem.utils.NativeText
 
 

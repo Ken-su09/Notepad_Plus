@@ -16,6 +16,4 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun noteDao(): NoteDao
     abstract fun pictureDao(): PictureDao
-
-
 }

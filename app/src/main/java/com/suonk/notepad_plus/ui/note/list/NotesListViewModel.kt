@@ -3,9 +3,9 @@ package com.suonk.notepad_plus.ui.note.list
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.SortingViewState
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.SortingViewState
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import com.suonk.notepad_plus.domain.filter.FilterEntity
 import com.suonk.notepad_plus.domain.filter.GetFilterParametersUseCase
 import com.suonk.notepad_plus.domain.sort.GetSortingParametersUseCase
@@ -19,7 +19,6 @@ import com.suonk.notepad_plus.domain.sort.SetSortingParametersUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.EquatableCallback
-import com.suonk.notepad_plus.utils.Filtering
 import com.suonk.notepad_plus.utils.Sorting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -77,7 +76,13 @@ class NotesListViewModel @Inject constructor(
         content = entity.noteEntity.content,
         date = entity.noteEntity.date.format(dateTimeFormatter),
         color = when (entity.noteEntity.color) {
-            ColorEntity.PINK -> Color.parseColor("FF7fdeea")
+            ColorEntity.PINK -> Color.parseColor("#FF7fdeea")
+            ColorEntity.PURPLE -> Color.parseColor("#FFd095db")
+            ColorEntity.GREEN -> Color.parseColor("#FF7fdeea")
+            ColorEntity.BLUE ->Color.parseColor("#FF7fdeea")
+            ColorEntity.ORANGE -> Color.parseColor("#FF7fdeea")
+            ColorEntity.YELLOW -> Color.parseColor("#FF7fdeea")
+            ColorEntity.RED -> Color.parseColor("#FFFF3633")
         },
         onItemNoteClicked = EquatableCallback {
             setCurrentNoteIdUseCase.invoke(entity.noteEntity.id)
@@ -114,28 +119,32 @@ class NotesListViewModel @Inject constructor(
             }
 
             FilteringViewState.ORANGE -> {
+                setFilterParametersUseCase.invoke(FilterEntity.ORANGE)
+            }
+
+            FilteringViewState.PINK -> {
                 setFilterParametersUseCase.invoke(FilterEntity.PINK)
             }
 
-//            FilteringViewState.PINK -> {
-//                setFilterParametersUseCase.invoke(Filtering.PINK)
-//            }
-//
-//            FilteringViewState.GREEN -> {
-//                setFilterParametersUseCase.invoke(Filtering.GREEN)
-//            }
-//
-//            FilteringViewState.YELLOW -> {
-//                setFilterParametersUseCase.invoke(Filtering.YELLOW)
-//            }
-//
-//            FilteringViewState.PURPLE -> {
-//                setFilterParametersUseCase.invoke(Filtering.PURPLE)
-//            }
-//
-//            FilteringViewState.BLUE -> {
-//                setFilterParametersUseCase.invoke(Filtering.BLUE)
-//            }
+            FilteringViewState.GREEN -> {
+                setFilterParametersUseCase.invoke(FilterEntity.GREEN)
+            }
+
+            FilteringViewState.YELLOW -> {
+                setFilterParametersUseCase.invoke(FilterEntity.YELLOW)
+            }
+
+            FilteringViewState.PURPLE -> {
+                setFilterParametersUseCase.invoke(FilterEntity.PURPLE)
+            }
+
+            FilteringViewState.BLUE -> {
+                setFilterParametersUseCase.invoke(FilterEntity.BLUE)
+            }
+
+            FilteringViewState.RED -> {
+                setFilterParametersUseCase.invoke(FilterEntity.RED)
+            }
 
             else -> {
                 setFilterParametersUseCase.invoke(FilterEntity.REMOVE_FILTER)

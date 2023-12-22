@@ -1,4 +1,4 @@
-package com.suonk.notepad_plus.designsystem.top_app_bar.filter
+package com.suonk.notepad_plus.designsystem.note_list.top_app_bar.filter
 
 import android.util.Log
 import androidx.compose.foundation.layout.Row
@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.suonk.notepad_plus.designsystem.R
-import com.suonk.notepad_plus.designsystem.top_app_bar.FilteringViewState
-import com.suonk.notepad_plus.designsystem.top_app_bar.TopAppBarViewModel
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.FilteringViewState
+import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.TopAppBarViewModel
 import com.suonk.notepad_plus.designsystem.utils.toCharSequence
 
 @Composable
@@ -26,7 +26,6 @@ fun NotesFilterDropdownMenuItem(
     defaultIntFilterState: MutableList<Int>,
     viewModel: TopAppBarViewModel
 ) {
-    Log.i("GetFilter", "defaultIntFilterState 1 : $defaultIntFilterState")
     DropdownMenuItem(
         text = {
             Row(

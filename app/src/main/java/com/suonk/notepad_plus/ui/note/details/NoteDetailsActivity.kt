@@ -1,14 +1,11 @@
 package com.suonk.notepad_plus.ui.note.details
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Animatable
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,17 +25,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -55,30 +45,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.mohamedrejeb.richeditor.model.RichTextState
-import com.mohamedrejeb.richeditor.model.RichTextValue
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.note_details.TopAppBarDetails
+import com.suonk.notepad_plus.designsystem.utils.toARGB
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.showToast
@@ -93,10 +79,19 @@ class NoteDetailsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NotepadPlusTheme {
-                AppPortrait(this@NoteDetailsActivity, {
-                    startActivity(Intent(this@NoteDetailsActivity, NotesListActivity::class.java))
+                val viewModel: NoteDetailsViewModel = viewModel()
+                val isDeleted by viewModel.isDeleted.collectAsState()
+                AppPortrait({
+                    viewModel.setNoteIdToNull()
+                    if (isDeleted) {
+                        startActivity(Intent(this@NoteDetailsActivity, DeletedNotesListActivity::class.java))
+                    } else {
+                        startActivity(Intent(this@NoteDetailsActivity, NotesListActivity::class.java))
+                    }
                 }, {
-                    startActivity(Intent(this@NoteDetailsActivity, DeletedNotesListActivity::class.java))
+                    viewModel.onDataEvent(NoteDetailsDataEvent.DeleteRestoreNote)
+                }, {
+                    viewModel.onDataEvent(NoteDetailsDataEvent.SaveNote)
                 })
             }
         }
@@ -106,15 +101,14 @@ class NoteDetailsActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppPortrait(
-    context: Context,
-    onBackToNotesListIconClicked: () -> Unit,
-    onBackToDeletedNotesListIconClicked: () -> Unit,
+    onBackToListClicked: () -> Unit,
+    onDeleteRestoreNoteClicked: () -> Unit,
+    onSaveNoteClicked: () -> Unit,
     viewModel: NoteDetailsViewModel = viewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val coroutineScope = rememberCoroutineScope()
-
-    val isDeleted by viewModel.isDeleted.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(coroutineScope) {
         viewModel.noteDetailsUiEvent.collectLatest { noteDetailsUiEvent ->
@@ -124,12 +118,7 @@ private fun AppPortrait(
                 }
 
                 is NoteDetailsUiEvent.ActionFinish -> {
-                    viewModel.setNoteIdToNull()
-                    if (isDeleted) {
-                        onBackToDeletedNotesListIconClicked()
-                    } else {
-                        onBackToNotesListIconClicked()
-                    }
+                    onBackToListClicked()
                 }
             }
         }
@@ -138,46 +127,11 @@ private fun AppPortrait(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        "", maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        viewModel.setNoteIdToNull()
-                        if (isDeleted) {
-                            onBackToDeletedNotesListIconClicked()
-                        } else {
-                            onBackToNotesListIconClicked()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_arrow)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.onEvent(NoteDetailsDataEvent.DeleteRestoreNote) }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = if (isDeleted) R.drawable.ic_restore else R.drawable.ic_garbage),
-                            contentDescription = stringResource(R.string.toolbar_delete)
-                        )
-                    }
-                    IconButton(onClick = {
-                        viewModel.onEvent(NoteDetailsDataEvent.SaveNote)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Create, contentDescription = stringResource(R.string.toolbar_save)
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
+            TopAppBarDetails(
+                onDeleteRestoreNoteClicked = onDeleteRestoreNoteClicked,
+                onBackToListClicked = onBackToListClicked,
+                onSaveNoteClicked = onSaveNoteClicked,
+                scrollBehavior = scrollBehavior
             )
         },
     ) { innerPadding ->
@@ -191,6 +145,7 @@ private fun EntireLayout(
 ) {
     val colorState by viewModel.noteColor.collectAsState()
     val isEnabled by viewModel.isDeleted.collectAsState()
+    val noteAllColors by viewModel.noteAllColors.collectAsState()
 
     val noteBackgroundAnimatable = remember { Animatable(Color(colorState.toARGB())) }
     val scope = rememberCoroutineScope()
@@ -206,8 +161,7 @@ private fun EntireLayout(
                 .fillMaxWidth()
                 .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // TODO Exposer le ViewModel (Par le ViewState)
-            ColorEntity.values().forEach { color ->
+            noteAllColors.forEach { color ->
                 Box(modifier = Modifier
                     .size(50.dp)
                     .shadow(15.dp, CircleShape)
@@ -226,7 +180,7 @@ private fun EntireLayout(
                                 )
                             )
                         }
-                        viewModel.onEvent(NoteDetailsDataEvent.ChangeColor(color))
+                        viewModel.onDataEvent(NoteDetailsDataEvent.ChangeColor(color))
                     })
             }
         }
@@ -344,13 +298,6 @@ private fun EntireLayout(
 //                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isEnabled, modifier = Modifier.padding(16.dp)
 //            )
 //        }
-    }
-}
-
-// TODO Foutre dans le design system
-private fun ColorEntity.toARGB(): Int {
-    return when (this) {
-        ColorEntity.PINK -> android.graphics.Color.parseColor("FF7fdeea")
     }
 }
 

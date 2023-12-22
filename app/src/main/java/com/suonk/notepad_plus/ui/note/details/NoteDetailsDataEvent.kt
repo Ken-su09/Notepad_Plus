@@ -1,6 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details
 
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 
 sealed class NoteDetailsDataEvent {
     data class ChangeTitle(val title: String) : NoteDetailsDataEvent()

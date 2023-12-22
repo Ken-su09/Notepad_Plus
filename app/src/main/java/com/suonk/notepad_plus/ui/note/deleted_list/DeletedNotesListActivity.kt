@@ -20,20 +20,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,11 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.toARGB
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
-import com.suonk.notepad_plus.ui.note.list.NotesListViewModel
-import com.suonk.notepad_plus.ui.note.list.NotesListViewState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -277,11 +271,4 @@ fun makeColorDarker(color: Color, scaleFactor: Float): Color {
         blue = color.blue * scaleFactor,
         alpha = color.alpha
     )
-}
-
-// TODO Foutre dans le design system
-private fun ColorEntity.toARGB(): Int {
-    return when (this) {
-        ColorEntity.PINK -> android.graphics.Color.parseColor("FF7fdeea")
-    }
 }

@@ -2,7 +2,6 @@ package com.suonk.notepad_plus.ui.note.deleted_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.suonk.notepad_plus.domain.ColorEntity
 import com.suonk.notepad_plus.domain.note.get_note.GetAllDeletedNotesFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
@@ -10,7 +9,6 @@ import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
-import com.suonk.notepad_plus.utils.CoroutineDispatcherProvider
 import com.suonk.notepad_plus.utils.EquatableCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

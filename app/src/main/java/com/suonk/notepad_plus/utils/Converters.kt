@@ -1,7 +1,7 @@
 package com.suonk.notepad_plus.utils
 
 import androidx.room.TypeConverter
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset

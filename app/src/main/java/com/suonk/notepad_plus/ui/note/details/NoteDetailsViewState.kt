@@ -1,6 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details
 
-import com.suonk.notepad_plus.domain.ColorEntity
+import com.suonk.notepad_plus.designsystem.utils.ColorEntity
 import com.suonk.notepad_plus.ui.note.details.actions_list.EditTextAction
 import com.suonk.notepad_plus.utils.NativeText
 import java.time.Instant
