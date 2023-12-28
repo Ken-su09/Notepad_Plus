@@ -15,12 +15,12 @@ enum class ColorEntity {
 
 fun ColorEntity.toARGB(): Int {
     return when (this) {
-        ColorEntity.PINK -> Color.parseColor("#FF7fdeea")
+        ColorEntity.PINK -> Color.parseColor("#FFFF80CF")
         ColorEntity.PURPLE -> Color.parseColor("#FFd095db")
-        ColorEntity.GREEN -> Color.parseColor("#FF7fdeea")
+        ColorEntity.GREEN -> Color.parseColor("#FF78E527")
         ColorEntity.BLUE ->Color.parseColor("#FF7fdeea")
-        ColorEntity.ORANGE -> Color.parseColor("#FF7fdeea")
-        ColorEntity.YELLOW -> Color.parseColor("#FF7fdeea")
-        ColorEntity.RED -> Color.parseColor("#FFFF3633")
+        ColorEntity.ORANGE -> Color.parseColor("#FFFFB64C")
+        ColorEntity.YELLOW -> Color.parseColor("#FFFFEC4C")
+        ColorEntity.RED -> Color.parseColor("#FFFC8C8C")
     }
 }

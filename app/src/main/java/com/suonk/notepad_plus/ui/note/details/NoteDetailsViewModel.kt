@@ -8,6 +8,7 @@ import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.firebase.user.CustomFirebaseUserRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.ui.note.details.actions_list.ActionsSealed
 import com.suonk.notepad_plus.utils.NativeText
@@ -32,6 +33,7 @@ class NoteDetailsViewModel @Inject constructor(
     private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
+    private val customFirebaseUserRepository: CustomFirebaseUserRepository,
     private val fixedClock: Clock,
 ) : ViewModel() {
 
@@ -55,6 +57,8 @@ class NoteDetailsViewModel @Inject constructor(
     private val _isDeleted = MutableStateFlow(false)
     val isDeleted = _isDeleted.asStateFlow()
 
+    private val _currentUserId = MutableStateFlow("")
+
     private val enabledTextStylesMutableStateFlow = MutableStateFlow(emptyList<ActionsSealed>())
 
     private val _noteDetailsUiEvent = MutableSharedFlow<NoteDetailsUiEvent>()
@@ -62,6 +66,9 @@ class NoteDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            customFirebaseUserRepository.getCustomFirebaseUser().id?.let { userId ->
+                _currentUserId.tryEmit(userId)
+            }
             getCurrentIdFlowUseCase.invoke().collect { id ->
                 val noteWithPictures = id?.let {
                     getNoteByIdFlowUseCase.invoke(it).firstOrNull()
@@ -147,7 +154,7 @@ class NoteDetailsViewModel @Inject constructor(
                                     color = _noteColor.value,
                                     isFavorite = false,
                                     isDeleted = false
-                                )
+                                ), _currentUserId.value
                             )
                         }
 
@@ -156,7 +163,7 @@ class NoteDetailsViewModel @Inject constructor(
                 }
             }
 
-            is NoteDetailsDataEvent.DeleteRestoreNote -> {
+            is NoteDetailsDataEvent.DeleteNote -> {
                 viewModelScope.launch {
                     val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
 
@@ -170,7 +177,33 @@ class NoteDetailsViewModel @Inject constructor(
                                 color = noteDetails.color,
                                 isFavorite = false,
                                 isDeleted = !isDeleted.value
-                            )
+                            ), _currentUserId.value
+                        )
+                    }
+
+                    _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
+                }
+            }
+
+            NoteDetailsDataEvent.DefinitiveDeleteNote -> {
+
+            }
+
+            is NoteDetailsDataEvent.RestoreNote -> {
+                viewModelScope.launch {
+                    val lastUpdateDate = ZonedDateTime.now(fixedClock).toInstant()
+
+                    noteDetailsViewStateMutableSharedFlow.firstOrNull()?.let { noteDetails ->
+                        upsertNoteUseCase.invoke(
+                            NoteEntity(
+                                id = noteDetails.id,
+                                title = noteDetails.title,
+                                content = noteDetails.content,
+                                date = fromInstantToLocalDate(lastUpdateDate),
+                                color = noteDetails.color,
+                                isFavorite = false,
+                                isDeleted = !isDeleted.value
+                            ), _currentUserId.value
                         )
                     }
 

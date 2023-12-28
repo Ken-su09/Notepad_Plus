@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetAllDeletedNotesFlowUseCase @Inject constructor(private val noteRepository: NoteRepository) {
+class GetAllDeletedNotesFlowUseCase @Inject constructor(private val getNotesRepository: GetNotesRepository) {
 
-    fun invoke(): Flow<List<NoteEntityWithPictures>> = noteRepository.getAllDeletedNotesWithPictures()
+    fun invoke(): Flow<List<NoteEntityWithPictures>> = getNotesRepository.getAllDeletedNotesWithPictures()
 }

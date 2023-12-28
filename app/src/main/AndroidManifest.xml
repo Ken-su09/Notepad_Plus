@@ -17,15 +17,10 @@
         tools:targetApi="31">
         <activity
             android:name=".ui.note.details.NoteDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.auth.AuthActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.note.deleted_list.DeletedNotesListActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.note.list.NotesListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.note.deleted_list.DeletedNotesListActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.note.list.NotesListActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

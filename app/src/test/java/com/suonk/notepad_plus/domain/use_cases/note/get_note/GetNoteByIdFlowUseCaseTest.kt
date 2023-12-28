@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.domain.use_cases.note.get_note
 
 import app.cash.turbine.test
 import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.TestCoroutineRule
@@ -26,9 +26,9 @@ class GetNoteByIdFlowUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val noteRepository: NoteRepository = mockk()
+    private val getNotesRepository: GetNotesRepository = mockk()
 
-    private val getNoteByIdFlowUseCase = GetNoteByIdFlowUseCase(noteRepository)
+    private val getNoteByIdFlowUseCase = GetNoteByIdFlowUseCase(getNotesRepository)
 
     @Before
     fun setup() {
@@ -37,7 +37,7 @@ class GetNoteByIdFlowUseCaseTest {
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getNoteById(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
+        every { getNotesRepository.getNoteById(NOTE_ID_1) } returns flowOf(defaultNoteWithPictures())
 
         // WHEN
         getNoteByIdFlowUseCase.invoke(NOTE_ID_1).test {
@@ -46,10 +46,10 @@ class GetNoteByIdFlowUseCaseTest {
             awaitComplete()
 
             verify {
-                noteRepository.getNoteById(NOTE_ID_1)
+                getNotesRepository.getNoteById(NOTE_ID_1)
             }
 
-            confirmVerified(noteRepository)
+            confirmVerified(getNotesRepository)
         }
     }
 

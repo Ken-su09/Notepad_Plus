@@ -7,6 +7,7 @@ import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.firebase.user.CustomFirebaseUserRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.EquatableCallback
@@ -31,12 +32,15 @@ class DeletedNotesListViewModel @Inject constructor(
     private val upsertNoteUseCase: UpsertNoteUseCase,
 
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
+    private val customFirebaseUserRepository: CustomFirebaseUserRepository,
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
     private val _searchBarText = MutableStateFlow("")
     val searchBarText = _searchBarText.asStateFlow()
+
+    private val _currentUserId = MutableStateFlow("")
 
     val deletedNotesListFlow: StateFlow<List<DeletedNotesListViewState>> = combine(
         getAllDeletedNotesFlowUseCase.invoke(),
@@ -54,6 +58,14 @@ class DeletedNotesListViewModel @Inject constructor(
             transformEntityToViewState(it)
         }.toList()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds), emptyList())
+
+    init {
+        viewModelScope.launch {
+            customFirebaseUserRepository.getCustomFirebaseUser().id?.let { userId ->
+                _currentUserId.tryEmit(userId)
+            }
+        }
+    }
 
     private fun transformEntityToViewState(entity: NoteEntityWithPictures) = DeletedNotesListViewState(id = entity.noteEntity.id,
         title = entity.noteEntity.title,
@@ -78,7 +90,7 @@ class DeletedNotesListViewModel @Inject constructor(
                     color = entity.noteEntity.color,
                     isFavorite = entity.noteEntity.isFavorite,
                     isDeleted = false,
-                )
+                ), _currentUserId.value
             )
         }
     }

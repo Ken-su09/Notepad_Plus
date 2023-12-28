@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.model.repositories
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepositoryImpl
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepositoryImpl
 import com.suonk.notepad_plus.model.database.data.dao.NoteDao
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
@@ -25,7 +25,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 
-class NoteRepositoryImplTest {
+class GetNotesRepositoryImplTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -35,7 +35,7 @@ class NoteRepositoryImplTest {
 
     private val noteDao: NoteDao = mockk()
 
-    private val noteRepositoryImpl = NoteRepositoryImpl(noteDao)
+    private val noteRepositoryImpl = GetNotesRepositoryImpl(noteDao)
 
     @Before
     fun setup() {

@@ -2,16 +2,22 @@ package com.suonk.notepad_plus.di
 
 import com.suonk.notepad_plus.domain.filter.FilterRepository
 import com.suonk.notepad_plus.domain.filter.FilterRepositoryImpl
+import com.suonk.notepad_plus.domain.note.delete_note.DeleteNoteRepository
+import com.suonk.notepad_plus.domain.note.delete_note.DeleteNoteRepositoryImpl
 import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepository
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepository
 import com.suonk.notepad_plus.domain.note.id.CurrentNoteIdRepositoryImpl
 import com.suonk.notepad_plus.domain.search.SearchRepository
 import com.suonk.notepad_plus.firebase.user.FirebaseUsersRepository
 import com.suonk.notepad_plus.firebase.user.FirebaseUsersRepositoryImpl
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepositoryImpl
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepositoryImpl
+import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteRepository
+import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteRepositoryImpl
 import com.suonk.notepad_plus.domain.search.SearchRepositoryImpl
 import com.suonk.notepad_plus.domain.sort.SortRepository
 import com.suonk.notepad_plus.domain.sort.SortRepositoryImpl
+import com.suonk.notepad_plus.firebase.notes.FirebaseNotesRepository
+import com.suonk.notepad_plus.firebase.notes.FirebaseNotesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -24,7 +30,15 @@ abstract class DataBindingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindNoteRepository(impl: NoteRepositoryImpl): NoteRepository
+    abstract fun bindGetNotesRepository(impl: GetNotesRepositoryImpl): GetNotesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeleteNoteRepository(impl: DeleteNoteRepositoryImpl): DeleteNoteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUpsertNoteRepository(impl: UpsertNoteRepositoryImpl): UpsertNoteRepository
 
     @Binds
     @Singleton
@@ -44,5 +58,9 @@ abstract class DataBindingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindUsersRepositoryImpl(impl: FirebaseUsersRepositoryImpl): FirebaseUsersRepository
+    abstract fun bindFirebaseUsersRepository(impl: FirebaseUsersRepositoryImpl): FirebaseUsersRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFirebaseNotesRepositoryImpl(impl: FirebaseNotesRepositoryImpl): FirebaseNotesRepository
 }

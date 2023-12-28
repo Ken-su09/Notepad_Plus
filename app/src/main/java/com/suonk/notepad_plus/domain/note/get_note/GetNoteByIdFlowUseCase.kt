@@ -4,7 +4,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetNoteByIdFlowUseCase @Inject constructor(private val noteRepository: NoteRepository) {
+class GetNoteByIdFlowUseCase @Inject constructor(private val getNotesRepository: GetNotesRepository) {
 
-    fun invoke(id: Long) = noteRepository.getNoteById(id)
+    fun invoke(id: Long) = getNotesRepository.getNoteById(id)
 }

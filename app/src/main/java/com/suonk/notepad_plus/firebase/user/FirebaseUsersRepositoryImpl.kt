@@ -8,9 +8,6 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseUsersRepositoryImpl @Inject constructor(private val firebaseFirestore: FirebaseFirestore) : FirebaseUsersRepository {
 
-    private val ALL_USERS = "ALL_USERS"
-    private val ID = "ID"
-
     override fun addNewUserToFirestore(id: String, customFirebaseUser: CustomFirebaseUser) {
         firebaseFirestore.collection(ALL_USERS)
             .whereEqualTo(ID, id)
@@ -20,5 +17,10 @@ class FirebaseUsersRepositoryImpl @Inject constructor(private val firebaseFirest
                     firebaseFirestore.collection(ALL_USERS).document(id).set(customFirebaseUser)
                 }
             }
+    }
+
+    companion object {
+        private const val ALL_USERS = "ALL_USERS"
+        private const val ID = "ID"
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,10 +26,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -45,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -52,15 +56,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.designsystem.note_details.TopAppBarDetails
@@ -89,7 +96,11 @@ class NoteDetailsActivity : ComponentActivity() {
                         startActivity(Intent(this@NoteDetailsActivity, NotesListActivity::class.java))
                     }
                 }, {
-                    viewModel.onDataEvent(NoteDetailsDataEvent.DeleteRestoreNote)
+                    viewModel.onDataEvent(NoteDetailsDataEvent.DeleteNote)
+                }, {
+                    viewModel.onDataEvent(NoteDetailsDataEvent.DefinitiveDeleteNote)
+                }, {
+                    viewModel.onDataEvent(NoteDetailsDataEvent.RestoreNote)
                 }, {
                     viewModel.onDataEvent(NoteDetailsDataEvent.SaveNote)
                 })
@@ -102,13 +113,16 @@ class NoteDetailsActivity : ComponentActivity() {
 @Composable
 private fun AppPortrait(
     onBackToListClicked: () -> Unit,
-    onDeleteRestoreNoteClicked: () -> Unit,
+    onDeleteNoteClicked: () -> Unit,
+    onDefinitiveDeleteNoteClicked: () -> Unit,
+    onRestoreNoteClicked: () -> Unit,
     onSaveNoteClicked: () -> Unit,
     viewModel: NoteDetailsViewModel = viewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val isDeleted by viewModel.isDeleted.collectAsState()
 
     LaunchedEffect(coroutineScope) {
         viewModel.noteDetailsUiEvent.collectLatest { noteDetailsUiEvent ->
@@ -128,23 +142,25 @@ private fun AppPortrait(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBarDetails(
-                onDeleteRestoreNoteClicked = onDeleteRestoreNoteClicked,
+                onDeleteNoteClicked = onDeleteNoteClicked,
+                onDefinitiveDeleteNoteClicked = onDefinitiveDeleteNoteClicked,
+                onRestoreNoteClicked = onRestoreNoteClicked,
                 onBackToListClicked = onBackToListClicked,
                 onSaveNoteClicked = onSaveNoteClicked,
+                isDeleted = isDeleted,
                 scrollBehavior = scrollBehavior
             )
         },
     ) { innerPadding ->
-        EntireLayout(innerPadding, viewModel)
+        EntireLayout(innerPadding, viewModel, isDeleted)
     }
 }
 
 @Composable
 private fun EntireLayout(
-    padding: PaddingValues, viewModel: NoteDetailsViewModel
+    padding: PaddingValues, viewModel: NoteDetailsViewModel, isEnabled: Boolean
 ) {
     val colorState by viewModel.noteColor.collectAsState()
-    val isEnabled by viewModel.isDeleted.collectAsState()
     val noteAllColors by viewModel.noteAllColors.collectAsState()
 
     val noteBackgroundAnimatable = remember { Animatable(Color(colorState.toARGB())) }
@@ -163,7 +179,7 @@ private fun EntireLayout(
         ) {
             noteAllColors.forEach { color ->
                 Box(modifier = Modifier
-                    .size(50.dp)
+                    .size(35.dp)
                     .shadow(15.dp, CircleShape)
                     .clip(CircleShape)
                     .background(Color(color.toARGB()))
@@ -187,117 +203,45 @@ private fun EntireLayout(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val state = rememberRichTextState()
-        val titleSize = MaterialTheme.typography.displaySmall.fontSize
-        val subtitleSize = MaterialTheme.typography.titleLarge.fontSize
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            val titleState by viewModel.noteTitle.collectAsState()
 
-        Scaffold {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(all = 20.dp)
-                    .padding(bottom = it.calculateBottomPadding())
-                    .padding(top = it.calculateTopPadding()),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                EditorControls(modifier = Modifier.weight(2f), state = state, onRedoClick = {
-                    state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                }, onUndoClick = {
-                    state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                }, onBoldClick = {
-                    state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                }, onItalicClick = {
-                    state.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
-                }, onUnderlineClick = {
-                    state.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
-                }, onTitleClick = {
-                    state.toggleSpanStyle(SpanStyle(fontSize = titleSize))
-                }, onSubtitleClick = {
-                    state.toggleSpanStyle(SpanStyle(fontSize = subtitleSize))
-                }, onTextColorClick = {
-                    state.toggleSpanStyle(SpanStyle(color = Color.Red))
-                }, onStartAlignClick = {
-                    state.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Start))
-                }, onEndAlignClick = {
-                    state.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.End))
-                }, onCenterAlignClick = {
-                    state.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center))
-                }, onExportClick = {
-                    Log.d("Editor", state.toHtml())
-                })
-                RichTextEditor(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(8f),
-                    state = state,
-                )
-            }
+            BasicTextField(
+                value = titleState.text, maxLines = 2, onValueChange = { newTitle ->
+                    viewModel.onDataEvent(NoteDetailsDataEvent.ChangeTitle(newTitle))
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), enabled = !isEnabled, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp)
+            )
         }
 
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(80.dp)
-//                .padding(16.dp)
-//                .background(
-//                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
-//                    shape = RoundedCornerShape(60.dp),
-//                ),
-//            contentAlignment = Alignment.CenterStart,
-//        ) {
-//            val titleState by viewModel.noteTitle.collectAsState()
-//            val richTextState = rememberRichTextState()
-//
-//            richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-//            richTextState.setText(titleState.text)
-//            val currentSpanStyle = richTextState.currentSpanStyle
-//            val isBold = currentSpanStyle.fontWeight == FontWeight.Bold
-//            richTextState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center))
-//            richTextState.setConfig(
-//                linkColor = Color.Blue,
-//                linkTextDecoration = TextDecoration.Underline,
-//                codeColor = Color.Yellow,
-//                codeBackgroundColor = Color.Transparent,
-//                codeStrokeColor = Color.LightGray,
-//            )
-//
-//            RichTextEditor(
-//                state = richTextState,
-//                maxLines = 2,
-//                textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
-//                enabled = !isEnabled,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 16.dp)
-//            )
-//
-////            BasicTextField(
-////                value = titleState.text, maxLines = 2, onValueChange = { newTitle ->
-////                    viewModel.onEvent(NoteDetailsDataEvent.ChangeTitle(newTitle))
-////                }, textStyle = TextStyle(color = Color.Black, fontSize = 18.sp), enabled = !isEnabled, modifier = Modifier
-////                    .fillMaxWidth()
-////                    .padding(start = 16.dp)
-////            )
-//        }
-//
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp)
-//                .background(
-//                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
-//                    shape = RoundedCornerShape(60.dp),
-//                ),
-//            contentAlignment = Alignment.CenterStart,
-//        ) {
-//            val contentState by viewModel.noteContent.collectAsState()
-//            BasicTextField(
-//                value = contentState.text, onValueChange = { newContent ->
-//                    viewModel.onEvent(NoteDetailsDataEvent.ChangeContent(newContent))
-//                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isEnabled, modifier = Modifier.padding(16.dp)
-//            )
-//        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            val contentState by viewModel.noteContent.collectAsState()
+            BasicTextField(
+                value = contentState.text, onValueChange = { newContent ->
+                    viewModel.onDataEvent(NoteDetailsDataEvent.ChangeContent(newContent))
+                }, textStyle = TextStyle(color = Color.Black, fontSize = 16.sp), enabled = !isEnabled, modifier = Modifier.padding(16.dp)
+            )
+        }
     }
 }
 

@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.domain.use_cases.note.get_note
 
 import app.cash.turbine.test
 import com.suonk.notepad_plus.domain.note.get_note.GetAllNotesFlowUseCase
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.TestCoroutineRule
@@ -26,9 +26,9 @@ class GetAllNotesFlowUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val noteRepository: NoteRepository = mockk()
+    private val getNotesRepository: GetNotesRepository = mockk()
 
-    private val getAllNotesFlowUseCase = GetAllNotesFlowUseCase(noteRepository)
+    private val getAllNotesFlowUseCase = GetAllNotesFlowUseCase(getNotesRepository)
 
     @Before
     fun setup() {
@@ -37,7 +37,7 @@ class GetAllNotesFlowUseCaseTest {
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(emptyList())
+        every { getNotesRepository.getAllNotesWithPictures() } returns flowOf(emptyList())
 
         // WHEN
         getAllNotesFlowUseCase.invoke().test {
@@ -46,17 +46,17 @@ class GetAllNotesFlowUseCaseTest {
             awaitComplete()
 
             verify {
-                noteRepository.getAllNotesWithPictures()
+                getNotesRepository.getAllNotesWithPictures()
             }
 
-            confirmVerified(noteRepository)
+            confirmVerified(getNotesRepository)
         }
     }
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
+        every { getNotesRepository.getAllNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
 
         // WHEN
         getAllNotesFlowUseCase.invoke().test {
@@ -65,10 +65,10 @@ class GetAllNotesFlowUseCaseTest {
             awaitComplete()
 
             verify {
-                noteRepository.getAllNotesWithPictures()
+                getNotesRepository.getAllNotesWithPictures()
             }
 
-            confirmVerified(noteRepository)
+            confirmVerified(getNotesRepository)
         }
         // WHEN
 //        getAllNotesFlowUseCase.invoke().asLiveData().observeForTesting(this) {

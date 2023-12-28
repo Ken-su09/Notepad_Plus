@@ -7,5 +7,7 @@ sealed class NoteDetailsDataEvent {
     data class ChangeContent(val content: String) : NoteDetailsDataEvent()
     data class ChangeColor(val colorEntity: ColorEntity) : NoteDetailsDataEvent()
     object SaveNote : NoteDetailsDataEvent()
-    object DeleteRestoreNote : NoteDetailsDataEvent()
+    object DeleteNote : NoteDetailsDataEvent()
+    object DefinitiveDeleteNote : NoteDetailsDataEvent()
+    object RestoreNote : NoteDetailsDataEvent()
 }

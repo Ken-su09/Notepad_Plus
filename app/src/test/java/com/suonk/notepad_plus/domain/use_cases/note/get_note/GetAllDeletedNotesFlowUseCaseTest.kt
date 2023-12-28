@@ -2,7 +2,7 @@ package com.suonk.notepad_plus.domain.use_cases.note.get_note
 
 import app.cash.turbine.test
 import com.suonk.notepad_plus.domain.note.get_note.GetAllDeletedNotesFlowUseCase
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntityWithPictures
 import com.suonk.notepad_plus.utils.TestCoroutineRule
@@ -25,9 +25,9 @@ class GetAllDeletedNotesFlowUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val noteRepository: NoteRepository = mockk()
+    private val getNotesRepository: GetNotesRepository = mockk()
 
-    private val getAllDeletedNotesFlowUseCase = GetAllDeletedNotesFlowUseCase(noteRepository)
+    private val getAllDeletedNotesFlowUseCase = GetAllDeletedNotesFlowUseCase(getNotesRepository)
 
     @Before
     fun setup() {
@@ -36,7 +36,7 @@ class GetAllDeletedNotesFlowUseCaseTest {
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllDeletedNotesWithPictures() } returns flowOf(emptyList())
+        every { getNotesRepository.getAllDeletedNotesWithPictures() } returns flowOf(emptyList())
 
         // WHEN
         getAllDeletedNotesFlowUseCase.invoke().test {
@@ -45,17 +45,17 @@ class GetAllDeletedNotesFlowUseCaseTest {
             awaitComplete()
 
             verify {
-                noteRepository.getAllDeletedNotesWithPictures()
+                getNotesRepository.getAllDeletedNotesWithPictures()
             }
 
-            confirmVerified(noteRepository)
+            confirmVerified(getNotesRepository)
         }
     }
 
     @Test
     fun `nominal case`() = testCoroutineRule.runTest {
         // GIVEN
-        every { noteRepository.getAllDeletedNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
+        every { getNotesRepository.getAllDeletedNotesWithPictures() } returns flowOf(defaultAllNotesWithPicturesList())
 
         // WHEN
         getAllDeletedNotesFlowUseCase.invoke().test {
@@ -64,10 +64,10 @@ class GetAllDeletedNotesFlowUseCaseTest {
             awaitComplete()
 
             verify {
-                noteRepository.getAllDeletedNotesWithPictures()
+                getNotesRepository.getAllDeletedNotesWithPictures()
             }
 
-            confirmVerified(noteRepository)
+            confirmVerified(getNotesRepository)
         }
     }
 

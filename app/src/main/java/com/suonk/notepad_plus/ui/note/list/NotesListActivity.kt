@@ -2,6 +2,7 @@ package com.suonk.notepad_plus.ui.note.list
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -50,10 +51,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
+import com.google.firebase.auth.FirebaseAuth
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.FilteringViewState
 import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.SortingViewState
 import com.suonk.notepad_plus.designsystem.note_list.top_app_bar.TopAppBar
+import com.suonk.notepad_plus.ui.auth.AuthActivity
 import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.details.NoteDetailsActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,6 +66,12 @@ import dagger.hilt.android.AndroidEntryPoint
 class NotesListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            startActivity(Intent(this, AuthActivity::class.java))
+            finish()
+            return
+        }
 
         setContent {
             NotepadPlusTheme {

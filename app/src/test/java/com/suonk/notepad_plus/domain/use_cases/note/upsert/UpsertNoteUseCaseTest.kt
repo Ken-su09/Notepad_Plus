@@ -1,7 +1,7 @@
 package com.suonk.notepad_plus.domain.use_cases.note.upsert
 
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
-import com.suonk.notepad_plus.domain.note.get_note.NoteRepository
+import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
 import com.suonk.notepad_plus.utils.TestCoroutineRule
 import io.mockk.coJustRun
@@ -22,9 +22,9 @@ class UpsertNoteUseCaseTest {
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
-    private val noteRepository: NoteRepository = mockk()
+    private val getNotesRepository: GetNotesRepository = mockk()
 
-    private val upsertNoteUseCase = UpsertNoteUseCase(noteRepository)
+    private val upsertNoteUseCase = UpsertNoteUseCase(getNotesRepository)
 
     @Before
     fun setup() {
@@ -33,16 +33,16 @@ class UpsertNoteUseCaseTest {
     @Test
     fun `initial case`() = testCoroutineRule.runTest {
         // GIVEN
-        coJustRun { noteRepository.upsertNoteEntity(defaultNoteEntity()) }
+        coJustRun { getNotesRepository.upsertNoteEntity(defaultNoteEntity()) }
 
         // WHEN
         upsertNoteUseCase.invoke(defaultNoteEntity())
 
         // THEN
         coVerify {
-            noteRepository.upsertNoteEntity(defaultNoteEntity())
+            getNotesRepository.upsertNoteEntity(defaultNoteEntity())
         }
-        confirmVerified(noteRepository)
+        confirmVerified(getNotesRepository)
     }
 
     private fun defaultNoteEntity(): NoteEntity {
