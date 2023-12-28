@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface FirebaseNotesRepository {
 
-    fun addNoteToFirebaseFirestore(note: NoteEntity, userId: String)
+    fun addNoteToFirebaseFirestore(note: NoteEntity, userId: String, noteId: Long)
 
     fun getListOfNotesFirebaseFirestoreByUserId(userId: String): Flow<List<NoteEntity>>
 

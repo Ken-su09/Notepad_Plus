@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.note.details
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
@@ -34,7 +35,7 @@ class NoteDetailsViewModel @Inject constructor(
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
     private val customFirebaseUserRepository: CustomFirebaseUserRepository,
-    private val fixedClock: Clock,
+    private val fixedClock: Clock
 ) : ViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
@@ -67,6 +68,7 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             customFirebaseUserRepository.getCustomFirebaseUser().id?.let { userId ->
+                Log.i("GetUserId", "NoteDetailsViewModel : userId : ${userId}")
                 _currentUserId.tryEmit(userId)
             }
             getCurrentIdFlowUseCase.invoke().collect { id ->
