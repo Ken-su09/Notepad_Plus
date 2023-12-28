@@ -1,5 +1,6 @@
 package com.suonk.notepad_plus.ui.auth
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -8,42 +9,64 @@ import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -53,12 +76,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.databinding.ActivityAuthBinding
+import com.suonk.notepad_plus.ui.note.deleted_list.DeletedNotesListActivity
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
 import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -66,94 +91,46 @@ class AuthActivity : AppCompatActivity() {
 
     private val binding by viewBinding { ActivityAuthBinding.inflate(it) }
     private val viewModel by viewModels<AuthViewModel>()
-    private var activityResultLauncher: ActivityResultLauncher<Intent>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        if (FirebaseAuth.getInstance().currentUser != null) {
-//            startActivity(Intent(this, MainActivity::class.java))
-//            finish()
-//            return
-//        }
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            startActivity(Intent(this, NotesListActivity::class.java))
+            finish()
+            return
+        }
 
         setContent {
-            LoginPage()
-        }
-
-        binding.signIn.setOnClickListener { mailPasswordSignIn() }
-        viewModel.isFieldsCorrectSingleLiveEvent.observe(this) { areFieldsCorrectlyFilled ->
-            if (areFieldsCorrectlyFilled) {
-                Log.i("LoginWithGoogle", "binding.mailText.text.toString() : ${binding.mailText.text.toString()}")
-                Log.i("LoginWithGoogle", "binding.passwordText.text.toString() : ${binding.passwordText.text.toString()}")
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                    binding.mailText.text.toString(), binding.passwordText.text.toString()
-                ).addOnCompleteListener { task ->
-                    Log.i("LoginWithGoogle", "task : $task")
-                    checkIfTaskIsSuccessfulThenLogin(task)
-                }
+            NotepadPlusTheme {
+                LoginPage({
+                    startActivity(Intent(this@AuthActivity, NotesListActivity::class.java))
+                })
             }
         }
 
-        binding.googleButton.setOnClickListener { googleSignIn() }
-        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                if (task.exception == null) {
-                    try {
-                        val account = task.getResult(ApiException::class.java)
-                        Log.i("LoginWithGoogle", "account.idToken : ${account.idToken}")
-                        account.idToken?.let { authWithGoogle(it) }
-                    } catch (e: ApiException) {
-                        Log.w("Ken", "Google sign in failed", e)
-                    }
-                } else {
-                    task.exception?.printStackTrace()
-                }
-            }
-        }
-
-        viewModel.toastMessageSingleLiveEvent.observe(this) { message -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
-
-        animationPasswordIconClick()
+//        binding.signIn.setOnClickListener { mailPasswordSignIn() }
+//        viewModel.isFieldsCorrectSingleLiveEvent.observe(this) { areFieldsCorrectlyFilled ->
+//            if (areFieldsCorrectlyFilled) {
+//                Log.i("LoginWithGoogle", "binding.mailText.text.toString() : ${binding.mailText.text.toString()}")
+//                Log.i("LoginWithGoogle", "binding.passwordText.text.toString() : ${binding.passwordText.text.toString()}")
+//                FirebaseAuth.getInstance().signInWithEmailAndPassword(
+//                    binding.mailText.text.toString(), binding.passwordText.text.toString()
+//                ).addOnCompleteListener { task ->
+//                    Log.i("LoginWithGoogle", "task : $task")
+//                    checkIfTaskIsSuccessfulThenLogin(task)
+//                }
+//            }
+//        }
+//        viewModel.toastMessageSingleLiveEvent.observe(this) { message -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
+//
+//        animationPasswordIconClick()
     }
 
     //region ====================================================== SIGN IN WITH MAIL/PASSWORD ======================================================
 
     private fun mailPasswordSignIn() {
-        Log.i("LoginWithGoogle", "Passe par là")
         viewModel.checkIfFieldsAreCorrect(binding.mailText.text?.toString(), binding.passwordText.text?.toString())
-    }
-
-    //endregion
-
-    //region ========================================================== SIGN IN WITH GOOGLE =========================================================
-
-    private fun googleSignIn() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail().build()
-
-        val googleSignInClient = GoogleSignIn.getClient(this, gso)
-
-        val signInIntent = googleSignInClient.signInIntent
-        Log.i("LoginWithGoogle", "activityResultLauncher : $activityResultLauncher")
-        activityResultLauncher?.launch(signInIntent)
-    }
-
-    private fun authWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.i("LoginWithGoogle", "task : $task")
-                if (FirebaseAuth.getInstance().currentUser != null) {
-                    Log.i("LoginWithGoogle", "FirebaseAuth.getInstance().currentUser : ${FirebaseAuth.getInstance().currentUser}")
-                    viewModel.addUserToFirestore()
-                    loginSuccessfulToastMessage()
-//                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                }
-            }
-        }
     }
 
     //endregion
@@ -171,7 +148,6 @@ class AuthActivity : AppCompatActivity() {
             Log.i("LoginWithGoogle", "task : $task")
             if (FirebaseAuth.getInstance().currentUser != null) {
                 Log.i("LoginWithGoogle", "FirebaseAuth.getInstance().currentUser : ${FirebaseAuth.getInstance().currentUser}")
-                viewModel.addUserToFirestore()
                 loginSuccessfulToastMessage()
                 startActivity(Intent(this, NotesListActivity::class.java))
                 finish()
@@ -208,8 +184,19 @@ class AuthActivity : AppCompatActivity() {
 }
 
 @Composable
-fun LoginPage() {
+fun LoginPage(onNavigateToNotesListActivity: () -> Unit, viewModel: AuthViewModel = viewModel()) {
+    val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(coroutineScope) {
+        viewModel.authUiEvent.collectLatest { uiEvent ->
+            when (uiEvent) {
+                is AuthUiEvent.LoginSuccessful -> {
+                    Log.i("LoginSuccessful", "LoginSuccessful")
+                    onNavigateToNotesListActivity()
+                }
+            }
+        }
+    }
 //    val customBackgroundDrawable = painterResource(id = R.drawable.custom_edit_text_background)
 //
 //    val density = LocalDensity.current.density
@@ -252,59 +239,321 @@ fun LoginPage() {
 private fun LoginFormVM(
     viewModel: AuthViewModel = viewModel()
 ) {
-    LoginForm { email, password ->
-        viewModel.onLoginClicked(email, password)
+    LoginForm({ email, password ->
+        viewModel.onLoginClickedWithMailAndPassword(email, password)
+    })
+}
+
+@Composable
+private fun LoginForm(
+    onLoginClickedWithMailAndPassword: (String, String) -> Unit = { _, _ -> },
+    viewModel: AuthViewModel = viewModel()
+) {
+    val email by viewModel.emailValueFlow.collectAsState("")
+    val password by viewModel.passwordValueFlow.collectAsState("")
+    var rememberFields by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val activityResultLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Log.i("LoginGoogle", "result.resultCode : ${result.resultCode}")
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            if (task.exception == null) {
+                Log.i("LoginGoogle", "task : ${task}")
+                val account = task.getResult(ApiException::class.java)
+                account?.idToken?.let { idToken ->
+                    val credential = GoogleAuthProvider.getCredential(idToken, null)
+                    FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener { task ->
+                        Log.i("LoginGoogle", "task : $task")
+                        if (task.isSuccessful) {
+                            if (FirebaseAuth.getInstance().currentUser != null) {
+                                viewModel.addUserToFirestore()
+
+//                                loginSuccessfulToastMessage()
+                                // Consider using Navigation to navigate to the next screen instead of finish()
+                            }
+                        }
+                    }
+                }
+            } else {
+                task.exception?.printStackTrace()
+            }
+        }
     }
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(getString(context, R.string.default_web_client_id))
+        .requestEmail().build()
+
+    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    DisposableEffect(context) {
+        onDispose {
+            activityResultLauncher.unregister()
+        }
+    }
+
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            // Email
+            TextField(
+                value = email,
+                onValueChange = { viewModel.onEvent(AuthDataEvent.ChangeEmail(it)) },
+                label = { Text("Enter your email") },
+                placeholder = { if (rememberFields) Text("Email") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Email
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+//                .background(brush = MaterialTheme.shapes.medium)
+                    .padding(16.dp),
+                textStyle = TextStyle(color = Color.Black)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            // Password
+            TextField(
+                value = password,
+                onValueChange = { viewModel.onEvent(AuthDataEvent.ChangePassword(it)) },
+                label = { Text("Enter your password") },
+                placeholder = { if (rememberFields) Text("Email") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textStyle = TextStyle(color = Color.Black)
+            )
+        }
+
+        // Login
+        Button(
+            onClick = {
+                onLoginClickedWithMailAndPassword(email, password)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA500)),
+            shape = CircleShape
+        ) {
+            Text("Login")
+        }
+
+        // Google Login
+        Button(
+            onClick = {
+                activityResultLauncher.launch(googleSignInClient.signInIntent)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0000)),
+            shape = CircleShape,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_google_plus_logo),
+                    contentDescription = stringResource(com.suonk.notepad_plus.designsystem.R.string.back_arrow)
+                )
+                Text("Login with Google")
+            }
+        }
+    }
+
+//    Row {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//                .background(
+//                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+//                    shape = RoundedCornerShape(60.dp),
+//                ),
+//            contentAlignment = Alignment.CenterStart,
+//        ) {
+//            // Email
+//            TextField(
+//                value = email,
+//                onValueChange = { viewModel.onEvent(AuthDataEvent.ChangeEmail(it)) },
+//                label = { Text("Enter your email") },
+//                placeholder = { if (rememberFields) Text("Email") },
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    imeAction = ImeAction.Done,
+//                    keyboardType = KeyboardType.Email
+//                ),
+//                keyboardActions = KeyboardActions(
+//                    onNext = { }
+//                ),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+////                .background(brush = MaterialTheme.shapes.medium)
+//                    .padding(16.dp),
+//                textStyle = TextStyle(color = Color.Black)
+//            )
+//        }
+//
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//                .background(
+//                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+//                    shape = RoundedCornerShape(60.dp),
+//                ),
+//            contentAlignment = Alignment.CenterStart,
+//        ) {
+//            // Password
+//            TextField(
+//                value = password,
+//                onValueChange = { viewModel.onEvent(AuthDataEvent.ChangePassword(it)) },
+//                label = { Text("Enter your password") },
+//                placeholder = { if (rememberFields) Text("Email") },
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    imeAction = ImeAction.Done,
+//                    keyboardType = KeyboardType.Password
+//                ),
+//                keyboardActions = KeyboardActions(
+//                    onDone = { }
+//                ),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp),
+//                textStyle = TextStyle(color = Color.Black)
+//            )
+//        }
+//    }
 }
 
 @Preview
 @Composable
-private fun LoginForm(onLoginClicked: (String, String) -> Unit = { _, _ -> }) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+private fun PreviewLoginForm(
+    onLoginClickedWithMailAndPassword: (String, String) -> Unit = { _, _ -> },
+    onLoginClickedWithGoogle: () -> Unit = { },
+) {
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            // Email
+            TextField(
+                value = "",
+                onValueChange = { },
+                label = { Text("Enter your email") },
+                placeholder = { },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Email
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+//                .background(brush = MaterialTheme.shapes.medium)
+                    .padding(16.dp),
+                textStyle = TextStyle(color = Color.Black)
+            )
+        }
 
-    // Email
-    BasicTextField(
-        value = "Test",
-        onValueChange = { email = it },
-        keyboardOptions = KeyboardOptions.Default,
-        keyboardActions = KeyboardActions(
-            onNext = { }
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-//                .color
-//                .background(brush = brushshape = MaterialTheme.shapes.medium)
-            .padding(16.dp),
-        textStyle = TextStyle(color = Color.Black)
-    )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color(0xFFe7dfec), Color(0xFFe7dfec))),
+                    shape = RoundedCornerShape(60.dp),
+                ),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            // Password
+            TextField(
+                value = "",
+                onValueChange = { },
+                label = { Text("Enter your password") },
+                placeholder = {},
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textStyle = TextStyle(color = Color.Black)
+            )
+        }
 
-    // Password
-    BasicTextField(
-        value = password,
-        onValueChange = { password = it },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Done,
-            keyboardType = KeyboardType.Password
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { }
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        textStyle = TextStyle(color = Color.Black)
-    )
+        // Login
+        Button(
+            onClick = { },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA500)),
+            shape = CircleShape
+        ) {
+            Text("Login")
+        }
 
-    // Login
-    Button(
-        onClick = {
-            onLoginClicked(email, password)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text("Login")
+        // Google Login
+        Button(
+            onClick = {
+                onLoginClickedWithGoogle()
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0000)),
+            shape = CircleShape,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_google_plus_logo),
+                    contentDescription = stringResource(com.suonk.notepad_plus.designsystem.R.string.back_arrow)
+                )
+                Text("Login with Google")
+            }
+        }
     }
 }

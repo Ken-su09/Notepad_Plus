@@ -15,6 +15,7 @@
     <string name="toolbar_sort">Sort the list</string>
     <string name="toolbar_filter">Filter the list</string>
     <string name="toolbar_delete">Delete note</string>
+    <string name="toolbar_restore">Restore note</string>
     <string name="toolbar_save">Save note</string>
     <string name="field_empty_toast_msg">Fields can not be empty</string>
     <string name="last_update">Last update : %s</string>
@@ -35,4 +36,9 @@
     <string name="yellow">Yellow</string>
     <string name="purple">Purple</string>
     <string name="blue">Blue</string>
+
+    <string name="delete_note_alert_dialog_title">Permanent deletion of the note</string>
+    <string name="delete_note_alert_dialog_message">If you delete this note, you will not be able to restore it this time, are your sure ?</string>
+    <string name="alert_dialog_confirm">Confirm</string>
+    <string name="alert_dialog_dismiss">Dismiss</string>
 </resources>
