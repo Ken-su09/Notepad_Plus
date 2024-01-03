@@ -37,7 +37,7 @@ fun TopAppBarDetails(
     val isAlertDialogVisible = rememberSaveable { mutableStateOf(false) }
 
     if (isAlertDialogVisible.value) {
-        AlertDialogExample(onDefinitiveDeleteNoteClicked, isAlertDialogVisible)
+        AlertDialogExample(onBackToListClicked, onDefinitiveDeleteNoteClicked, isAlertDialogVisible)
     }
 
     CenterAlignedTopAppBar(
@@ -93,7 +93,7 @@ fun TopAppBarDetails(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlertDialogExample(onDefinitiveDeleteNoteClicked: () -> Unit, isAlertDialogVisible: MutableState<Boolean>) {
+fun AlertDialogExample(onBackToListClicked: () -> Unit, onDefinitiveDeleteNoteClicked: () -> Unit, isAlertDialogVisible: MutableState<Boolean>) {
     AlertDialog(icon = {
         Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_garbage), contentDescription = "Example Icon")
     }, title = {
@@ -104,7 +104,9 @@ fun AlertDialogExample(onDefinitiveDeleteNoteClicked: () -> Unit, isAlertDialogV
         isAlertDialogVisible.value = !isAlertDialogVisible.value
     }, confirmButton = {
         TextButton(onClick = {
+            isAlertDialogVisible.value = !isAlertDialogVisible.value
             onDefinitiveDeleteNoteClicked()
+            onBackToListClicked()
         }) {
             Text(stringResource(R.string.alert_dialog_confirm))
         }

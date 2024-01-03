@@ -9,7 +9,7 @@ interface FirebaseNotesRepository {
 
     fun getListOfNotesFirebaseFirestoreByUserId(userId: String): Flow<List<NoteEntity>>
 
-    fun getNoteById(id: Long)
+    fun getNoteById(userId: String, noteId: Long): Flow<NoteEntity>
 
-    fun deleteNoteById(id: Long)
+    fun deleteNoteById(userId: String, noteId: Long)
 }

@@ -1,48 +1,58 @@
 package com.suonk.notepad_plus.ui.auth
 
-import android.content.Intent
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.suonk.notepad_plus.R
+import com.suonk.notepad_plus.domain.shared_preferences.GetRememberFieldsUseCase
+import com.suonk.notepad_plus.domain.shared_preferences.SetRememberFieldsUseCase
 import com.suonk.notepad_plus.domain.use_cases.user.AddUserToFirestoreUseCase
 import com.suonk.notepad_plus.utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val addUserToFirestoreUseCase: AddUserToFirestoreUseCase,
-//    private val oneTapClient: SignInClient,
-//    private val auth: FirebaseAuth
+
+    getRememberFieldsUseCase: GetRememberFieldsUseCase,
+    private val setRememberFieldsUseCase: SetRememberFieldsUseCase,
 ) : ViewModel() {
 
-    val isFieldsCorrectSingleLiveEvent = SingleLiveEvent<Boolean>()
-    val toastMessageSingleLiveEvent = SingleLiveEvent<String>()
-
-    private val _emailValueFlow = MutableSharedFlow<String>()
+    private val _emailValueFlow = MutableStateFlow("")
     val emailValueFlow = _emailValueFlow.asSharedFlow()
 
-    private val _passwordValueFlow = MutableSharedFlow<String>()
+    private val _emailIconValidationValueFlow = MutableStateFlow(R.drawable.ic_check_email_cross)
+    val emailIconValidationValueFlow = _emailIconValidationValueFlow.asSharedFlow()
+
+    private val _emailIconValidationColorValueFlow = MutableStateFlow(Color.Red)
+    val emailIconValidationColorValueFlow = _emailIconValidationColorValueFlow.asSharedFlow()
+
+    private val _passwordValueFlow = MutableStateFlow("")
     val passwordValueFlow = _passwordValueFlow.asSharedFlow()
+
+    private val _passwordAnimationValueFlow = MutableStateFlow(R.drawable.password_visible_animation)
+    val passwordAnimationValueFlow = _passwordAnimationValueFlow.asSharedFlow()
+
+    private val _rememberFieldsValueFlow = MutableStateFlow(getRememberFieldsUseCase.invoke())
+    val rememberFieldsValueFlow = _rememberFieldsValueFlow.asSharedFlow()
 
     private val _authUiEvent = MutableSharedFlow<AuthUiEvent>()
     val authUiEvent = _authUiEvent.asSharedFlow()
 
-    fun checkIfFieldsAreCorrect(mail: String?, password: String?) {
-        if (mail == null || password == null || mail.isEmpty() || password.isEmpty()) {
-            isFieldsCorrectSingleLiveEvent.setValue(false)
-            toastMessageSingleLiveEvent.setValue("Fields aren't correctly filled")
-        } else {
-            isFieldsCorrectSingleLiveEvent.setValue(true)
-        }
-    }
+//    fun checkIfFieldsAreCorrect(mail: String?, password: String?) {
+//        if (mail == null || password == null || mail.isEmpty() || password.isEmpty()) {
+//            isFieldsCorrectSingleLiveEvent.setValue(false)
+//            toastMessageSingleLiveEvent.setValue("Fields aren't correctly filled")
+//        } else {
+//            isFieldsCorrectSingleLiveEvent.setValue(true)
+//        }
+//    }
 
     fun addUserToFirestore() {
         addUserToFirestoreUseCase.invoke()
@@ -55,43 +65,41 @@ class AuthViewModel @Inject constructor(
     fun onEvent(authDataEvent: AuthDataEvent) {
         when (authDataEvent) {
             is AuthDataEvent.ChangeEmail -> {
+                _emailValueFlow.value = authDataEvent.email
 
+                val emailPattern = Pattern.compile("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")
+
+                if (authDataEvent.email.trim().matches(emailPattern.toRegex())) {
+                    _emailIconValidationValueFlow.value = R.drawable.ic_check_email
+                    _emailIconValidationColorValueFlow.value = Color.Green
+                } else {
+                    _emailIconValidationValueFlow.value = R.drawable.ic_check_email_cross
+                    _emailIconValidationColorValueFlow.value = Color.Red
+                }
             }
 
             is AuthDataEvent.ChangePassword -> {
-
+                _passwordValueFlow.value = authDataEvent.password
             }
 
-            AuthDataEvent.LoginClick -> {
-
+            is AuthDataEvent.ChangeRememberFields -> {
+                _rememberFieldsValueFlow.value = authDataEvent.isChecked
+                setRememberFieldsUseCase.invoke(authDataEvent.isChecked)
             }
-        }
-    }
 
-//    private fun checkEmailValidationSignUp(): Boolean {
-//        val emailPattern = Pattern.compile("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")
-//        val userEmail = binding.loginEmail.text.toString()
-//
-//        return userEmail.trim().matches(emailPattern.toRegex())
-//    }
-
-    private fun checkEmailConstantly(mail: String) {
-        val emailPattern = Pattern.compile("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")
-
-        if (mail.trim().matches(emailPattern.toRegex())) {
-
-        } else {
-//            if (userEmail.isEmpty()) {
-//                binding.loginEmailValidation.visibility = View.INVISIBLE
-//            } else {
-//                binding.loginEmailValidation.visibility = View.VISIBLE
-//                binding.loginEmailValidation.setImageDrawable(
-//                    AppCompatResources.getDrawable(
-//                        this,
-//                        R.drawable.ic_check_email_cross
+            is AuthDataEvent.LoginClick -> {
+//                if (authDataEvent.email.isEmpty() || authDataEvent.password.isEmpty()) {
+//                    binding.loginEmailValidation.visibility = View.INVISIBLE
+//                } else {
+//                    binding.loginEmailValidation.visibility = View.VISIBLE
+//                    binding.loginEmailValidation.setImageDrawable(
+//                        AppCompatResources.getDrawable(
+//                            this,
+//                            R.drawable.ic_check_email_cross
+//                        )
 //                    )
-//                )
-//            }
+//                }
+            }
         }
     }
 
@@ -111,10 +119,6 @@ class AuthViewModel @Inject constructor(
 //    }
 
     fun onLoginClickedWithMailAndPassword(email: String, password: String) {
-
-    }
-
-    fun onLoginClickedWithGoogle() {
 
     }
 }

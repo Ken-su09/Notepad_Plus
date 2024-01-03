@@ -23,10 +23,8 @@ import com.suonk.notepad_plus.designsystem.utils.toCharSequence
 fun NotesSortDropdownMenuItem(
     onSortItemSelected: (SortingViewState) -> Unit,
     sortItem: NotesSortDropdownMenuItemViewState,
-    defaultIntSortState: MutableIntState,
-    viewModel: TopAppBarViewModel
+    defaultIntSortState: MutableIntState
 ) {
-    Log.i("GetFilter", "defaultIntSortState 1 : $defaultIntSortState")
     DropdownMenuItem(text = {
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()

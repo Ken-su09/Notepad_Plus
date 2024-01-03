@@ -12,6 +12,7 @@
     <string name="content_hint">Type something…</string>
 
     <string name="back_arrow">Back to notes list</string>
+    <string name="toolbar_open_drawer">Open Drawer</string>
     <string name="toolbar_sort">Sort the list</string>
     <string name="toolbar_filter">Filter the list</string>
     <string name="toolbar_delete">Delete note</string>

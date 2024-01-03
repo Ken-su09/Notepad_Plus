@@ -8,8 +8,8 @@ class DeleteNoteByIdUseCase @Inject constructor(
     private val deleteNoteRepository: DeleteNoteRepository
 ) {
 
-    suspend fun invoke(id: Long) {
-        firebaseNotesRepositoryImpl.getNoteById(id)
+    suspend fun invoke(userId: String, id: Long) {
+        firebaseNotesRepositoryImpl.deleteNoteById(userId, id)
         deleteNoteRepository.deleteNoteEntityById(id)
     }
 }

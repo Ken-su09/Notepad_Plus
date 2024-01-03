@@ -1,10 +1,10 @@
 package com.suonk.notepad_plus.ui.note.details
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suonk.notepad_plus.R
 import com.suonk.notepad_plus.designsystem.utils.ColorEntity
+import com.suonk.notepad_plus.domain.note.delete_note.DeleteNoteByIdUseCase
 import com.suonk.notepad_plus.domain.note.get_note.GetNoteByIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.GetCurrentIdFlowUseCase
 import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
@@ -34,6 +34,7 @@ class NoteDetailsViewModel @Inject constructor(
     private val getCurrentIdFlowUseCase: GetCurrentIdFlowUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
     private val upsertNoteUseCase: UpsertNoteUseCase,
+    private val deleteNoteByIdUseCase: DeleteNoteByIdUseCase,
     private val customFirebaseUserRepository: CustomFirebaseUserRepository,
     private val fixedClock: Clock
 ) : ViewModel() {
@@ -68,7 +69,6 @@ class NoteDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             customFirebaseUserRepository.getCustomFirebaseUser().id?.let { userId ->
-                Log.i("GetUserId", "NoteDetailsViewModel : userId : ${userId}")
                 _currentUserId.tryEmit(userId)
             }
             getCurrentIdFlowUseCase.invoke().collect { id ->
@@ -188,7 +188,17 @@ class NoteDetailsViewModel @Inject constructor(
             }
 
             NoteDetailsDataEvent.DefinitiveDeleteNote -> {
+                viewModelScope.launch {
+                    customFirebaseUserRepository.getCustomFirebaseUser().id?.let { userId ->
+                        getCurrentIdFlowUseCase.invoke().collect { id ->
+                            id?.let {
+                                deleteNoteByIdUseCase.invoke(userId, it)
+                            }
+                        }
+                    }
 
+                    _noteDetailsUiEvent.emit(NoteDetailsUiEvent.ActionFinish)
+                }
             }
 
             is NoteDetailsDataEvent.RestoreNote -> {

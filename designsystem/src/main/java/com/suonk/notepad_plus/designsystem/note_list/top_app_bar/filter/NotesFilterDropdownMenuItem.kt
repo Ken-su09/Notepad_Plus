@@ -23,8 +23,7 @@ import com.suonk.notepad_plus.designsystem.utils.toCharSequence
 fun NotesFilterDropdownMenuItem(
     onFilterItemChecked: (FilteringViewState) -> Unit,
     filterItem: NotesFilterDropdownMenuItemViewState,
-    defaultIntFilterState: MutableList<Int>,
-    viewModel: TopAppBarViewModel
+    defaultIntFilterState: MutableList<Int>
 ) {
     DropdownMenuItem(
         text = {

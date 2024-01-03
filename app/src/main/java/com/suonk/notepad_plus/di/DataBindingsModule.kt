@@ -14,6 +14,8 @@ import com.suonk.notepad_plus.domain.note.get_note.GetNotesRepositoryImpl
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteRepository
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteRepositoryImpl
 import com.suonk.notepad_plus.domain.search.SearchRepositoryImpl
+import com.suonk.notepad_plus.domain.shared_preferences.RememberFieldsRepository
+import com.suonk.notepad_plus.domain.shared_preferences.RememberFieldsRepositoryImpl
 import com.suonk.notepad_plus.domain.sort.SortRepository
 import com.suonk.notepad_plus.domain.sort.SortRepositoryImpl
 import com.suonk.notepad_plus.firebase.notes.FirebaseNotesRepository
@@ -63,4 +65,8 @@ abstract class DataBindingsModule {
     @Binds
     @Singleton
     abstract fun bindFirebaseNotesRepositoryImpl(impl: FirebaseNotesRepositoryImpl): FirebaseNotesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRememberFieldsRepositoryImpl(impl: RememberFieldsRepositoryImpl): RememberFieldsRepository
 }

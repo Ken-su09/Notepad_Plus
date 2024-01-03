@@ -17,6 +17,8 @@ import com.suonk.notepad_plus.domain.note.id.SetCurrentNoteIdUseCase
 import com.suonk.notepad_plus.domain.search.GetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.search.SetSearchNoteUseCase
 import com.suonk.notepad_plus.domain.note.upsert.UpsertNoteUseCase
+import com.suonk.notepad_plus.domain.shared_preferences.GetRememberFieldsUseCase
+import com.suonk.notepad_plus.domain.shared_preferences.SetRememberFieldsUseCase
 import com.suonk.notepad_plus.domain.sort.SetSortingParametersUseCase
 import com.suonk.notepad_plus.firebase.user.CustomFirebaseUserRepository
 import com.suonk.notepad_plus.model.database.data.entities.NoteEntity
@@ -54,6 +56,7 @@ class NotesListViewModel @Inject constructor(
 
     private val upsertNoteUseCase: UpsertNoteUseCase,
     private val setCurrentNoteIdUseCase: SetCurrentNoteIdUseCase,
+
     private val customFirebaseUserRepository: CustomFirebaseUserRepository,
 ) : ViewModel() {
 
