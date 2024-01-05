@@ -15,4 +15,12 @@
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">@color/darkGrey</item>
     </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.Notepad_plus</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
+    </style>
+
+
 </resources>

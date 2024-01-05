@@ -9,9 +9,11 @@ import com.suonk.notepad_plus.domain.shared_preferences.SetRememberFieldsUseCase
 import com.suonk.notepad_plus.domain.use_cases.user.AddUserToFirestoreUseCase
 import com.suonk.notepad_plus.utils.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -24,8 +26,11 @@ class AuthViewModel @Inject constructor(
     private val setRememberFieldsUseCase: SetRememberFieldsUseCase,
 ) : ViewModel() {
 
+    private val _isReadyFlow = MutableStateFlow(false)
+    val isReadyFlow = _isReadyFlow.asStateFlow()
+
     private val _emailValueFlow = MutableStateFlow("")
-    val emailValueFlow = _emailValueFlow.asSharedFlow()
+    val emailValueFlow = _emailValueFlow.asStateFlow()
 
     private val _emailIconValidationValueFlow = MutableStateFlow(R.drawable.ic_check_email_cross)
     val emailIconValidationValueFlow = _emailIconValidationValueFlow.asSharedFlow()
@@ -44,6 +49,13 @@ class AuthViewModel @Inject constructor(
 
     private val _authUiEvent = MutableSharedFlow<AuthUiEvent>()
     val authUiEvent = _authUiEvent.asSharedFlow()
+
+    init {
+        viewModelScope.launch {
+            delay(3000L)
+            _isReadyFlow.value = true
+        }
+    }
 
 //    fun checkIfFieldsAreCorrect(mail: String?, password: String?) {
 //        if (mail == null || password == null || mail.isEmpty() || password.isEmpty()) {

@@ -2,23 +2,15 @@ package com.suonk.notepad_plus.ui.auth
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
-import android.text.method.HideReturnsTransformationMethod
-import android.text.method.PasswordTransformationMethod
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +40,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,10 +60,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcomposetutorial.ui.theme.NotepadPlusTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -81,15 +74,9 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.suonk.notepad_plus.R
-import com.suonk.notepad_plus.databinding.ActivityAuthBinding
 import com.suonk.notepad_plus.ui.note.list.NotesListActivity
-import com.suonk.notepad_plus.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AuthActivity : AppCompatActivity() {
@@ -97,17 +84,25 @@ class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            startActivity(Intent(this, NotesListActivity::class.java))
-            finish()
-            return
-        }
-
         setContent {
             NotepadPlusTheme {
-                LoginPage({
-                    startActivity(Intent(this@AuthActivity, NotesListActivity::class.java))
-                })
+                val viewModel: AuthViewModel = viewModel()
+                val isReady by viewModel.isReadyFlow.collectAsState()
+                installSplashScreen().apply {
+                    setKeepOnScreenCondition {
+                        !isReady
+                    }
+                }
+
+//                if (isReady) {
+//                    if (FirebaseAuth.getInstance().currentUser != null) {
+//                        startActivity(Intent(this, NotesListActivity::class.java))
+//                        finish()
+//                    }
+//                    LoginPage({
+//                        startActivity(Intent(this@AuthActivity, NotesListActivity::class.java))
+//                    })
+//                }
             }
         }
 
@@ -364,7 +359,7 @@ private fun LoginForm(onLoginClickedWithMailAndPassword: (String, String) -> Uni
                 textStyle = TextStyle(color = Color.Black, fontSize = 18.sp)
             )
 
-            var icon by remember { mutableStateOf(R.drawable.ic_invisible_1) }
+            var icon by remember { mutableIntStateOf(R.drawable.ic_invisible_1) }
 
             Icon(
                 painter = painterResource(id = icon),
