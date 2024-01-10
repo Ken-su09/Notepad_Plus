@@ -90,19 +90,23 @@ class AuthActivity : AppCompatActivity() {
                 val isReady by viewModel.isReadyFlow.collectAsState()
                 installSplashScreen().apply {
                     setKeepOnScreenCondition {
+//                        viewModel.onEvent(AuthDataEvent.AnimationIsFinished(isReady))
                         !isReady
                     }
                 }
 
-//                if (isReady) {
-//                    if (FirebaseAuth.getInstance().currentUser != null) {
-//                        startActivity(Intent(this, NotesListActivity::class.java))
-//                        finish()
-//                    }
-//                    LoginPage({
-//                        startActivity(Intent(this@AuthActivity, NotesListActivity::class.java))
-//                    })
-//                }
+                Log.i("AnimationFinished", "isReady : $isReady")
+
+                if (isReady) {
+                    if (FirebaseAuth.getInstance().currentUser != null) {
+                        startActivity(Intent(this, NotesListActivity::class.java))
+                        finish()
+                    } else {
+                        LoginPage({
+                            startActivity(Intent(this@AuthActivity, NotesListActivity::class.java))
+                        })
+                    }
+                }
             }
         }
 

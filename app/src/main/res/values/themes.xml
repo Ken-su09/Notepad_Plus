@@ -21,6 +21,4 @@
         <item name="postSplashScreenTheme">@style/Theme.Notepad_plus</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
     </style>
-
-
 </resources>

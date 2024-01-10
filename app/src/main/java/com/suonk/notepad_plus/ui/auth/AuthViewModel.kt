@@ -99,6 +99,10 @@ class AuthViewModel @Inject constructor(
                 setRememberFieldsUseCase.invoke(authDataEvent.isChecked)
             }
 
+            is AuthDataEvent.AnimationIsFinished -> {
+                _isReadyFlow.value = true
+            }
+
             is AuthDataEvent.LoginClick -> {
 //                if (authDataEvent.email.isEmpty() || authDataEvent.password.isEmpty()) {
 //                    binding.loginEmailValidation.visibility = View.INVISIBLE
